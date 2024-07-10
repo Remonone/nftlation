@@ -1,0 +1,137 @@
+package remonone.nftilation.config;
+
+import lombok.Getter;
+import org.apache.commons.lang.ObjectUtils;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.util.Vector;
+import remonone.nftilation.Nftilation;
+import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.utils.Logger;
+
+import java.io.File;
+import java.util.*;
+
+public class ConfigManager {
+    
+    @Getter
+    private final static ConfigManager instance = new ConfigManager();
+    
+    private File file;
+    private YamlConfiguration configuration;
+    
+    // CONFIGS
+    
+    @Getter
+    private Vector adminRoomCoords;
+    @Getter
+    private Vector lobbyRoomCoords;
+    @Getter
+    private Vector centerDeadZoneCoords;
+    @Getter
+    private List<TeamSpawnPoint> teamSpawnList;
+    
+    private ConfigManager() {}
+    
+    public void Load() {
+        Logger.log("Loading configs...");
+        file = new File(Nftilation.getInstance().getDataFolder(), "config.yml");
+        if(!file.exists()) {
+            Nftilation.getInstance().saveResource("config.yml", false);
+        }
+        
+        configuration = new YamlConfiguration();
+        try {
+            configuration.load(file);
+        } catch(Exception e) {
+            Logger.error("Error during loading a configurations: " + e.getMessage());
+        }
+        
+        LoadData();
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void LoadData() {
+        adminRoomCoords = (Vector) configuration.get(PropertyConstant.ADMIN_ROOM);
+        lobbyRoomCoords = (Vector) configuration.get(PropertyConstant.LOBBY_ROOM);
+        centerDeadZoneCoords = (Vector) configuration.get(PropertyConstant.CENTER_DEAD_POINT);
+        List<TeamSpawnPoint> teamSpawnPoints = (List<TeamSpawnPoint>) configuration.getList(PropertyConstant.TEAMS_SPAWN_POINTS);
+        Logger.log("Loaded " + teamSpawnPoints.size() + " team spawn points.");
+        teamSpawnList = teamSpawnPoints;
+    }
+
+    public void Save() {
+        Logger.log("Saving configs...");
+        try {
+            configuration.save(file);
+        } catch(Exception e) {
+            Logger.error("Cannot save the configs due to next reason: " + e.getMessage());
+        }
+    }
+    
+    public void setAdminRoomCoords(Vector coords) {
+        adminRoomCoords = coords;
+        SetValue(PropertyConstant.ADMIN_ROOM, adminRoomCoords);
+    }
+    
+    public void setLobbyRoomCoords(Vector coords) {
+        lobbyRoomCoords = coords;
+        SetValue(PropertyConstant.LOBBY_ROOM, lobbyRoomCoords);
+    }
+    
+    public void setCenterDeadZoneCoords(Vector coords) {
+        centerDeadZoneCoords = coords;
+        SetValue(PropertyConstant.CENTER_DEAD_POINT, centerDeadZoneCoords);
+    }
+    
+    public String addTeamSpawnPosition(Vector coords) {
+        TeamSpawnPoint point = new TeamSpawnPoint();
+        point.setId(UUID.randomUUID().toString().substring(0, 5));
+        point.setPosition(coords);
+        Logger.debug(String.valueOf(teamSpawnList.size()));
+        teamSpawnList.add(point);
+        SetValue(PropertyConstant.TEAMS_SPAWN_POINTS, teamSpawnList.toArray());
+        return point.getId();
+    }
+    public void removeTeamSpawnPosition(String id) {
+        teamSpawnList.removeIf(point -> point.getId().equals(id));
+        SetValue(PropertyConstant.TEAMS_SPAWN_POINTS, teamSpawnList.toArray());
+    }
+    
+    public boolean trySetTeamSpawnCore(String id, Vector pos) {
+        TeamSpawnPoint teamPoint = teamSpawnList.stream().filter(point -> point.getId().equals(id)).findFirst().orElse(null);
+        if(teamPoint == null) {
+            return false;
+        }
+        teamPoint.setCoreCenter(pos);
+        SetValue(PropertyConstant.TEAMS_SPAWN_POINTS, teamSpawnList.toArray());
+        return true;
+    }
+    
+    public boolean trySetShopKeeper(String id, Vector pos) {
+        TeamSpawnPoint teamPoint = teamSpawnList.stream().filter(point -> point.getId().equals(id)).findFirst().orElse(null);
+        if(teamPoint == null) {
+            return false;
+        }
+        teamPoint.setShopKeeperPosition(pos);
+        SetValue(PropertyConstant.TEAMS_SPAWN_POINTS, teamSpawnList.toArray());
+        return true;
+    }
+    
+    private void SetValue(String path, Object value) {
+        configuration.set(path, value);
+        Save();
+    }
+    
+    public boolean isPositionExisting(String id) {
+        return ObjectUtils.notEqual(teamSpawnList
+                .stream()
+                .filter(teamSpawnPoint -> teamSpawnPoint.getId().equals(id))
+                .findFirst()
+                .orElse(null), null);
+    }
+    
+    
+    public int positionsSize() {
+        return teamSpawnList.size();
+    }
+}

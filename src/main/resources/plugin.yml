@@ -1,0 +1,45 @@
+name: Nftilation
+version: '${project.version}'
+main: remonone.nftilation.Nftilation
+authors: [ Remonone ]
+commands: 
+  switchStage:
+    description: Change stage of the game
+    usage: /switchStage [stage]
+  login:
+    description: Authenticate to the server
+    usage: /login [password]
+  setAdminRoom:
+    description: Set admin room spawn position
+    usage: /setadminroom
+  setLobby:
+    description: Set Lobby spawn position
+    usage: /setlobby
+  addTeamPosition:
+    description: Add team position for a game
+    usage: /addTeamPosition
+  removeTeamPosition:
+    description: Remove team position from the game
+    usage: /removeTeamPositon [teamId]
+  setTeamCore:
+    description: Set team core
+    usage: /setTeamCore [teamId]
+  getTeamPositions:
+    description: Get Teams positions
+    usage: /getTeamPositions
+  startLobbyStage:
+    description: Initiate lobby stage and give permission to players for join
+    usage: /startLobbyStage
+  setShopKeeper:
+    description: Set shop keeper to the position
+    usage: /setShopKeeper [teamId]
+  setDieCenter:
+    description: Set position of the player after his death
+    usage: /setDieCenter
+  addTokens:
+    description: Add tokens to the player
+    usage: /addTokens [amount]
+  getLevel:
+    usage: /getLevel
+  skipPhase:
+    usage: /skipPhase
