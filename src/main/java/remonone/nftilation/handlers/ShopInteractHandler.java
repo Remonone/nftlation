@@ -8,8 +8,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import remonone.nftilation.Store;
-import remonone.nftilation.application.models.PlayerData;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
@@ -64,20 +64,24 @@ public class ShopInteractHandler implements Listener {
     private void HandleItemPurchase(Player player, ItemStack item) {
         if (!tryWithdrawPrice(player, item)) return;
         ItemStack reward = new ItemStack(item.getType());
+        if(item.getType() == Material.POTION) {
+            PotionMeta meta = (PotionMeta) item.getItemMeta();
+            reward.setItemMeta(meta);
+        }
         reward.setAmount(item.getAmount());
         player.getInventory().addItem(reward);
     }
 
     private boolean tryWithdrawPrice(Player player, ItemStack item) {
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
-        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(data.getTeam().getTeamName(), player);
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
         if(model == null) return false;
         int price = NBT.get(item, nbt -> (Integer) nbt.getInteger(PropertyConstant.NBT_PRICE));
         if(model.getTokens() < price) {
             player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
             return false;
         }
-        GameInstance.getInstance().withdrawFunds(data.getTeam().getTeamName(), player, price);
+        GameInstance.getInstance().withdrawFunds(team, player, price);
         return true;
     }
 

@@ -5,7 +5,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 import remonone.nftilation.Store;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.utils.ConfigUtils;
@@ -21,8 +20,7 @@ public class AddTeamPositionCommand implements CommandExecutor {
         if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getName()))) {
             return true;
         }
-        Vector pos = player.getLocation().toVector();
-        String teamId = ConfigManager.getInstance().addTeamSpawnPosition(pos);
+        String teamId = ConfigManager.getInstance().addTeamSpawnPosition(player.getLocation());
         player.sendMessage(ChatColor.GREEN + "Team with id " + teamId + " have been created");
         return true;
     }

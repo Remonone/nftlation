@@ -9,6 +9,7 @@ import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
 import remonone.nftilation.game.ingame.actions.world.CryptDrop;
+import remonone.nftilation.game.ingame.actions.world.Hamster;
 import remonone.nftilation.game.lobby.LobbyDisposer;
 import remonone.nftilation.game.roles.*;
 import remonone.nftilation.handlers.*;
@@ -32,6 +33,7 @@ public final class Nftilation extends JavaPlugin {
 
     private void InitActions() {
         ActionContainer.registerAction(ActionType.CRYPT_DROP, new CryptDrop());
+        ActionContainer.registerAction(ActionType.HAMSTER, new Hamster());
     }
 
     private void SerializeProperties() {
@@ -61,7 +63,7 @@ public final class Nftilation extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PhaseUpdateHandler(), this);
         getServer().getPluginManager().registerEvents(new OnBlockDestroyHandler(), this);
         getServer().getPluginManager().registerEvents(new OnRoleSelectHandler(), this);
-        getServer().getPluginManager().registerEvents(new OnPlayerDropItemHandler(), this);
+        getServer().getPluginManager().registerEvents(new OnItemManipulateHandler(), this);
         getServer().getPluginManager().registerEvents(new ShopKeeperInteract(), this);
         getServer().getPluginManager().registerEvents(new OnPlayerDieHandler(), this);
         getServer().getPluginManager().registerEvents(new ShopInteractHandler(), this);
@@ -84,6 +86,8 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("addTokens").setExecutor(new AddTokenCommand());
         this.getCommand("getLevel").setExecutor(new GetUpgradeLevelCommand());
         this.getCommand("skipPhase").setExecutor(new SkipPhaseCommand());
+        this.getCommand("setCenterPosition").setExecutor(new SetCenterPositionCommand());
+        this.getCommand("addDiamondPosition").setExecutor(new AddDiamondPlaceSpawnCommand());
     }
     
     public static Nftilation getInstance() {
@@ -95,7 +99,6 @@ public final class Nftilation extends JavaPlugin {
         Logger.log("Disabling...");
         GameInstance.getInstance().getCounter().bar.setVisible(false);
         EntityList.clearEntities();
-        GameInstance.getInstance().unregisterScoreboardTeams();
     }
     
 }

@@ -8,7 +8,6 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import remonone.nftilation.Store;
-import remonone.nftilation.application.models.PlayerData;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.roles.Role;
 
@@ -21,8 +20,8 @@ public class ScoreboardHandler {
         Scoreboard scoreboard = manager.getNewScoreboard();
         Objective objective = scoreboard.registerNewObjective("Nftlation", "dummy");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
-        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(data.getTeam().getTeamName(), player);
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
         fillObjective(model, objective);
         player.setScoreboard(scoreboard);
     }
@@ -33,7 +32,7 @@ public class ScoreboardHandler {
         objective.getScore("Level: " + model.getUpgradeLevel()).setScore(++counter);
         objective.getScore("Tokens: " + model.getTokens()).setScore(++counter);
         objective.getScore("Role: " + Role.getRoleByID(model.getRoleId()).getRoleName()).setScore(++counter);
-        String data = Store.getInstance().getDataInstance().FindPlayerByName(model.getReference().getName()).getTeam().getTeamName();
+        String data = Store.getInstance().getDataInstance().getPlayerTeam(model.getReference().getName());
         objective.getScore("Core Health: " + instance.getCoreHealth(data)).setScore(++counter);
         objective.getScore(ChatColor.RED + "" + ChatColor.BOLD + "= Info =").setScore(++counter);
         objective.getScore(ChatColor.RED + "").setScore(++counter);
@@ -67,8 +66,4 @@ public class ScoreboardHandler {
         newObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
         fillObjective(player, newObjective);
     }
-    
-    // TODO: Build scoreboard(based on player)
-    // TODO: Update scoreboard(provide player)
-    // TODO: Unregister scoreboard
 }

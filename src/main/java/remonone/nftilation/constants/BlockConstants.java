@@ -23,6 +23,10 @@ public class BlockConstants {
         return RESPAWNABLE_BLOCKS.containsKey(block.getType());
     }
     
+    public static boolean isRespawnableBlock(Material material) {
+        return RESPAWNABLE_BLOCKS.containsKey(material);
+    }
+    
     public static int getMaterialCooldown(Material mat) {
         return RESPAWNABLE_BLOCKS.getOrDefault(mat, new BlockDetails(-1, 0)).secondsCooldown;
     }

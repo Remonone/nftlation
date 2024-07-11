@@ -3,6 +3,7 @@ package remonone.nftilation.config;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.util.Vector;
@@ -18,13 +19,13 @@ import java.util.Map;
 public class TeamSpawnPoint implements Cloneable, ConfigurationSerializable {
 
     private String id;
-    private Vector position;
+    private Location position;
     private Vector coreCenter;
-    private Vector shopKeeperPosition;
+    private Location shopKeeperPosition;
     
     @Override
     public String toString() {
-        return "TeamSpawnPoint [id=" + id + ", position=" + VectorUtils.convertRoundVectorString(position) + ", coreCenter=" + VectorUtils.convertRoundVectorString(coreCenter) + "];";
+        return "TeamSpawnPoint [id=" + id + ", position=" + VectorUtils.convertRoundVectorString(position.toVector()) + ", coreCenter=" + VectorUtils.convertRoundVectorString(coreCenter) + "];";
     }
 
     public Map<String, Object> serialize() {
@@ -51,21 +52,21 @@ public class TeamSpawnPoint implements Cloneable, ConfigurationSerializable {
 
     public static TeamSpawnPoint deserialize(Map<String, Object> args) {
         String id = "";
-        Vector pos = new Vector();
+        Location pos = new Location(null, 0, 0, 0);
         Vector center = new Vector();
-        Vector shopKeeper = new Vector();
+        Location shopKeeper = new Location(null, 0, 0, 0);
 
         if (args.containsKey("id")) {
             id = (String) args.get("id");
         }
         if (args.containsKey("position")) {
-            pos = (Vector) args.get("position");
+            pos = (Location) args.get("position");
         }
         if (args.containsKey("coreCenter")) {
             center = (Vector) args.get("coreCenter");
         }
         if(args.containsKey("shopKeeper")) {
-            shopKeeper = (Vector) args.get("shopKeeper");
+            shopKeeper = (Location) args.get("shopKeeper");
         }
 
         return new TeamSpawnPoint(id, pos, center, shopKeeper);

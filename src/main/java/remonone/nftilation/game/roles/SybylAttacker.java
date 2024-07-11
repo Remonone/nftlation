@@ -16,7 +16,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.application.models.PlayerData;
+import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
@@ -39,7 +40,7 @@ public class SybylAttacker extends Role {
 
     @Override
     public List<String> getRoleDescription() {
-        return Arrays.asList("This is a Sybyl Attacker");
+        return Arrays.asList(RoleConstant.SYBYL_DESCRIPTION_1, RoleConstant.SYBYL_DESCRIPTION_2, RoleConstant.SYBYL_DESCRIPTION_3);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class SybylAttacker extends Role {
     public void setPlayer(Player player, int upgradeLevel) {
         player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 1000000, 1, false, false));
         if(upgradeLevel > 1) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 10000000, 1, false, false));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, DataConstants.CONSTANT_POTION_DURATION, 1, false, false));
         }
     }
     
@@ -82,13 +83,13 @@ public class SybylAttacker extends Role {
                 break;
         }
         ItemMeta bowMeta = bow.getItemMeta();
-        bowMeta.setDisplayName("Precise bow");
+        bowMeta.setDisplayName(RoleConstant.SYBYL_BOW_NAME);
         bowMeta.setUnbreakable(true);
         bowMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         bow.setItemMeta(bowMeta);
         items.add(bow);
         ItemStack arrows = new ItemStack(Material.ARROW);
-        arrows.setAmount(15);
+        arrows.setAmount(RoleConstant.SYBYL_ARROW_AMOUNT);
         items.add(arrows);
         return items;
     }
@@ -120,8 +121,8 @@ public class SybylAttacker extends Role {
         DataInstance data = Store.getInstance().getDataInstance();
         Role role = data.getPlayerRole(shooter.getName());
         if(!(role instanceof SybylAttacker)) return;
-        PlayerData playerData = Store.getInstance().getDataInstance().FindPlayerByName(shooter.getName());
-        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(playerData.getTeam().getTeamName(), shooter);
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(shooter.getName());
+        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, shooter);
         if(model == null) return;
         if(model.getUpgradeLevel() < 3) return;
         Location location = null;
@@ -134,7 +135,7 @@ public class SybylAttacker extends Role {
         }
         if(location != null) {
             TNTPrimed entity = e.getEntity().getWorld().spawn(location, TNTPrimed.class);
-            entity.setYield(3);
+            entity.setYield(RoleConstant.SYBYL_EXPLOSION_ARROW_STRENGTH);
             entity.setFuseTicks(0);
             entity.setMetadata("invoker", new FixedMetadataValue(Nftilation.getInstance(), e.getEntity().getShooter()));
             entity.setIsIncendiary(true);

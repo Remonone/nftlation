@@ -43,3 +43,9 @@ commands:
     usage: /getLevel
   skipPhase:
     usage: /skipPhase
+  setCenterPosition:
+    description: Set the center of the map
+    usage: /setCenterPosition
+  addDiamondPosition:
+    description: Set diamond spawn point
+    usage: /addDiamondPosition

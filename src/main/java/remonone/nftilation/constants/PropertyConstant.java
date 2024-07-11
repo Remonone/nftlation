@@ -6,6 +6,8 @@ public class PropertyConstant {
     public static final String LOBBY_ROOM = "rooms.lobby";
     public static final String TEAMS_SPAWN_POINTS = "teams.spawnpoints";
     public static final String CENTER_DEAD_POINT = "center";
+    public static final String CENTER_LOCATION = "centerLocation";
+    public static final String DIAMOND_POSITION = "diamondsList";
 
     public static final String RULE_CORE_INVULNERABLE = "isCoreInvulnerable";
     public static final String RULE_RESOURCE_RESPAWNABLE = "isResourcesRespawnable";

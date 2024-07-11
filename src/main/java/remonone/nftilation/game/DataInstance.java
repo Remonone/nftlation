@@ -47,7 +47,7 @@ public class DataInstance {
     private final Map<String, List<PlayerInfo>> teams = new HashMap<>();
     
     public LoginState TryAddPlayerToGame(PlayerData playerData, Player player) {
-        if(playerData.getTeam().getTeamName().isEmpty()) return LoginState.EMPTY_TEAM;
+        if(playerData.getRole().equals(PlayerRole.PLAYER) && playerData.getTeam().getTeamName().isEmpty()) return LoginState.EMPTY_TEAM;
         if(players.contains(playerData)) {
             return LoginState.ALREADY_LOGGED_IN;
         }
@@ -70,6 +70,12 @@ public class DataInstance {
         
         Logger.log("Player " + playerData.getLogin() + " has authenticated to the game");
         return LoginState.LOGGED_IN;
+    }
+    
+    public String getPlayerTeam(String playerName) {
+        PlayerData data = FindPlayerByName(playerName);
+        if(data == null) return "";
+        return data.getTeam().getTeamName();
     }
     
     public void DisconnectPlayer(String playerName) {
@@ -125,7 +131,7 @@ public class DataInstance {
     
     private PlayerInfo getPlayerInfo(String playerName) {
         PlayerData data = FindPlayerByName(playerName);
-        if(data == null) {
+        if(data == null || !data.getRole().equals(PlayerRole.PLAYER)) {
             return null;
         }
         return teams.get(data.getTeam().getTeamName())

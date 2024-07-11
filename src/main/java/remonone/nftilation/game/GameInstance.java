@@ -2,13 +2,16 @@ package remonone.nftilation.game;
 
 import lombok.*;
 import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
-import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.application.models.PlayerData;
 import remonone.nftilation.application.models.TeamData;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
@@ -23,6 +26,7 @@ import remonone.nftilation.game.phase.PhaseCounter;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.scoreboard.ScoreboardHandler;
+import remonone.nftilation.utils.ColorUtils;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
 
@@ -47,7 +51,6 @@ public class GameInstance {
         disposePlayers();
         InitServices();
         for(Team team : teamData.values()) {
-            createTeamScoreboard(team);
             initPlayerRoles(team.players);
             fillPlayerItems(team.players);
             for(PlayerModel model : team.players) {
@@ -59,23 +62,9 @@ public class GameInstance {
     }
     
     public boolean checkIfPlayersInSameTeam(Player player1, Player player2) {
-        PlayerData data1 = Store.getInstance().getDataInstance().FindPlayerByName(player1.getName());
-        PlayerData data2 = Store.getInstance().getDataInstance().FindPlayerByName(player2.getName());
-        return data1 != null && data2 != null && data1.getTeam().getTeamName().equals(data2.getTeam().getTeamName());
-    }
-
-    private void createTeamScoreboard(Team team) {
-        Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        org.bukkit.scoreboard.Team registeredTeam = scoreboard.registerNewTeam(team.name);
-        team.players.stream().map(PlayerModel::getReference).forEach(player -> registeredTeam.addEntry(player.getName()));
-        registeredTeam.setAllowFriendlyFire(false);
-        registeredTeam.setCanSeeFriendlyInvisibles(true);
-        team.scoreboardTeam = registeredTeam;
-        team.players.stream().map(PlayerModel::getReference).forEach(player -> player.setScoreboard(scoreboard));
-    }
-    
-    public void unregisterScoreboardTeams() {
-        teamData.values().forEach(team -> team.scoreboardTeam.unregister());
+        String data1 = Store.getInstance().getDataInstance().getPlayerTeam(player1.getName());
+        String data2 = Store.getInstance().getDataInstance().getPlayerTeam(player2.getName());
+        return !StringUtils.isEmpty(data1) && !StringUtils.isEmpty(data2) && data1.equals(data2);
     }
 
     private void InitServices() {
@@ -139,13 +128,13 @@ public class GameInstance {
     
     public void increasePlayerKillCounter(String teamName, Player player) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        model.killCounter++;
+        model.killCounter += 1;
         ScoreboardHandler.updateScoreboard(model);
     }
 
     public void increasePlayerDeathCounter(String teamName, Player player) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        model.deathCounter++;
+        model.deathCounter += 1;
         ScoreboardHandler.updateScoreboard(model);
     }
     
@@ -159,11 +148,9 @@ public class GameInstance {
 
     private void SpawnShopKeeper(TeamSpawnPoint point) {
         World world = Store.getInstance().getDataInstance().getMainWorld();
-        Location location = point.getShopKeeperPosition().toLocation(world);
+        Location location = point.getShopKeeperPosition();
         Villager villager = world.spawn(location, Villager.class);
         villager.setAI(false);
-        float rot = villager.getLocation().setDirection(point.getShopKeeperPosition().subtract(point.getCoreCenter()).normalize()).getYaw();
-        villager.getLocation().setYaw(rot);
         villager.setCustomName("Shop keeper");
         villager.setCustomNameVisible(false);
         villager.setInvulnerable(true);
@@ -179,16 +166,16 @@ public class GameInstance {
     }
     
     public void upgradePlayer(Player player, int level, int price) {
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
-        PlayerModel model = getPlayerModelFromTeam(data.getTeam().getTeamName(), player);
+        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        PlayerModel model = getPlayerModelFromTeam(teamName, player);
         if(level - model.upgradeLevel != 1) {
             player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_UPGRADE_LEVEL);
-            awardPlayer(data.getTeam().getTeamName(), player, price);
+            awardPlayer(teamName, player, price);
             return;
         }
         if((int)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_AVAILABLE_TIER, 1) < level) {
             player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_STAGE_FOR_UPGRADE);
-            awardPlayer(data.getTeam().getTeamName(), player, price);
+            awardPlayer(teamName, player, price);
             return;
         }
         player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, .5f, 1f);
@@ -212,8 +199,7 @@ public class GameInstance {
     }
     
     private void setPlayerToPosition(Team team, Player player) {
-        World world = Store.getInstance().getDataInstance().getMainWorld();
-        Location position = team.spawnPoint.getPosition().toLocation(world);
+        Location position = team.spawnPoint.getPosition();
         player.teleport(position);
     }
 
@@ -238,9 +224,7 @@ public class GameInstance {
         Team team = teamData.get(teamName);
         if(team == null) return false;
         boolean isDamaged = team.core.TakeDamage();
-        if(isDamaged) {
-            team.players.forEach(ScoreboardHandler::updateScoreboard);
-        }
+        team.players.forEach(ScoreboardHandler::updateScoreboard);
         return isDamaged;
     }
     
@@ -266,10 +250,37 @@ public class GameInstance {
         Location location = team.spawnPoint.getCoreCenter().toLocation(world);
         location.getBlock().setType(Material.AIR);
         notifyDestruction(team);
-        team.core = null;
+        if(team.players.stream().noneMatch(PlayerModel::isAlive)) {
+            team.isActive = false;
+            CheckOnActiveTeams();
+        }
         for(Team activeTeam : teamData.values()) {
             activeTeam.players.stream().filter(playerModel -> activeTeam.isCoreAlive || playerModel.isAlive).forEach(ScoreboardHandler::updateScoreboard);
         }
+    }
+
+    private void CheckOnActiveTeams() {
+        List<Team> aliveTeams = teamData.values().stream().filter(Team::isActive).collect(Collectors.toList());
+        if(aliveTeams.size() < 2) {
+            AnnounceTeamWinner(aliveTeams.get(0));
+        }
+    }
+
+    private void AnnounceTeamWinner(Team team) {
+        Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(ChatColor.GREEN + "Team: " + team.core.getTeamData().getTeamName() + "have won the game! Congratulations!"));
+        BukkitRunnable task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                team.players.forEach(model -> {
+                    Player player = model.reference;
+                    Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
+                    FireworkMeta fireworkMeta = firework.getFireworkMeta();
+                    fireworkMeta.setPower(5);
+                    fireworkMeta.addEffect(FireworkEffect.builder().flicker(true).trail(true).withColor(ColorUtils.TranslateToColor(ChatColor.getByChar(team.getCore().getTeamData().getTeamColor()))).with(FireworkEffect.Type.BALL_LARGE).build());
+                });
+            }
+        };
+        task.runTaskTimer(Nftilation.getInstance(), 0L, 40L);
     }
 
     private void notifyDestruction(Team team) {
@@ -283,7 +294,7 @@ public class GameInstance {
                 title = ChatColor.GREEN + "" + ChatColor.BOLD + String.format(MessageConstant.OTHER_CORE_DESTROYED_TITLE, team.core.getTeamData().getTeamName());
                 subTitle = ChatColor.WHITE + MessageConstant.OTHER_CORE_DESTROYED_SUBTITLE;
             }
-            player.sendTitle(title, subTitle, 3, 10, 3);
+            player.sendTitle(title, subTitle, 10, 60, 10);
         });
         Logger.broadcast(ChatColor.GOLD + String.format(MessageConstant.CORE_DESTROYED_BROADCAST, team.core.getTeamData().getTeamName()));
     }
@@ -353,7 +364,6 @@ public class GameInstance {
         private boolean isActive;
         @NonNull
         private String name;
-        private org.bukkit.scoreboard.Team scoreboardTeam;
     }
     
     @Getter

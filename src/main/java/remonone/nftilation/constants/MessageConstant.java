@@ -25,9 +25,10 @@ public class MessageConstant {
     public static final String DIE_CENTER_COMMAND = "Center position for dead player has been set.";
     public static final String PLAYER_ON_DIE = "You have been slain!";
     public static final String NOT_ENOUGH_MONEY = "You don't have enough money to buy this!";
-    public static final String ITEM_COOLDOWN = "Item is on a cooldown! Try again later.";
+    public static final String ITEM_COOLDOWN = "Item is on a cooldown! Try again later. Cooldown: ";
     public static final String START_RECALL = "Recall has been started!";
     public static final String INCORRECT_UPGRADE_LEVEL = "You cannot buy this level! Try another one!";
     public static final String INCORRECT_STAGE_FOR_UPGRADE = "You cannot buy this upgrade at current phase!";
     public static final String CANNOT_HEAL_CORE = "You cannot heal core right now!";
+    public static final String CANNOT_SPAWN_BLAZE = "Cannot spawn blazes, please try again!";
 }

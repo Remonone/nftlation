@@ -30,7 +30,7 @@ public class Core {
     }
     
     public boolean Heal() {
-        if(health < 1 || health > 100) return false;
+        if(health < 1 || health >= 100) return false;
         health++;
         return true;
     }

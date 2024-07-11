@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.PlayerData;
+import remonone.nftilation.components.ItemStatModifierComponent;
 import remonone.nftilation.constants.ItemConstant;
 import remonone.nftilation.game.equipment.DefaultEquipment;
 import remonone.nftilation.utils.ColorUtils;
@@ -91,36 +92,36 @@ public abstract class Role implements Cloneable, Listener {
     }
     
     protected ItemStack getHelmet(Player player, int level) {
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
         ItemStack helmet = new ItemStack(DefaultEquipment.DEFAULT_HELMET);
         LeatherArmorMeta meta = (LeatherArmorMeta) helmet.getItemMeta();
+        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
         meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
         meta.setUnbreakable(true);
         helmet.setItemMeta(meta);
         return helmet;
     }
     protected ItemStack getChestplate(Player player, int level) {
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
         ItemStack chestplate = new ItemStack(DefaultEquipment.DEFAULT_CHEST);
         LeatherArmorMeta meta = (LeatherArmorMeta) chestplate.getItemMeta();
+        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
         meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
         meta.setUnbreakable(true);
         chestplate.setItemMeta(meta);
         return chestplate;
     }
     protected ItemStack getLeggins(Player player, int level) {
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
         ItemStack leggins = new ItemStack(DefaultEquipment.DEFAULT_LEGS);
         LeatherArmorMeta meta = (LeatherArmorMeta) leggins.getItemMeta();
+        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
         meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
         meta.setUnbreakable(true);
         leggins.setItemMeta(meta);
         return leggins;
     }
     protected ItemStack getBoots(Player player, int level) {
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
         ItemStack boots = new ItemStack(DefaultEquipment.DEFAULT_BOOTS);
         LeatherArmorMeta meta = (LeatherArmorMeta) boots.getItemMeta();
+        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
         meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
         meta.setUnbreakable(true);
         boots.setItemMeta(meta);
@@ -152,12 +153,22 @@ public abstract class Role implements Cloneable, Listener {
                 role.getAxe(upgradeLevel),
                 role.getShovel(upgradeLevel)).toArray(new ItemStack[0]);
         SetOwner(player, itemStacks);
+        for(ItemStack stack : itemStacks) {
+            ItemStatModifierComponent.markItemAsUndroppable(stack);
+            ItemStatModifierComponent.markItemAsUnstorable(stack);
+        }
         inventory.addItem(itemStacks);
         FillEquipment(player, role, upgradeLevel);
-        ItemStack[] abilityItems = role.getAbilityItems(upgradeLevel).toArray(new ItemStack[0]);
-        SetOwner(player, abilityItems);
-        for(int i = 0; i < abilityItems.length; i++) {
-            inventory.setItem(8 - i, abilityItems[i]);
+        role.giveAbilityItems(player, upgradeLevel);
+    }
+    
+    protected void giveAbilityItems(Player player, int upgradeLevel) {
+        for(ItemStack stack : getAbilityItems(upgradeLevel)) {
+            SetOwner(player, stack);
+            ItemStatModifierComponent.markItemAsUndroppable(stack);
+            ItemStatModifierComponent.markItemAsUnstorable(stack);
+            ItemStatModifierComponent.markItemAsUncraftable(stack);
+            player.getInventory().addItem(stack);
         }
     }
     
@@ -192,6 +203,14 @@ public abstract class Role implements Cloneable, Listener {
         ItemStack leggins = role.getLeggins(player, upgradeLevel);
         ItemStack boots = role.getBoots(player, upgradeLevel);
         SetOwner(player, helmet, chestplate, leggins, boots);
+        ItemStatModifierComponent.markItemAsUnstorable(helmet);
+        ItemStatModifierComponent.markItemAsUnstorable(chestplate);
+        ItemStatModifierComponent.markItemAsUnstorable(leggins);
+        ItemStatModifierComponent.markItemAsUnstorable(boots);
+        ItemStatModifierComponent.markItemAsUndroppable(helmet);
+        ItemStatModifierComponent.markItemAsUndroppable(chestplate);
+        ItemStatModifierComponent.markItemAsUndroppable(leggins);
+        ItemStatModifierComponent.markItemAsUndroppable(boots);
         equipment.setHelmet(helmet);
         equipment.setChestplate(chestplate);
         equipment.setLeggings(leggins);
@@ -205,9 +224,8 @@ public abstract class Role implements Cloneable, Listener {
     @Override
     public Role clone() {
         try {
-            Role clone = (Role) super.clone();
             // TODO: copy mutable state here, so the clone can't change the internals of the original
-            return clone;
+            return (Role) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }

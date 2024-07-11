@@ -98,9 +98,9 @@ public class InventoryBuilder {
     public static Inventory getShopKeeperUpgrades(Player player) {
         Inventory inventory = Bukkit.createInventory(player, 27, NameConstants.SHOP_TAB);
         ItemStack upgradeToSecond = buildItem(Material.NETHER_STAR, 1, "Upgrades to second tier");
-        addServiceItemToInventory(inventory, upgradeToSecond, "second-tier", 800, 12);
+        addServiceItemToInventory(inventory, upgradeToSecond, "second-tier", 200, 12);
         ItemStack upgradeToThird = buildItem(Material.NETHER_STAR, 1, "Upgrades to third tier");
-        addServiceItemToInventory(inventory, upgradeToThird, "third-tier", 3000, 14);
+        addServiceItemToInventory(inventory, upgradeToThird, "third-tier", 600, 14);
         return inventory;
     }
 

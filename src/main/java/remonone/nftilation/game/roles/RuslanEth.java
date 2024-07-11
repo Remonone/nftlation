@@ -1,11 +1,11 @@
 package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
-import jdk.nashorn.internal.ir.Block;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -19,8 +19,11 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.application.models.PlayerData;
+import remonone.nftilation.components.ItemStatModifierComponent;
+import remonone.nftilation.components.OwnerHandleComponent;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.MessageConstant;
+import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.utils.BlockUtils;
 import remonone.nftilation.utils.EntityList;
@@ -49,7 +52,7 @@ public class RuslanEth extends Role {
 
     @Override
     public List<String> getRoleDescription() {
-        return Arrays.asList("This is a ruslan.eth");
+        return Arrays.asList(RoleConstant.RUSLAN_DESCRIPTION_1, RoleConstant.RUSLAN_DESCRIPTION_2, RoleConstant.RUSLAN_DESCRIPTION_3);
     }
 
     @Override
@@ -70,13 +73,14 @@ public class RuslanEth extends Role {
             entitiesList.put(player.getUniqueId(), new ArrayList<>());
         }
         player.setHealthScaled(true);
-        player.setHealthScale(14.0D);
+        float health = 12.0F + 2 * upgradeLevel;
+        player.setHealthScale(health);
     }
     
     @Override
     public List<ItemStack> getAbilityItems(int upgradeLevel) {
         ItemStack snowball = new ItemStack(Material.SNOW_BALL);
-        return Arrays.asList(snowball);
+        return Collections.singletonList(snowball);
     }
     
     @Override
@@ -92,25 +96,33 @@ public class RuslanEth extends Role {
         Player player = (Player) projectile.getShooter();
         if (!(Store.getInstance().getDataInstance().getPlayerRole(player.getName()) instanceof RuslanEth)) return;
         if(projectile.getType() != EntityType.SNOWBALL) return;
-        PlayerData playerData = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
-        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(playerData.getTeam().getTeamName(), player);
-        projectile.setMetadata("invoker", new FixedMetadataValue(Nftilation.getInstance(), model));
-        projectile.setMetadata("invokerTeam", new FixedMetadataValue(Nftilation.getInstance(), playerData.getTeam().getTeamName()));
-    
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        OwnerHandleComponent.setEntityOwner(projectile, player);
+        projectile.setMetadata("invokerTeam", new FixedMetadataValue(Nftilation.getInstance(), team));
+       
+        BukkitRunnable task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                RemoveRuslanActionItems(player);
+                String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+                GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
+                giveAbilityItems(player, model.getUpgradeLevel());
+            }
+        };
+        task.runTaskLater(Nftilation.getInstance(), RoleConstant.RUSLAN_SPAWN_CLONES_COOLDOWN * DataConstants.TICKS_IN_SECOND);
+        int taskId = task.getTaskId();
+        Store.getInstance().getDataInstance().getPlayerParams(player.getName()).put("taskId", taskId);
     }
     
     @EventHandler
     public void onProjectileHit(final ProjectileHitEvent e) {
-        Entity entity = e.getEntity();
-        GameInstance.PlayerModel model = (GameInstance.PlayerModel)entity.getMetadata("invoker").get(0).value();
-        if(model == null) return;
-        String invokerTeam = (String)entity.getMetadata("invokerTeam").get(0).value();
-        Player player = model.getReference();
-        if(!entitiesList.get(player.getUniqueId()).isEmpty()) {
-            entitiesList.get(player.getUniqueId()).forEach(EntityList::removeEntity);
-            entitiesList.get(player.getUniqueId()).clear();
+        Player owner = OwnerHandleComponent.getEntityOwner(e.getEntity());
+        if(owner == null) return;
+        
+        if(!entitiesList.get(owner.getUniqueId()).isEmpty()) {
+            entitiesList.get(owner.getUniqueId()).forEach(EntityList::removeEntity);
+            entitiesList.get(owner.getUniqueId()).clear();
         }
-        int bodyCount = 2 * model.getUpgradeLevel();
         Location spawnPoint = null;
         if(e.getHitBlock() != null) {
             spawnPoint = e.getHitBlock().getLocation();            
@@ -119,13 +131,23 @@ public class RuslanEth extends Role {
             spawnPoint = e.getHitEntity().getLocation();
         }
         if(spawnPoint == null) return;
+        Location nearestEmptyBlock = BlockUtils.getNearestEmptySpace(spawnPoint.getBlock(), 1);
+        if(nearestEmptyBlock == null) {
+            owner.playSound(owner.getLocation(), Sound.ENTITY_BLAZE_HURT, 1, .8f);
+            owner.sendMessage(MessageConstant.CANNOT_SPAWN_BLAZE);
+            return;
+        }
+        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(owner.getName());
+        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, owner);
+        int bodyCount = 2 * model.getUpgradeLevel();
+        nearestEmptyBlock.setX(nearestEmptyBlock.getX() + .5F);
+        nearestEmptyBlock.setZ(nearestEmptyBlock.getZ() + .5F);
         for(int i = 0; i < bodyCount; i++) {
-            Location nearestEmptyBlock = BlockUtils.getNearestEmptySpace(spawnPoint.getBlock(), 5).getLocation();
-            Blaze blaze = player.getWorld().spawn(spawnPoint, Blaze.class);
-            blaze.setMetadata("ruslan", new FixedMetadataValue(Nftilation.getInstance(), invokerTeam));
-            blaze.setMetadata("host", new FixedMetadataValue(Nftilation.getInstance(), player));
+            Blaze blaze = owner.getWorld().spawn(nearestEmptyBlock, Blaze.class);
+            blaze.setMetadata("ruslan", new FixedMetadataValue(Nftilation.getInstance(), teamName));
+            OwnerHandleComponent.setEntityOwner(blaze, owner);
             EntityList.addEntity(blaze);
-            entitiesList.get(player.getUniqueId()).add(blaze);
+            entitiesList.get(owner.getUniqueId()).add(blaze);
         }
         List<ItemStack> stack = new ArrayList<>();
         stack.add(getCallbackItem());
@@ -133,20 +155,10 @@ public class RuslanEth extends Role {
             stack.add(getExplodeItem());
         }
         ItemStack[] stacks = stack.toArray(new ItemStack[0]);
-        Store.getInstance().getDataInstance().getPlayerParams(player.getName()).put("actions", stacks);
+        Store.getInstance().getDataInstance().getPlayerParams(owner.getName()).put("actions", stacks);
         for(ItemStack stack1 : stacks) {
-            player.getInventory().addItem(stack1);
+            owner.getInventory().addItem(stack1);
         }
-        BukkitRunnable task = new BukkitRunnable() {
-            @Override
-            public void run() {
-                RemoveRuslanActionItems(player);
-                player.getInventory().addItem(new ItemStack(Material.SNOW_BALL));
-            }
-        };
-        task.runTaskLater(Nftilation.getInstance(), 5 * DataConstants.TICKS_IN_SECOND);
-        int taskId = task.getTaskId();
-        Store.getInstance().getDataInstance().getPlayerParams(player.getName()).put("taskId", taskId);
     }
     
     private ItemStack getExplodeItem() {
@@ -155,6 +167,9 @@ public class RuslanEth extends Role {
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setDisplayName(ChatColor.DARK_RED + "CABOOM");
         itemStack.setItemMeta(itemMeta);
+        ItemStatModifierComponent.markItemAsUncraftable(itemStack);
+        ItemStatModifierComponent.markItemAsUnstorable(itemStack);
+        ItemStatModifierComponent.markItemAsUndroppable(itemStack);
         NBT.modify(itemStack, (nbt) -> {
             nbt.setString("ruslan_action", "explode");
         });
@@ -167,6 +182,9 @@ public class RuslanEth extends Role {
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setDisplayName(ChatColor.BLUE + "Recall team");
         itemStack.setItemMeta(itemMeta);
+        ItemStatModifierComponent.markItemAsUncraftable(itemStack);
+        ItemStatModifierComponent.markItemAsUnstorable(itemStack);
+        ItemStatModifierComponent.markItemAsUndroppable(itemStack);
         NBT.modify(itemStack, (nbt) -> {
             nbt.setString("ruslan_action", "recall");
         });
@@ -181,8 +199,8 @@ public class RuslanEth extends Role {
         Player target = (Player) e.getTarget();
         Blaze blaze = (Blaze) e.getEntity();
         String team = (String)blaze.getMetadata("ruslan").get(0).value();
-        PlayerData playerData = Store.getInstance().getDataInstance().FindPlayerByName(target.getName());
-        if(playerData == null || playerData.getTeam().getTeamName().equals(team)) {
+        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(target.getName());
+        if(StringUtils.isEmpty(teamName) || teamName.equals(team)) {
             e.setCancelled(true);
         }
     }
@@ -196,13 +214,16 @@ public class RuslanEth extends Role {
         if(!(e.getEntity() instanceof Player)) return;
         Player player = (Player) e.getEntity();
         String team = (String)blaze.getMetadata("ruslan").get(0).value();
-        Player host = (Player)blaze.getMetadata("host").get(0).value();
-        PlayerData playerData = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
-        e.setCancelled(true);
-        if(playerData == null || playerData.getTeam().getTeamName().equals(team)) {
+        Player host = OwnerHandleComponent.getEntityOwner(blaze);
+        if(host == null) {
             return;
         }
-        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(player, host, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 2D);
+        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        e.setCancelled(true);
+        if(StringUtils.isEmpty(teamName) || teamName.equals(team)) {
+            return;
+        }
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(host, player, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 2D);
         getServer().getPluginManager().callEvent(event);
         if(!event.isCancelled()) {
             player.setHealth(player.getHealth() - event.getFinalDamage());
@@ -233,9 +254,27 @@ public class RuslanEth extends Role {
                 List<LivingEntity> entities = entitiesList.get(player.getUniqueId());
                 entities.forEach(entity -> entity.teleport(playerLocation));
                 RemoveRuslanActionItems(player);
+                break;
             }
             case "explode": {
-
+                List<LivingEntity> blazes = entitiesList.get(player.getUniqueId());
+                for(LivingEntity entity : blazes) {
+                    if(entity.getHealth() < .5F) {
+                        continue;
+                    }
+                    Location loc = entity.getLocation();
+                    entity.remove();
+                    TNTPrimed tnt = player.getWorld().spawn(loc, TNTPrimed.class);
+                    tnt.setYield(RoleConstant.RUSLAN_CLONE_EXPLOSION_STRENGTH);
+                    tnt.setFuseTicks(0);
+                    tnt.setMetadata("invoker", new FixedMetadataValue(Nftilation.getInstance(), player));
+                    tnt.setIsIncendiary(true);
+                    AreaEffectCloud area = player.getWorld().spawn(loc, AreaEffectCloud.class);
+                    area.setCustomName(RoleConstant.RUSLAN_AREA_EFFECT_NAME);
+                    area.setMetadata("invoker", new FixedMetadataValue(Nftilation.getInstance(), player));
+                    area.addCustomEffect(new PotionEffect(getRandomNegativeEffect(), 10 * DataConstants.TICKS_IN_SECOND, 1, false, true), true);
+                    area.setRadius(RoleConstant.RUSLAN_NEGATIVE_AREA_RADIUS);
+                }
             }
         }
     }

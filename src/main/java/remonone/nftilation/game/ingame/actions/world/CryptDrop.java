@@ -15,7 +15,7 @@ public class CryptDrop implements IAction {
     @Override
     public void Init(Map<String, Object> params) {
         RuleManager.getInstance().setRule(PropertyConstant.RULE_RESOURCE_RESPAWNABLE, false);
-        long timeToSpawnAgain = System.currentTimeMillis() + 10 * DataConstants.ONE_MINUTE;
+        long timeToSpawnAgain = System.currentTimeMillis() + 2 * DataConstants.ONE_MINUTE;
         RuleManager.getInstance().setRule(PropertyConstant.RULE_RESOURCE_SPAWN_AUTO_ENABLE_AT, timeToSpawnAgain);
         BukkitRunnable task = new BukkitRunnable() {
             @Override
@@ -23,7 +23,7 @@ public class CryptDrop implements IAction {
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_RESOURCE_RESPAWNABLE, true);
             }
         };
-        task.runTaskLater(Nftilation.getInstance(), 10 * DataConstants.TICKS_IN_MINUTE);
+        task.runTaskLater(Nftilation.getInstance(), 2 * DataConstants.TICKS_IN_MINUTE);
     }
 
     @Override

@@ -15,17 +15,14 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.application.models.PlayerData;
+import remonone.nftilation.components.OwnerHandleComponent;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.GameInstance;
-import remonone.nftilation.utils.Logger;
 
 import java.util.*;
 
@@ -47,7 +44,7 @@ public class Cryptomarine extends Role {
 
     @Override
     public List<String> getRoleDescription() {
-        return Arrays.asList("This is a Cryptomarine");
+        return Arrays.asList(RoleConstant.CRYPTOMARINE_DESCRIPTION_1, RoleConstant.CTYPTOMARINE_DESCRIPTION_2, RoleConstant.CTYPTOMARINE_DESCRIPTION_3, RoleConstant.CTYPTOMARINE_DESCRIPTION_4);
     }
 
     @Override
@@ -73,7 +70,7 @@ public class Cryptomarine extends Role {
                 break;
             case 3:
                 itemStack = new ItemStack(Material.DIAMOND_HELMET);
-                itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+                itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
                 break;
         }
         ItemMeta meta = itemStack.getItemMeta();
@@ -95,7 +92,7 @@ public class Cryptomarine extends Role {
                 break;
             case 3:
                 itemStack = new ItemStack(Material.DIAMOND_CHESTPLATE);
-                itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+                itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
                 break;
         }
         ItemMeta meta = itemStack.getItemMeta();
@@ -114,7 +111,7 @@ public class Cryptomarine extends Role {
                 break;
             case 3:
                 itemStack = new ItemStack(Material.DIAMOND_LEGGINGS);
-                itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+                itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
                 break;
         }
         ItemMeta meta = itemStack.getItemMeta();
@@ -133,7 +130,7 @@ public class Cryptomarine extends Role {
                 break;
             case 3:
                 itemStack = new ItemStack(Material.DIAMOND_BOOTS);
-                itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+                itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
                 break;
         }
         ItemMeta meta = itemStack.getItemMeta();
@@ -154,13 +151,13 @@ public class Cryptomarine extends Role {
                 itemStack.addEnchantment(Enchantment.DAMAGE_ALL, 2);
                 break;
             case 3:
-                itemStack = new ItemStack(Material.DIAMOND_AXE);
+                itemStack = new ItemStack(Material.IRON_AXE);
                 itemStack.addEnchantment(Enchantment.DAMAGE_ALL, 2);
                 NBT.modify(itemStack, nbt -> {nbt.setString("cryptomarine", "axe");});
                 break;
         }
         ItemMeta meta = itemStack.getItemMeta();
-        meta.setDisplayName("Splitter");
+        meta.setDisplayName(RoleConstant.CRYPTOMARINE_AXE);
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
@@ -171,15 +168,14 @@ public class Cryptomarine extends Role {
         ItemStack itemStack = new ItemStack(Material.SHIELD);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName("Humanity defender");
+        meta.setDisplayName(RoleConstant.CTYPTOMARINE_SHIELD);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
-        return Arrays.asList(itemStack);
+        return Collections.singletonList(itemStack);
     }
     
     @Override
     public void setPlayer(Player player, int upgradeLevel) {
-        Logger.debug("applying...");
         player.setHealthScaled(true);
         float health = DataConstants.PLAYER_HEALTH + upgradeLevel * 2;
         player.setHealthScale(health);
@@ -188,48 +184,23 @@ public class Cryptomarine extends Role {
         player.setWalkSpeed(speed - (speed / 100) * modifier);
         if(upgradeLevel > 1) {
             player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(1);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 100000, 1, false, false));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, DataConstants.CONSTANT_POTION_DURATION, 1, false, false));
         }
     }
     
     @Override
     protected void killPlayer(Player player, int upgradeLevel) {
         if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getName()) instanceof Cryptomarine)) return;
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
-        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(data.getTeam().getTeamName(), player);
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
         if(model.getUpgradeLevel() < 3) return;
-        World world = player.getWorld();
         Location location = player.getLocation();
         player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20, 1000, false, false));
         TNTPrimed entity = player.getWorld().spawn(location, TNTPrimed.class);
-        entity.setYield(10);
+        entity.setYield(RoleConstant.CRYPTOMARINE_EXPLOSION_STRENGTH);
         entity.setFuseTicks(0);
-        entity.setMetadata("invoker", new MetadataValue() {
-            @Override
-            public Object value() {return player;}
-            @Override
-            public int asInt() {return 0;}
-            @Override
-            public float asFloat() {return 0;}
-            @Override
-            public double asDouble() {return 0;}
-            @Override
-            public long asLong() {return 0;}
-            @Override
-            public short asShort() {return 0;}
-            @Override
-            public byte asByte() {return 0;}
-            @Override
-            public boolean asBoolean() {return false;}
-            @Override
-            public String asString() {return "";}
-            @Override
-            public Plugin getOwningPlugin() {return Nftilation.getInstance();}
-            @Override
-            public void invalidate() {}
-        });
+        OwnerHandleComponent.setEntityOwner(entity, player);
         entity.setIsIncendiary(true);
-        world.createExplosion(location.getX(), location.getY(), location.getZ(), 5, true, false);
     }
     
     @EventHandler
@@ -243,11 +214,11 @@ public class Cryptomarine extends Role {
         if(!(Store.getInstance().getDataInstance().getPlayerRole(attacker.getName()) instanceof Cryptomarine)) return;
         String axe = NBT.get(attacker.getInventory().getItemInMainHand(), nbt -> (String) nbt.getString("cryptomarine"));
         if(StringUtils.isEmpty(axe) || !axe.equals("axe")) return;
-        if(RANDOM.nextInt(10) > 7) return;
+        if(RANDOM.nextFloat() > RoleConstant.CRYPTOMARINE_LIGHTNING_CHANCE) return;
         World world = attacker.getWorld();
         Location location = e.getEntity().getLocation();
         world.strikeLightningEffect(location);
-        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(attacker, victim, EntityDamageEvent.DamageCause.LIGHTNING, 5D);
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(attacker, victim, EntityDamageEvent.DamageCause.LIGHTNING, RoleConstant.CRYPTOMARINE_LIGHTNING_DAMAGE);
         getServer().getPluginManager().callEvent(event);
         if(event.isCancelled()) return;
         victim.setHealth(victim.getHealth() - event.getFinalDamage());

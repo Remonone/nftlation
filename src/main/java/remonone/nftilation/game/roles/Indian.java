@@ -17,13 +17,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.application.models.PlayerData;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.utils.InventoryUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +44,11 @@ public class Indian extends Role {
 
     @Override
     public List<String> getRoleDescription() {
-        return Arrays.asList("This is Indian");
+        return Arrays.asList(RoleConstant.INDIAN_DESCRIPTION_1, 
+                RoleConstant.INDIAN_DESCRIPTION_2, 
+                RoleConstant.INDIAN_DESCRIPTION_3,
+                RoleConstant.INDIAN_DESCRIPTION_4,
+                RoleConstant.INDIAN_DESCRIPTION_5);
     }
 
     @Override
@@ -87,7 +91,7 @@ public class Indian extends Role {
                 break;
         }
         ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName("Programming guide");
+        meta.setDisplayName(RoleConstant.INDIAN_PICKAXE_NAME);
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         stack.setItemMeta(meta);
@@ -141,10 +145,8 @@ public class Indian extends Role {
         String block = NBT.get(item, nbt -> (String)nbt.getString("block-type"));
         if(StringUtils.isEmpty(block)) return;
         event.setCancelled(true);
-        long cooldown = NBT.get(item, nbt -> (Long) nbt.getLong("cooldown"));
-        if(cooldown > System.currentTimeMillis()) {
-            player.playSound(player.getLocation(), Sound.ENTITY_CAT_HURT, 1f, 1f);
-            player.sendMessage(ChatColor.RED + MessageConstant.ITEM_COOLDOWN + " Cooldown: " + (int)((cooldown - System.currentTimeMillis()) / 1000));
+        if(InventoryUtils.isCooldownRemain(item)) {
+            InventoryUtils.notifyAboutCooldown(player, item);
             return;
         }
         int amount = NBT.get(item, nbt -> (Integer)nbt.getInteger("amount"));
@@ -154,7 +156,7 @@ public class Indian extends Role {
         player.getInventory().addItem(stack);
         World world = player.getWorld();
         world.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, .5f, 1f);
-        NBT.modify(item, nbt -> {nbt.setLong("cooldown", System.currentTimeMillis() + 60 * DataConstants.ONE_SECOND);});
+        InventoryUtils.setCooldownForItem(item, RoleConstant.INDIAN_BLOCK_COOLDOWN);
     }
 
     @EventHandler
@@ -172,7 +174,7 @@ public class Indian extends Role {
         int taskId = (int)params.get("recall");
         params.remove("recall");
         getServer().getScheduler().cancelTask(taskId);
-        accessor.sendMessage(ChatColor.GOLD + RoleConstant.MONKEY_RECALL_CANCEL);
+        accessor.sendMessage(ChatColor.GOLD + RoleConstant.INDIAN_RECALL_CANCEL);
     }
 
     @EventHandler
@@ -190,20 +192,20 @@ public class Indian extends Role {
         DataInstance dataInstance = Store.getInstance().getDataInstance();
         Map<String, Object> params = dataInstance.getPlayerParams(player.getName());
         if(params.containsKey("recall")) {
-            player.sendMessage(ChatColor.GOLD + RoleConstant.MONKEY_RECALL_ACTIVE);
+            player.sendMessage(ChatColor.GOLD + RoleConstant.INDIAN_RECALL_ACTIVE);
             return;
         }
         player.sendMessage(ChatColor.GOLD + MessageConstant.START_RECALL);
-        PlayerData playerData = dataInstance.FindPlayerByName(player.getName());
-        GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(playerData.getTeam().getTeamName(), player);
+        String team = dataInstance.getPlayerTeam(player.getName());
+        GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(team, player);
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override
             public void run() {
                 params.remove("recall");
-                GameInstance.getInstance().teleportPlayerToBase(playerData.getTeam().getTeamName(), player);
+                GameInstance.getInstance().teleportPlayerToBase(team, player);
             }
         };
-        int delay = model.getUpgradeLevel() > 1 ? 7 : 10;
+        int delay = model.getUpgradeLevel() > 2 ? RoleConstant.INDIAN_RECALL_MAX_LEVEL : RoleConstant.INDIAN_RECALL_MIN_LEVEL;
         runnable.runTaskLater(Nftilation.getInstance(), delay * 20);
         int taskId = runnable.getTaskId();
         params.put("recall", taskId);

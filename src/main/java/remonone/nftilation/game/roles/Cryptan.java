@@ -15,12 +15,11 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Store;
-import remonone.nftilation.application.models.PlayerData;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.ItemConstant;
-import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.utils.InventoryUtils;
 
 import java.util.*;
 
@@ -39,7 +38,7 @@ public class Cryptan extends Role {
 
     @Override
     public List<String> getRoleDescription() {
-        return Arrays.asList("This is a cryptan");
+        return Arrays.asList(RoleConstant.CRYPTAN_DESCRIPTION_1, RoleConstant.CRYPTAN_DESCRIPTION_2, RoleConstant.CRYPTAN_DESCRIPTION_3);
     }
 
     @Override
@@ -99,7 +98,7 @@ public class Cryptan extends Role {
                 break;
         }
         ItemMeta meta = itemStack.getItemMeta();
-        meta.setDisplayName("Solid chestplate");
+        meta.setDisplayName(RoleConstant.CRYPTAN_CHESTPLATE_NAME);
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
@@ -108,6 +107,7 @@ public class Cryptan extends Role {
     
     @Override
     protected List<ItemStack> getAbilityItems(int upgradeLevel) {
+        if(upgradeLevel < 2) return Collections.emptyList();
         ItemStack itemStack = new ItemStack(Material.FISHING_ROD);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setDisplayName(RoleConstant.CRYPTAN_ABILITY);
@@ -125,10 +125,8 @@ public class Cryptan extends Role {
         Player player = event.getPlayer();
         ItemStack stack = player.getInventory().getItemInMainHand();
         if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getName()) instanceof Cryptan)) return;
-        long cooldown = NBT.get(stack, nbt -> (Long) nbt.getLong("cooldown"));
-        if(cooldown > System.currentTimeMillis()) {
-            player.playSound(player.getLocation(), Sound.ENTITY_CAT_HURT, 1f, 1f);
-            player.sendMessage(ChatColor.RED + MessageConstant.ITEM_COOLDOWN + " Cooldown: " + (int)((cooldown - System.currentTimeMillis()) / 1000));
+        if(InventoryUtils.isCooldownRemain(stack)) {
+            InventoryUtils.notifyAboutCooldown(player, stack);
             event.setCancelled(true);
             return;
         }
@@ -141,11 +139,15 @@ public class Cryptan extends Role {
 
         Location flyTo = event.getHook().getLocation();
         event.setCancelled(true);
+        
+        // ==set Velocity==
         Vector direction = flyTo.toVector().subtract(player.getLocation().toVector()).add(new Vector(0, 3F, 0)).multiply(
                 new Vector(RoleConstant.CRYPTAN_HOOK_AIRBORNE_MODIFIER, 1, RoleConstant.CRYPTAN_HOOK_AIRBORNE_MODIFIER))
                 .normalize();
         Vector destinationVelocity = direction.multiply(flyTo.distance(player.getLocation()) * RoleConstant.CRYPTAN_HOOK_SPEED);
         player.setVelocity(destinationVelocity);
+        // =====
+        
         event.getHook().remove();
         if(event.getCaught() != null && event.getCaught() instanceof Player) {
             Player caught = (Player) event.getCaught();
@@ -166,10 +168,10 @@ public class Cryptan extends Role {
             }
         }
         
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
-        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(data.getTeam().getTeamName(), player);
-        int setCooldown = model.getUpgradeLevel() == 3 ? 2 : 5;
-        NBT.modify(stack, nbt -> {nbt.setLong("cooldown", System.currentTimeMillis() + setCooldown * DataConstants.ONE_SECOND);});
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
+        int setCooldown = model.getUpgradeLevel() == 3 ? RoleConstant.CRYPTAN_COOLDOWN_MAX_RANK : RoleConstant.CRYPTAN_COOLDOWN_LOW_RANK;
+        InventoryUtils.setCooldownForItem(stack, setCooldown);
     }
     
     @EventHandler
@@ -178,8 +180,8 @@ public class Cryptan extends Role {
         Player player = (Player) event.getEntity();
         if(player.getHealth() - event.getFinalDamage() > 6D) return;
         if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getName()) instanceof Cryptan)) return;
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
-        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(data.getTeam().getTeamName(), player);
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
         World world = player.getWorld();
         world.playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, .5f, 1f);
         int power = Math.min(model.getUpgradeLevel(), 2);

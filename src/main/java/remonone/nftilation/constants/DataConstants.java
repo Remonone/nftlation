@@ -18,4 +18,5 @@ public class DataConstants {
     public static final String NBT_CATEGORY_POTIONS = "potions";
     public static final String NBT_CATEGORY_UPGRADES = "upgrades";
     public static final String NBT_CATEGORY_FOOD = "food";
+    public static int CONSTANT_POTION_DURATION = Integer.MAX_VALUE;
 }

@@ -16,14 +16,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import remonone.nftilation.Store;
-import remonone.nftilation.application.models.PlayerData;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
+import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Monkey extends Role {
@@ -39,7 +40,7 @@ public class Monkey extends Role {
 
     @Override
     public List<String> getRoleDescription() {
-        return Arrays.asList("This is a Monkey");
+        return Arrays.asList(RoleConstant.MONKEY_DESCRIPTION_1, RoleConstant.MONKEY_DESCRIPTION_2, RoleConstant.MONKEY_DESCRIPTION_3);
     }
 
     @Override
@@ -81,6 +82,26 @@ public class Monkey extends Role {
         stack.setItemMeta(meta);
         return stack;
     }
+    
+    @Override
+    protected ItemStack getHelmet(Player player, int upgradeLevel) {
+        return new ItemStack(Material.AIR);
+    }
+
+    @Override
+    protected ItemStack getChestplate(Player player, int upgradeLevel) {
+        return new ItemStack(Material.AIR);
+    }
+
+    @Override
+    protected ItemStack getLeggins(Player player, int upgradeLevel) {
+        return new ItemStack(Material.AIR);
+    }
+
+    @Override
+    protected ItemStack getBoots(Player player, int upgradeLevel) {
+        return new ItemStack(Material.AIR);
+    }
 
     @Override
     protected List<ItemStack> getAbilityItems(int upgradeLevel){
@@ -91,7 +112,7 @@ public class Monkey extends Role {
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
         NBT.modify(itemStack, nbt -> {nbt.setString("monkey", "invisibility");});
-        return Arrays.asList(itemStack);
+        return Collections.singletonList(itemStack);
     }
     
     @Override
@@ -117,8 +138,8 @@ public class Monkey extends Role {
         if(StringUtils.isBlank(isStick) || !isStick.equals("stick")) return;
         GameInstance instance = GameInstance.getInstance();
         DataInstance dataInstance = Store.getInstance().getDataInstance();
-        PlayerData playerData = dataInstance.FindPlayerByName(attacker.getName());
-        GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(playerData.getTeam().getTeamName(), attacker);
+        String team = dataInstance.getPlayerTeam(attacker.getName());
+        GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(team, attacker);
         if(model == null) return;
         int level = model.getUpgradeLevel();
         if(level == 2) {
@@ -183,13 +204,13 @@ public class Monkey extends Role {
         long cooldown = NBT.get(item, nbt -> (Long) nbt.getLong("cooldown"));
         if(cooldown > System.currentTimeMillis()) {
             player.playSound(player.getLocation(), Sound.ENTITY_CAT_HURT, 1f, 1f);
-            player.sendMessage(ChatColor.RED + MessageConstant.ITEM_COOLDOWN + " Cooldown: " + (int)((cooldown - System.currentTimeMillis()) / 1000));
+            player.sendMessage(ChatColor.RED + MessageConstant.ITEM_COOLDOWN + (int)((cooldown - System.currentTimeMillis()) / 1000));
             return;
         }
         GameInstance instance = GameInstance.getInstance();
         DataInstance dataInstance = Store.getInstance().getDataInstance();
-        PlayerData playerData = dataInstance.FindPlayerByName(player.getName());
-        GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(playerData.getTeam().getTeamName(), player);
+        String team = dataInstance.getPlayerTeam(player.getName());
+        GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(team, player);
         int length = 1 + model.getUpgradeLevel() * 2;
         World world = player.getWorld();
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, length * DataConstants.TICKS_IN_SECOND, 0, false, false));

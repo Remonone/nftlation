@@ -1,12 +1,13 @@
 package remonone.nftilation.utils;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 public class BlockUtils {
 
-    public static Block getNearestEmptySpace(Block b, int maxRadius) {
+    public static Location getNearestEmptySpace(Block b, int maxRadius) {
         BlockFace[] faces = {BlockFace.UP, BlockFace.NORTH, BlockFace.EAST};
         BlockFace[][] orth = {{BlockFace.NORTH, BlockFace.EAST}, {BlockFace.UP, BlockFace.EAST}, {BlockFace.NORTH, BlockFace.UP}};
         for (int r = 0; r <= maxRadius; r++) {
@@ -20,7 +21,7 @@ public class BlockUtils {
                     for (int y = -r; y <= r; y++) {
                         Block a = c.getRelative(o[0], x).getRelative(o[1], y);
                         if (a.getType() == Material.AIR && a.getRelative(BlockFace.UP).getType() == Material.AIR)
-                            return a;
+                            return a.getLocation();
                     }
                 }
             }

@@ -2,6 +2,7 @@ package remonone.nftilation.config;
 
 import lombok.Getter;
 import org.apache.commons.lang.ObjectUtils;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
@@ -29,6 +30,11 @@ public class ConfigManager {
     private Vector centerDeadZoneCoords;
     @Getter
     private List<TeamSpawnPoint> teamSpawnList;
+    @Getter
+    private Location centerLocation;
+    
+    @Getter
+    private List<Location> diamondSpawnList;
     
     private ConfigManager() {}
     
@@ -57,6 +63,8 @@ public class ConfigManager {
         List<TeamSpawnPoint> teamSpawnPoints = (List<TeamSpawnPoint>) configuration.getList(PropertyConstant.TEAMS_SPAWN_POINTS);
         Logger.log("Loaded " + teamSpawnPoints.size() + " team spawn points.");
         teamSpawnList = teamSpawnPoints;
+        diamondSpawnList = (List<Location>) configuration.getList(PropertyConstant.DIAMOND_POSITION);
+        centerLocation = (Location) configuration.get(PropertyConstant.CENTER_LOCATION);
     }
 
     public void Save() {
@@ -83,11 +91,15 @@ public class ConfigManager {
         SetValue(PropertyConstant.CENTER_DEAD_POINT, centerDeadZoneCoords);
     }
     
-    public String addTeamSpawnPosition(Vector coords) {
+    public void addDiamondsSpawnPoint(Location coords) {
+        diamondSpawnList.add(coords);
+        SetValue(PropertyConstant.DIAMOND_POSITION, diamondSpawnList);
+    }
+    
+    public String addTeamSpawnPosition(Location coords) {
         TeamSpawnPoint point = new TeamSpawnPoint();
         point.setId(UUID.randomUUID().toString().substring(0, 5));
         point.setPosition(coords);
-        Logger.debug(String.valueOf(teamSpawnList.size()));
         teamSpawnList.add(point);
         SetValue(PropertyConstant.TEAMS_SPAWN_POINTS, teamSpawnList.toArray());
         return point.getId();
@@ -107,7 +119,7 @@ public class ConfigManager {
         return true;
     }
     
-    public boolean trySetShopKeeper(String id, Vector pos) {
+    public boolean trySetShopKeeper(String id, Location pos) {
         TeamSpawnPoint teamPoint = teamSpawnList.stream().filter(point -> point.getId().equals(id)).findFirst().orElse(null);
         if(teamPoint == null) {
             return false;
@@ -120,6 +132,11 @@ public class ConfigManager {
     private void SetValue(String path, Object value) {
         configuration.set(path, value);
         Save();
+    }
+    
+    public void setCenterLocation(Location loc) {
+        centerLocation = loc;
+        SetValue(PropertyConstant.CENTER_LOCATION, centerLocation);
     }
     
     public boolean isPositionExisting(String id) {
