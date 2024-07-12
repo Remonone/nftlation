@@ -19,4 +19,6 @@ public class DataConstants {
     public static final String NBT_CATEGORY_UPGRADES = "upgrades";
     public static final String NBT_CATEGORY_FOOD = "food";
     public static int CONSTANT_POTION_DURATION = Integer.MAX_VALUE;
+
+    public static int ACTION_ROBO_SYBYL_COUNT_PER_POINT = 4;
 }

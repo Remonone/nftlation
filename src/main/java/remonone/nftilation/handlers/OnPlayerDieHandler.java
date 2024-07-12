@@ -13,7 +13,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.components.OwnerHandleComponent;
+import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
@@ -67,7 +67,7 @@ public class OnPlayerDieHandler implements Listener {
             attacker = (Player) ((Arrow) event.getDamager()).getShooter();
         }
         if(event.getDamager() instanceof AreaEffectCloud) {
-            attacker = OwnerHandleComponent.getEntityOwner(event.getDamager());
+            attacker = EntityHandleComponent.getEntityOwner(event.getDamager());
             if(attacker == null) return;
             String teamName = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getName());
             if(StringUtils.isEmpty(teamName)) return;
@@ -77,7 +77,7 @@ public class OnPlayerDieHandler implements Listener {
             }
         }
         if(event.getDamager() instanceof Fireball) {
-            attacker = OwnerHandleComponent.getEntityOwner(event.getDamager());
+            attacker = EntityHandleComponent.getEntityOwner(event.getDamager());
         }
         if(attacker == null) return;
         if(GameInstance.getInstance().checkIfPlayersInSameTeam(target, attacker)) {
@@ -96,7 +96,7 @@ public class OnPlayerDieHandler implements Listener {
 
     private void OnDeath(Player player) {
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
-        GameInstance.getInstance().setPlayerDead(teamName, player.getUniqueId());
+        GameInstance.getInstance().setPlayerDead(teamName, player);
         GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
         Role.OnDie(player, Role.getRoleByID(model.getRoleId()), model.getUpgradeLevel());
         Vector pos = ConfigManager.getInstance().getCenterDeadZoneCoords();
@@ -111,6 +111,6 @@ public class OnPlayerDieHandler implements Listener {
                 if((boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_INVENTORY_AUTO_CLEAR, true))
                     Role.refillInventoryWithItems(player, Role.getRoleByID(model.getRoleId()), model.getUpgradeLevel());
             }
-        }, (long) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_RESPAWN_TIMER, 5 * 20));
+        }, (long) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_RESPAWN_TIMER, 5 * DataConstants.TICKS_IN_SECOND));
     }
 }

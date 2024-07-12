@@ -315,10 +315,10 @@ public class GameInstance {
         return team.core.getHealth();
     }
     
-    public void setPlayerDead(String teamName, UUID playerId) {
+    public void setPlayerDead(String teamName, Player player) {
         Team team = teamData.get(teamName);
         if(team == null) return;
-        PlayerModel model = team.players.stream().filter(playerModel -> playerModel.reference.getUniqueId().equals(playerId)).findFirst().orElse(null);
+        PlayerModel model = getPlayerModelFromTeam(teamName, player);
         if(model == null) return;
         model.isAlive = false;
         if(!team.isCoreAlive) {
@@ -334,7 +334,9 @@ public class GameInstance {
         if(team == null) return;
         if(team.isCoreAlive) {
             setPlayerToPosition(team, player);
-            PlayerModel model = team.players.stream().filter(playerModel -> playerModel.reference.getUniqueId().equals(player.getUniqueId())).findFirst().orElse(null);
+            // BUG: Check on model
+            PlayerModel model = getPlayerModelFromTeam(teamName, player);
+            Logger.debug("Check model availability on respawn: " + (model != null));
             if(model == null) return;
             model.isAlive = true;
             Role.UpdatePlayerAbilities(player, Role.getRoleByID(model.getRoleId()), model.getUpgradeLevel());

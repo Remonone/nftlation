@@ -35,6 +35,8 @@ public class ConfigManager {
     
     @Getter
     private List<Location> diamondSpawnList;
+    @Getter
+    private List<Location> roboSybylsSpawnList;
     
     private ConfigManager() {}
     
@@ -61,10 +63,22 @@ public class ConfigManager {
         lobbyRoomCoords = (Vector) configuration.get(PropertyConstant.LOBBY_ROOM);
         centerDeadZoneCoords = (Vector) configuration.get(PropertyConstant.CENTER_DEAD_POINT);
         List<TeamSpawnPoint> teamSpawnPoints = (List<TeamSpawnPoint>) configuration.getList(PropertyConstant.TEAMS_SPAWN_POINTS);
+        if(teamSpawnPoints == null) {
+            teamSpawnPoints = new ArrayList<>();
+        }
         Logger.log("Loaded " + teamSpawnPoints.size() + " team spawn points.");
         teamSpawnList = teamSpawnPoints;
-        diamondSpawnList = (List<Location>) configuration.getList(PropertyConstant.DIAMOND_POSITION);
+        List<Location> diamondPositions = (List<Location>) configuration.getList(PropertyConstant.DIAMOND_POSITION);
+        if(diamondPositions == null) {
+            diamondPositions = new ArrayList<>();
+        }
+        diamondSpawnList = diamondPositions;
         centerLocation = (Location) configuration.get(PropertyConstant.CENTER_LOCATION);
+        List<Location> roboSybylPoints = (List<Location>) configuration.get(PropertyConstant.ROBO_SYBYL_SPAWN_POINTS);
+        if(roboSybylPoints == null) {
+            roboSybylPoints = new ArrayList<>();
+        }
+        roboSybylsSpawnList = roboSybylPoints;
     }
 
     public void Save() {
@@ -107,6 +121,11 @@ public class ConfigManager {
     public void removeTeamSpawnPosition(String id) {
         teamSpawnList.removeIf(point -> point.getId().equals(id));
         SetValue(PropertyConstant.TEAMS_SPAWN_POINTS, teamSpawnList.toArray());
+    }
+
+    public void addRoboSybylPoint(Location coords) {
+        roboSybylsSpawnList.add(coords);
+        SetValue(PropertyConstant.ROBO_SYBYL_SPAWN_POINTS, roboSybylsSpawnList.toArray());
     }
     
     public boolean trySetTeamSpawnCore(String id, Vector pos) {

@@ -8,7 +8,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
-import remonone.nftilation.components.OwnerHandleComponent;
+import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
 
@@ -19,7 +19,7 @@ public class ExplosionDestructionDisable implements Listener {
     
     @EventHandler
     public void onExplosion(EntityExplodeEvent e) {
-        if(OwnerHandleComponent.getEntityOwner(e.getEntity()) != null) {
+        if(EntityHandleComponent.getEntityOwner(e.getEntity()) != null) {
             e.setCancelled(true);
             return;
         }

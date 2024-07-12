@@ -20,7 +20,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.ItemStatModifierComponent;
-import remonone.nftilation.components.OwnerHandleComponent;
+import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.RoleConstant;
@@ -97,7 +97,7 @@ public class RuslanEth extends Role {
         if (!(Store.getInstance().getDataInstance().getPlayerRole(player.getName()) instanceof RuslanEth)) return;
         if(projectile.getType() != EntityType.SNOWBALL) return;
         String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
-        OwnerHandleComponent.setEntityOwner(projectile, player);
+        EntityHandleComponent.setEntityOwner(projectile, player);
         projectile.setMetadata("invokerTeam", new FixedMetadataValue(Nftilation.getInstance(), team));
        
         BukkitRunnable task = new BukkitRunnable() {
@@ -116,7 +116,7 @@ public class RuslanEth extends Role {
     
     @EventHandler
     public void onProjectileHit(final ProjectileHitEvent e) {
-        Player owner = OwnerHandleComponent.getEntityOwner(e.getEntity());
+        Player owner = EntityHandleComponent.getEntityOwner(e.getEntity());
         if(owner == null) return;
         
         if(!entitiesList.get(owner.getUniqueId()).isEmpty()) {
@@ -145,7 +145,7 @@ public class RuslanEth extends Role {
         for(int i = 0; i < bodyCount; i++) {
             Blaze blaze = owner.getWorld().spawn(nearestEmptyBlock, Blaze.class);
             blaze.setMetadata("ruslan", new FixedMetadataValue(Nftilation.getInstance(), teamName));
-            OwnerHandleComponent.setEntityOwner(blaze, owner);
+            EntityHandleComponent.setEntityOwner(blaze, owner);
             EntityList.addEntity(blaze);
             entitiesList.get(owner.getUniqueId()).add(blaze);
         }
@@ -195,13 +195,17 @@ public class RuslanEth extends Role {
     @EventHandler
     public void onEventTarget(final EntityTargetEvent e) {
         if(!(e.getEntity() instanceof Blaze)) return;
-        if(!(e.getTarget() instanceof Player)) return;
-        Player target = (Player) e.getTarget();
-        Blaze blaze = (Blaze) e.getEntity();
-        String team = (String)blaze.getMetadata("ruslan").get(0).value();
-        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(target.getName());
-        if(StringUtils.isEmpty(teamName) || teamName.equals(team)) {
-            e.setCancelled(true);
+        if(e.getTarget() instanceof Player) {
+            Player target = (Player) e.getTarget();
+            Blaze blaze = (Blaze) e.getEntity();
+            String team = (String)blaze.getMetadata("ruslan").get(0).value();
+            String teamName = Store.getInstance().getDataInstance().getPlayerTeam(target.getName());
+            if(StringUtils.isEmpty(teamName) || teamName.equals(team)) {
+                e.setCancelled(true);
+            }
+        }
+        if(EntityHandleComponent.isEntityHostile(e.getEntity())) {
+            e.setTarget(e.getEntity());
         }
     }
     
@@ -214,7 +218,7 @@ public class RuslanEth extends Role {
         if(!(e.getEntity() instanceof Player)) return;
         Player player = (Player) e.getEntity();
         String team = (String)blaze.getMetadata("ruslan").get(0).value();
-        Player host = OwnerHandleComponent.getEntityOwner(blaze);
+        Player host = EntityHandleComponent.getEntityOwner(blaze);
         if(host == null) {
             return;
         }

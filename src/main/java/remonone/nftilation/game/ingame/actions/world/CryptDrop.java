@@ -28,7 +28,7 @@ public class CryptDrop implements IAction {
 
     @Override
     public String getTitle() {
-        return ChatColor.DARK_RED + "" + ChatColor.BOLD + "Crypt drop";
+        return ChatColor.DARK_RED + "" + ChatColor.BOLD + "Падение крипты";
     }
 
     @Override

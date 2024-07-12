@@ -18,7 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import remonone.nftilation.Store;
-import remonone.nftilation.components.OwnerHandleComponent;
+import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
@@ -199,7 +199,7 @@ public class Cryptomarine extends Role {
         TNTPrimed entity = player.getWorld().spawn(location, TNTPrimed.class);
         entity.setYield(RoleConstant.CRYPTOMARINE_EXPLOSION_STRENGTH);
         entity.setFuseTicks(0);
-        OwnerHandleComponent.setEntityOwner(entity, player);
+        EntityHandleComponent.setEntityOwner(entity, player);
         entity.setIsIncendiary(true);
     }
     

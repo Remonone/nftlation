@@ -10,12 +10,11 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
-import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
+import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
@@ -137,7 +136,7 @@ public class SybylAttacker extends Role {
             TNTPrimed entity = e.getEntity().getWorld().spawn(location, TNTPrimed.class);
             entity.setYield(RoleConstant.SYBYL_EXPLOSION_ARROW_STRENGTH);
             entity.setFuseTicks(0);
-            entity.setMetadata("invoker", new FixedMetadataValue(Nftilation.getInstance(), e.getEntity().getShooter()));
+            EntityHandleComponent.setEntityOwner(entity, shooter);
             entity.setIsIncendiary(true);
             e.getEntity().remove();
         }

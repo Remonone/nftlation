@@ -10,6 +10,7 @@ import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
 import remonone.nftilation.game.ingame.actions.world.CryptDrop;
 import remonone.nftilation.game.ingame.actions.world.Hamster;
+import remonone.nftilation.game.ingame.actions.world.RoboSybyl;
 import remonone.nftilation.game.lobby.LobbyDisposer;
 import remonone.nftilation.game.roles.*;
 import remonone.nftilation.handlers.*;
@@ -32,8 +33,10 @@ public final class Nftilation extends JavaPlugin {
     }
 
     private void InitActions() {
+        Logger.log("Initializing actions...");
         ActionContainer.registerAction(ActionType.CRYPT_DROP, new CryptDrop());
         ActionContainer.registerAction(ActionType.HAMSTER, new Hamster());
+        ActionContainer.registerAction(ActionType.ROBOSYBYL_ATTACK, new RoboSybyl());
     }
 
     private void SerializeProperties() {

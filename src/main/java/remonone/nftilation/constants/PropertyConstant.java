@@ -8,6 +8,7 @@ public class PropertyConstant {
     public static final String CENTER_DEAD_POINT = "center";
     public static final String CENTER_LOCATION = "centerLocation";
     public static final String DIAMOND_POSITION = "diamondsList";
+    public static final String ROBO_SYBYL_SPAWN_POINTS = "roboSybylSpawnPoints";
 
     public static final String RULE_CORE_INVULNERABLE = "isCoreInvulnerable";
     public static final String RULE_RESOURCE_RESPAWNABLE = "isResourcesRespawnable";
