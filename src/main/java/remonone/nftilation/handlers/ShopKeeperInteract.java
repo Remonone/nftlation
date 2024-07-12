@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.Inventory;
 import remonone.nftilation.game.inventory.InventoryBuilder;
+import remonone.nftilation.game.shop.ShopBuilder;
 
 
 public class ShopKeeperInteract implements Listener {
@@ -18,7 +19,7 @@ public class ShopKeeperInteract implements Listener {
         String name = entity.getCustomName();
         if("Shop keeper".equals(name)) {
             event.setCancelled(true);
-            Inventory inventory = InventoryBuilder.getShopKeeperInventory(player);
+            Inventory inventory = InventoryBuilder.buildShopKeeperInventory(player, ShopBuilder.getInstance().getMainElement());
             player.openInventory(inventory);
         }
     }

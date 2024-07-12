@@ -48,4 +48,4 @@ commands:
     usage: /setCenterPosition
   addDiamondPosition:
     description: Set diamond spawn point
-    usage: /addDiamondPosition
+    usage: /addDiamondPosition    

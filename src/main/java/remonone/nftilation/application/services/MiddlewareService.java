@@ -24,7 +24,7 @@ public class MiddlewareService {
 //                PlayerData data = HttpRequestSender.post(RequestConstant.REQ_PLAYER_LOG_IN, credentials, PlayerData.class);
                 TeamData data = teams.get(counter);
                 counter = counter == 0 ? 1 : 0;
-                onData.apply(new PlayerData(credentials.getLogin(), PlayerRole.PLAYER, data));
+                onData.apply(new PlayerData(credentials.getLogin(), PlayerRole.DEV, data));
             } catch(Exception ex) {
                 onFail.apply(ex.getMessage());
             }

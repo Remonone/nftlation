@@ -119,11 +119,12 @@ public class GameInstance {
         ScoreboardHandler.updateScoreboard(model);
     }
     
-    public void withdrawFunds(String teamName, Player player, int amount) {
+    public boolean withdrawFunds(String teamName, Player player, int amount) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        if(model.tokens < amount) return;
+        if(model.tokens < amount) return false;
         model.tokens -= amount;
         ScoreboardHandler.updateScoreboard(model);
+        return true;
     }
     
     public void increasePlayerKillCounter(String teamName, Player player) {
@@ -170,12 +171,14 @@ public class GameInstance {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
         if(level - model.upgradeLevel != 1) {
             player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_UPGRADE_LEVEL);
-            awardPlayer(teamName, player, price);
             return;
         }
         if((int)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_AVAILABLE_TIER, 1) < level) {
             player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_STAGE_FOR_UPGRADE);
-            awardPlayer(teamName, player, price);
+            return;
+        }
+        if(!withdrawFunds(teamName, player, price)) {
+            player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
             return;
         }
         player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, .5f, 1f);

@@ -1,6 +1,5 @@
 package remonone.nftilation.game.shop.registry;
 
-import remonone.nftilation.game.shop.content.IExpandable;
 import remonone.nftilation.game.shop.content.IShopElement;
 import remonone.nftilation.utils.Logger;
 
@@ -12,6 +11,10 @@ public class ShopItemRegistry {
     public static void addRegistry(IShopElement item) {
         if(item == null) {
             Logger.error("Item is not belongs to shop item or null!");
+            return;
+        }
+        if(isItemContains(item.getId())) {
+            Logger.error("Trying to add an item that already exists! Id: " + item.getId());
             return;
         }
         itemRegistry.put(item.getId(), item);

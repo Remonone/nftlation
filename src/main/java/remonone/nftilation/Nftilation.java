@@ -13,6 +13,11 @@ import remonone.nftilation.game.ingame.actions.world.Hamster;
 import remonone.nftilation.game.ingame.actions.world.RoboSybyl;
 import remonone.nftilation.game.lobby.LobbyDisposer;
 import remonone.nftilation.game.roles.*;
+import remonone.nftilation.game.shop.ShopBuilder;
+import remonone.nftilation.game.shop.content.CategoryElement;
+import remonone.nftilation.game.shop.content.ItemElement;
+import remonone.nftilation.game.shop.content.ServiceElement;
+import remonone.nftilation.game.shop.content.ShopItemPosition;
 import remonone.nftilation.handlers.*;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
@@ -25,6 +30,7 @@ public final class Nftilation extends JavaPlugin {
         // Plugin startup logic
         Logger.log("Starting...");
         SerializeProperties();
+        ShopBuilder.getInstance().Load();
         ConfigManager.getInstance().Load();
         InitHandlers();
         InitCommands();
@@ -42,6 +48,10 @@ public final class Nftilation extends JavaPlugin {
     private void SerializeProperties() {
         Logger.log("Serializing properties...");
         ConfigurationSerialization.registerClass(TeamSpawnPoint.class);
+        ConfigurationSerialization.registerClass(CategoryElement.class);
+        ConfigurationSerialization.registerClass(ItemElement.class);
+        ConfigurationSerialization.registerClass(ServiceElement.class);
+        ConfigurationSerialization.registerClass(ShopItemPosition.class);
     }
 
     private void RegisterRoles() {
