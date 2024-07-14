@@ -4,15 +4,16 @@ import lombok.*;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
+import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
+import org.bukkit.entity.*;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.TeamData;
+import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
 import remonone.nftilation.constants.MessageConstant;
@@ -22,6 +23,7 @@ import remonone.nftilation.game.ingame.services.RepairCoreService;
 import remonone.nftilation.game.ingame.services.SecondTierService;
 import remonone.nftilation.game.ingame.services.ServiceContainer;
 import remonone.nftilation.game.ingame.services.ThirdTierService;
+import remonone.nftilation.game.mob.AngryGolem;
 import remonone.nftilation.game.phase.PhaseCounter;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
@@ -49,7 +51,7 @@ public class GameInstance {
         Map<String, List<DataInstance.PlayerInfo>> teams = Store.getInstance().getDataInstance().getTeams();
         constructTeamData(teams);
         disposePlayers();
-        InitServices();
+        initServices();
         for(Team team : teamData.values()) {
             initPlayerRoles(team.players);
             fillPlayerItems(team.players);
@@ -57,17 +59,31 @@ public class GameInstance {
                 ScoreboardHandler.buildScoreboard(model.reference);
             }
         }
+        spawnGolems();
         counter = new PhaseCounter();
         counter.Init();
     }
-    
+
+    private void spawnGolems() {
+        List<Location> locations = ConfigManager.getInstance().getIronGolemPositions();
+        for(Location location : locations) {
+            location.getChunk().load();
+            AngryGolem golem = new AngryGolem(location);
+            ((CraftWorld)location.getWorld()).getHandle().addEntity(golem, CreatureSpawnEvent.SpawnReason.CUSTOM);
+            EntityHandleComponent.setEntityUnloadLocked(golem.getBukkitEntity());
+            EntityHandleComponent.setEntityHostile(golem.getBukkitEntity());
+            EntityList.addEntity((LivingEntity) golem.getBukkitEntity());
+            golem.setCustomName("Angry Golem");
+        }
+    }
+
     public boolean checkIfPlayersInSameTeam(Player player1, Player player2) {
-        String data1 = Store.getInstance().getDataInstance().getPlayerTeam(player1.getName());
-        String data2 = Store.getInstance().getDataInstance().getPlayerTeam(player2.getName());
+        String data1 = Store.getInstance().getDataInstance().getPlayerTeam(player1.getUniqueId());
+        String data2 = Store.getInstance().getDataInstance().getPlayerTeam(player2.getUniqueId());
         return !StringUtils.isEmpty(data1) && !StringUtils.isEmpty(data2) && data1.equals(data2);
     }
 
-    private void InitServices() {
+    private void initServices() {
         ServiceContainer.registerService(new RepairCoreService());
         ServiceContainer.registerService(new SecondTierService());
         ServiceContainer.registerService(new ThirdTierService());
@@ -129,13 +145,15 @@ public class GameInstance {
     
     public void increasePlayerKillCounter(String teamName, Player player) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        model.killCounter += 1;
+        model.killCounter = model.killCounter + 1;
         ScoreboardHandler.updateScoreboard(model);
     }
 
     public void increasePlayerDeathCounter(String teamName, Player player) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        model.deathCounter += 1;
+        Logger.debug(model.toString());
+        model.deathCounter = model.deathCounter + 1;
+        Logger.debug(model.toString());
         ScoreboardHandler.updateScoreboard(model);
     }
     
@@ -155,6 +173,7 @@ public class GameInstance {
         villager.setCustomName("Shop keeper");
         villager.setCustomNameVisible(false);
         villager.setInvulnerable(true);
+        EntityHandleComponent.setEntityUnloadLocked(villager);
         EntityList.addEntity(villager);
     }
 
@@ -167,7 +186,7 @@ public class GameInstance {
     }
     
     public void upgradePlayer(Player player, int level, int price) {
-        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
         if(level - model.upgradeLevel != 1) {
             player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_UPGRADE_LEVEL);
@@ -191,7 +210,9 @@ public class GameInstance {
 
     private void disposePlayers() {
         for(Team team : teamData.values()) {
-            team.players.forEach(playerModel -> setPlayerToPosition(team, playerModel.reference));
+            team.players.forEach(playerModel -> {
+                setPlayerToPosition(team, playerModel.reference);
+            });
         }
     }
     
@@ -255,21 +276,21 @@ public class GameInstance {
         notifyDestruction(team);
         if(team.players.stream().noneMatch(PlayerModel::isAlive)) {
             team.isActive = false;
-            CheckOnActiveTeams();
+            checkOnActiveTeams();
         }
         for(Team activeTeam : teamData.values()) {
             activeTeam.players.stream().filter(playerModel -> activeTeam.isCoreAlive || playerModel.isAlive).forEach(ScoreboardHandler::updateScoreboard);
         }
     }
 
-    private void CheckOnActiveTeams() {
+    private void checkOnActiveTeams() {
         List<Team> aliveTeams = teamData.values().stream().filter(Team::isActive).collect(Collectors.toList());
         if(aliveTeams.size() < 2) {
-            AnnounceTeamWinner(aliveTeams.get(0));
+            announceTeamWinner(aliveTeams.get(0));
         }
     }
 
-    private void AnnounceTeamWinner(Team team) {
+    private void announceTeamWinner(Team team) {
         Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(ChatColor.GREEN + "Team: " + team.core.getTeamData().getTeamName() + "have won the game! Congratulations!"));
         BukkitRunnable task = new BukkitRunnable() {
             @Override
@@ -332,6 +353,10 @@ public class GameInstance {
         }
     }
     
+    public TeamSpawnPoint getTeamSpawnPoint(String teamName) {
+        return teamData.get(teamName).getSpawnPoint();
+    }
+    
     public void respawnPlayer(Player player, String teamName) {
         Team team = teamData.get(teamName);
         if(team == null) return;
@@ -341,6 +366,7 @@ public class GameInstance {
             PlayerModel model = getPlayerModelFromTeam(teamName, player);
             Logger.debug("Check model availability on respawn: " + (model != null));
             if(model == null) return;
+            Logger.debug(model.toString());
             model.isAlive = true;
             Role.UpdatePlayerAbilities(player, Role.getRoleByID(model.getRoleId()), model.getUpgradeLevel());
         }
@@ -373,6 +399,7 @@ public class GameInstance {
     
     @Getter
     @AllArgsConstructor
+    @ToString
     public static class PlayerModel {
         @Setter
         private Player reference;

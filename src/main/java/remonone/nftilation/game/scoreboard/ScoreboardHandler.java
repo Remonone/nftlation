@@ -20,7 +20,7 @@ public class ScoreboardHandler {
         Scoreboard scoreboard = manager.getNewScoreboard();
         Objective objective = scoreboard.registerNewObjective("Nftlation", "dummy");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
         fillObjective(model, objective);
         player.setScoreboard(scoreboard);
@@ -32,7 +32,7 @@ public class ScoreboardHandler {
         objective.getScore("Level: " + model.getUpgradeLevel()).setScore(++counter);
         objective.getScore("Tokens: " + model.getTokens()).setScore(++counter);
         objective.getScore("Role: " + Role.getRoleByID(model.getRoleId()).getRoleName()).setScore(++counter);
-        String data = Store.getInstance().getDataInstance().getPlayerTeam(model.getReference().getName());
+        String data = Store.getInstance().getDataInstance().getPlayerTeam(model.getReference().getUniqueId());
         objective.getScore("Core Health: " + instance.getCoreHealth(data)).setScore(++counter);
         objective.getScore(ChatColor.RED + "" + ChatColor.BOLD + "= Info =").setScore(++counter);
         objective.getScore(ChatColor.RED + "").setScore(++counter);

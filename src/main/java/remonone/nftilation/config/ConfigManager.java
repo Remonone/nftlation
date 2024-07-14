@@ -37,6 +37,8 @@ public class ConfigManager {
     private List<Location> diamondSpawnList;
     @Getter
     private List<Location> roboSybylsSpawnList;
+    @Getter
+    private List<Location> ironGolemPositions;
     
     private ConfigManager() {}
     
@@ -74,11 +76,16 @@ public class ConfigManager {
         }
         diamondSpawnList = diamondPositions;
         centerLocation = (Location) configuration.get(PropertyConstant.CENTER_LOCATION);
-        List<Location> roboSybylPoints = (List<Location>) configuration.get(PropertyConstant.ROBO_SYBYL_SPAWN_POINTS);
+        List<Location> roboSybylPoints = (List<Location>) configuration.getList(PropertyConstant.ROBO_SYBYL_SPAWN_POINTS);
         if(roboSybylPoints == null) {
             roboSybylPoints = new ArrayList<>();
         }
         roboSybylsSpawnList = roboSybylPoints;
+        List<Location> ironGolemPos = (List<Location>) configuration.getList(PropertyConstant.IRON_GOLEM_SPAWN_POINTS);
+        if(ironGolemPos == null) {
+            ironGolemPos = new ArrayList<>();
+        }
+        ironGolemPositions = ironGolemPos;
     }
 
     public void Save() {
@@ -108,6 +115,11 @@ public class ConfigManager {
     public void addDiamondsSpawnPoint(Location coords) {
         diamondSpawnList.add(coords);
         SetValue(PropertyConstant.DIAMOND_POSITION, diamondSpawnList);
+    }
+    
+    public void addIronGolemPos(Location loc) {
+        ironGolemPositions.add(loc);
+        SetValue(PropertyConstant.IRON_GOLEM_SPAWN_POINTS, ironGolemPositions);
     }
     
     public String addTeamSpawnPosition(Location coords) {
@@ -164,6 +176,16 @@ public class ConfigManager {
                 .filter(teamSpawnPoint -> teamSpawnPoint.getId().equals(id))
                 .findFirst()
                 .orElse(null), null);
+    }
+    
+    public boolean trySetCheckerPosition(String id, Location pos) {
+        TeamSpawnPoint teamPoint = teamSpawnList.stream().filter(point -> point.getId().equals(id)).findFirst().orElse(null);
+        if(teamPoint == null) {
+            return false;
+        }
+        teamPoint.setCheckerChestPosition(pos);
+        SetValue(PropertyConstant.TEAMS_SPAWN_POINTS, teamSpawnList.toArray());
+        return true;
     }
     
     

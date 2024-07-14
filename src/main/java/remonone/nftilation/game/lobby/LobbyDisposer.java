@@ -43,7 +43,7 @@ public class LobbyDisposer implements Listener {
         if(!StringUtils.equals(meta.getDisplayName(), NameConstants.ROLE_SELECTOR)) return;
         event.setCancelled(true);
         Player player = event.getPlayer();
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
+        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
         if(data.getRole().equals(PlayerRole.ADMIN) || data.getRole().equals(PlayerRole.DEV)) return;
         String teamName = data.getTeam().getTeamName();
         if(teamName == null) return;

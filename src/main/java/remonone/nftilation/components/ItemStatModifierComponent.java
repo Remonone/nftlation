@@ -12,14 +12,17 @@ public class ItemStatModifierComponent {
     
     
     public static void markItemAsUndroppable(ItemStack stack) {
+        if(isItemNotSatisfy(stack)) return;
         NBT.modify(stack, nbt -> {nbt.setBoolean(UNDROPPABLE_ITEM, true);});
     }
 
     public static void markItemAsUnstorable(ItemStack stack) {
+        if(isItemNotSatisfy(stack)) return;
         NBT.modify(stack, nbt -> {nbt.setBoolean(UNSTORABLE_ITEM, true);});
     }
     
     public static void markItemAsUncraftable(ItemStack stack) {
+        if(isItemNotSatisfy(stack)) return;
         NBT.modify(stack, nbt -> {nbt.setBoolean(UNCRAFTABLE_ITEM, true);});
     }
     

@@ -5,28 +5,26 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 import remonone.nftilation.Store;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.utils.ConfigUtils;
 
+public class CheckerChestCommand implements CommandExecutor {
 
-public class SetTeamCoreBlockCommand implements CommandExecutor {
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be executed by a player");
+    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
+        if(!(commandSender instanceof Player)) {
+            commandSender.sendMessage("This command can only be executed by a player");
             return true;
         }
-        Player player = (Player) sender;
+        Player player = (Player) commandSender;
         if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
             return true;
         }
-        if(args.length == 0) {
+        if(strings.length == 0) {
             return false;
         }
-        Vector position = player.getLocation().toVector();
-        if(!ConfigManager.getInstance().trySetTeamSpawnCore(args[0], position)) {
+        if(!ConfigManager.getInstance().trySetCheckerPosition(strings[0], player.getLocation())) {
             player.sendMessage(ChatColor.RED + "This position is not existing!");
         }
         return true;

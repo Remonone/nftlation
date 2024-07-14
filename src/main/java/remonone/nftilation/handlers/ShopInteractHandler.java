@@ -72,7 +72,7 @@ public class ShopInteractHandler implements Listener {
     }
 
     private void HandleItemPurchase(Player player, ItemStack item, int price) {
-        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         if (!GameInstance.getInstance().withdrawFunds(teamName, player, price)) {
             player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
             return;

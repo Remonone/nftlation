@@ -22,8 +22,9 @@ import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
-import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.ResetUtils;
+
+import java.util.Objects;
 
 import static org.bukkit.Bukkit.getServer;
 
@@ -33,9 +34,6 @@ public class OnPlayerDieHandler implements Listener {
         if(!(event.getEntity() instanceof Player)) return;
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
         if(event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) return;
-        if(event.getCause().equals(EntityDamageEvent.DamageCause.BLOCK_EXPLOSION)) {
-            Logger.debug("Get exploded!");
-        }
         Player player = (Player) event.getEntity();
         if(player.getHealth() - event.getFinalDamage() <= 0) {
             event.setCancelled(true);
@@ -49,14 +47,13 @@ public class OnPlayerDieHandler implements Listener {
         if(Store.getInstance().getGameStage().getStage() == Stage.LOBBY) {
             event.setCancelled(true);
         }
-        Logger.broadcast(event.getDamager().toString());
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
         Player target = (Player) event.getEntity();
         Player attacker = null;
         if(event.getDamager() instanceof TNTPrimed) {
             TNTPrimed tntPrimed = (TNTPrimed) event.getDamager();
-            attacker = (Player) tntPrimed.getMetadata("invoker").get(0).value();
-            if(attacker.equals(target)) {
+            attacker = EntityHandleComponent.getEntityOwner(tntPrimed);
+            if(Objects.equals(attacker, target)) {
                 event.setDamage(event.getDamage() / 2);
             }
         }
@@ -69,7 +66,7 @@ public class OnPlayerDieHandler implements Listener {
         if(event.getDamager() instanceof AreaEffectCloud) {
             attacker = EntityHandleComponent.getEntityOwner(event.getDamager());
             if(attacker == null) return;
-            String teamName = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getName());
+            String teamName = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getUniqueId());
             if(StringUtils.isEmpty(teamName)) return;
             if(attacker.equals(target)) {
                 event.setCancelled(true);
@@ -79,6 +76,17 @@ public class OnPlayerDieHandler implements Listener {
         if(event.getDamager() instanceof Fireball) {
             attacker = EntityHandleComponent.getEntityOwner(event.getDamager());
         }
+        if(!(event.getDamager() instanceof Player) && event.getDamager() instanceof LivingEntity) {
+            Player owner = EntityHandleComponent.getEntityOwner(event.getDamager());
+            if(owner == null) {
+                if(target.getHealth() - event.getFinalDamage() <= 0) {
+                    event.setCancelled(true);
+                    OnDeath(target);
+                }
+                return;
+            }
+            attacker = owner;
+        }
         if(attacker == null) return;
         if(GameInstance.getInstance().checkIfPlayersInSameTeam(target, attacker)) {
             event.setCancelled(true);
@@ -87,15 +95,16 @@ public class OnPlayerDieHandler implements Listener {
         if(target.getHealth() - event.getFinalDamage() <= 0) {
             event.setCancelled(true);
             OnDeath(target);
-            String teamName = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getName());
-            GameInstance.getInstance().awardPlayer(teamName, attacker, DataConstants.TOKEN_PER_KILL);
-            GameInstance.getInstance().increasePlayerKillCounter(teamName, attacker);
-            GameInstance.getInstance().increasePlayerDeathCounter(teamName, target);
+            String attackerTeam = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getUniqueId());
+            GameInstance.getInstance().awardPlayer(attackerTeam, attacker, DataConstants.TOKEN_PER_KILL);
+            String targetTeam =Store.getInstance().getDataInstance().getPlayerTeam(target.getUniqueId());
+            GameInstance.getInstance().increasePlayerKillCounter(attackerTeam, attacker);
+            GameInstance.getInstance().increasePlayerDeathCounter(targetTeam, target);
         }
     }
 
     private void OnDeath(Player player) {
-        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         GameInstance.getInstance().setPlayerDead(teamName, player);
         GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
         Role.OnDie(player, Role.getRoleByID(model.getRoleId()), model.getUpgradeLevel());

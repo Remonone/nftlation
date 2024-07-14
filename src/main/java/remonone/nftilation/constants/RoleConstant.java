@@ -39,7 +39,7 @@ public class RoleConstant {
     public static final String RUSLAN_DESCRIPTION_3 = "Обладает способностью призывать своих сибилов.";
     public static final int RUSLAN_NEGATIVE_AREA_RADIUS = 5;
     public static final int RUSLAN_CLONE_EXPLOSION_STRENGTH = 4;
-    public static final int RUSLAN_SPAWN_CLONES_COOLDOWN = 5;
+    public static final int RUSLAN_SPAWN_CLONES_COOLDOWN = 30;
     public static final String RUSLAN_AREA_EFFECT_NAME = "Ruslan gases";
 
     public static final int INDIAN_BLOCK_COOLDOWN = 60;

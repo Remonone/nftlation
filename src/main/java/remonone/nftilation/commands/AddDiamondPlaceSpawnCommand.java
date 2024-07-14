@@ -13,7 +13,7 @@ public class AddDiamondPlaceSpawnCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) return true;
         Player player = (Player) sender;
-        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getName()))) {
+        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
             return true;
         }
         ConfigManager.getInstance().addDiamondsSpawnPoint(player.getLocation());

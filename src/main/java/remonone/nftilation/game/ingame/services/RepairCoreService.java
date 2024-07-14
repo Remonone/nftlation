@@ -13,7 +13,7 @@ public class RepairCoreService implements IPurchasableService {
 
     @Override
     public void OnPurchase(Player buyer, int price) {
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(buyer.getName());
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(buyer.getUniqueId());
         GameInstance.getInstance().healCore(buyer, team, price);
     }
 }

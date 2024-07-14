@@ -20,7 +20,7 @@ public class SetLobbyCommand implements CommandExecutor {
         if(!(sender instanceof Player)) return false;
 
         Player player = (Player) sender;
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
+        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
         if(ConfigUtils.trySendMessageOnProhibited(player, data)) {
             return true;
         }

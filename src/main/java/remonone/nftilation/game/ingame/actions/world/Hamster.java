@@ -15,6 +15,7 @@ import remonone.nftilation.Nftilation;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.game.ingame.actions.IAction;
+import remonone.nftilation.utils.Logger;
 
 import java.util.Map;
 
@@ -24,12 +25,16 @@ public class Hamster implements IAction, Listener {
     @Override
     public void Init(Map<String, Object> params) {
         Location location = ConfigManager.getInstance().getCenterLocation();
+        if(!location.getChunk().load()) {
+            Logger.error("Chunk wasn't loaded properly!");
+        }
         Zombie zombie = location.getWorld().spawn(location, Zombie.class);
         zombie.setCustomName(ChatColor.BLUE + "" + ChatColor.BOLD + "Hamster");
         zombie.setCustomNameVisible(true);
         zombie.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(20.0D);
         zombie.setHealth(20.0D);
         EntityHandleComponent.setEntityHostile(zombie);
+        EntityHandleComponent.setEntityUnloadLocked(zombie);
         GiveArmorToBoss(zombie);
         getServer().getPluginManager().registerEvents(this, Nftilation.getInstance());
     }

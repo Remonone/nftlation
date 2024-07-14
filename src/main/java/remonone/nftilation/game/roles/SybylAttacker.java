@@ -34,7 +34,7 @@ public class SybylAttacker extends Role {
 
     @Override
     public String getRoleName() {
-        return "Sybyl Attacker";
+        return "Sybil Attacker";
     }
 
     @Override
@@ -99,7 +99,8 @@ public class SybylAttacker extends Role {
         if(!(e.getEntity() instanceof Player)) return;
         Player accessor = (Player) e.getEntity();
         DataInstance data = Store.getInstance().getDataInstance();
-        Role role = data.getPlayerRole(accessor.getName());
+        Role role = data.getPlayerRole(accessor.getUniqueId());
+        EntityHandleComponent.setEntityOwner(e.getEntity(), accessor);
         if(!(role instanceof SybylAttacker)) {
             return;
         }
@@ -118,9 +119,9 @@ public class SybylAttacker extends Role {
         if(!(e.getEntity().getShooter() instanceof Player)) return;
         Player shooter = (Player) e.getEntity().getShooter();
         DataInstance data = Store.getInstance().getDataInstance();
-        Role role = data.getPlayerRole(shooter.getName());
+        Role role = data.getPlayerRole(shooter.getUniqueId());
         if(!(role instanceof SybylAttacker)) return;
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(shooter.getName());
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(shooter.getUniqueId());
         GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, shooter);
         if(model == null) return;
         if(model.getUpgradeLevel() < 3) return;
@@ -154,6 +155,7 @@ public class SybylAttacker extends Role {
         newPosition.setDirection(deflectedDirection);
 
         Arrow newInstance = entity.getWorld().spawn(newPosition, Arrow.class);
+        EntityHandleComponent.setEntityOwner(newInstance, player);
         newInstance.setVelocity(new Vector(scale * deflectedDirection.getX(), scale * deflectedDirection.getY(), scale * deflectedDirection.getZ()));
         newInstance.setShooter(player);
     }

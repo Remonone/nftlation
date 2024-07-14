@@ -190,8 +190,8 @@ public class Cryptomarine extends Role {
     
     @Override
     protected void killPlayer(Player player, int upgradeLevel) {
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getName()) instanceof Cryptomarine)) return;
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Cryptomarine)) return;
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
         if(model.getUpgradeLevel() < 3) return;
         Location location = player.getLocation();
@@ -211,7 +211,7 @@ public class Cryptomarine extends Role {
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
         Player attacker = (Player)e.getDamager();
         Player victim = (Player)e.getEntity();
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(attacker.getName()) instanceof Cryptomarine)) return;
+        if(!(Store.getInstance().getDataInstance().getPlayerRole(attacker.getUniqueId()) instanceof Cryptomarine)) return;
         String axe = NBT.get(attacker.getInventory().getItemInMainHand(), nbt -> (String) nbt.getString("cryptomarine"));
         if(StringUtils.isEmpty(axe) || !axe.equals("axe")) return;
         if(RANDOM.nextFloat() > RoleConstant.CRYPTOMARINE_LIGHTNING_CHANCE) return;

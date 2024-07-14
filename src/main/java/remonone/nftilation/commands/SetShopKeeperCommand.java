@@ -18,7 +18,7 @@ public class SetShopKeeperCommand implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
-        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getName()))) {
+        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
             return true;
         }
         if(args.length == 0) {

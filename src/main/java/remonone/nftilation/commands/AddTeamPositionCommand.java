@@ -17,7 +17,7 @@ public class AddTeamPositionCommand implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
-        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getName()))) {
+        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
             return true;
         }
         String teamId = ConfigManager.getInstance().addTeamSpawnPosition(player.getLocation());

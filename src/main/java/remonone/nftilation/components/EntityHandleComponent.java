@@ -24,6 +24,16 @@ public class EntityHandleComponent {
     public static void setEntityHostile(Entity entityToHostile) {
         entityToHostile.setMetadata("hostile", new FixedMetadataValue(Nftilation.getInstance(), true));
     }
+    
+    public static void setEntityUnloadLocked(Entity entityToLock) {
+        entityToLock.setMetadata("locked", new FixedMetadataValue(Nftilation.getInstance(), true));
+    }
+    
+    public static boolean isEntityLockedForUnload(Entity entity) {
+        List<MetadataValue> values = entity.getMetadata("locked");
+        if(values.isEmpty()) return false;
+        return (Boolean) entity.getMetadata("locked").get(0).value();
+    }
 
     public static boolean isEntityHostile(Entity entity) {
         List<MetadataValue> values = entity.getMetadata("hostile");

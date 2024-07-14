@@ -65,7 +65,7 @@ public class OnBlockDestroyHandler implements Listener {
             boolean isResourcesRespawnable = (boolean)rules.getRuleOrDefault(PropertyConstant.RULE_RESOURCE_RESPAWNABLE, false);
             long timer = BlockConstants.getMaterialCooldown(mat);
             int tokens = BlockConstants.getTokensFromBlock(mat);
-            String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+            String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
             if(drops.length != 0) {
                 GameInstance.getInstance().awardPlayer(team, player, tokens);
             }
@@ -86,7 +86,7 @@ public class OnBlockDestroyHandler implements Listener {
         if(block.getType() == Material.BEACON) {
             TeamData teamData = GameInstance.getInstance().getTeamByCorePosition(block.getLocation().toVector());
             Logger.debug(teamData.toString());
-            String playerTeam = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+            String playerTeam = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
             if(teamData.getTeamName().equals(playerTeam)) {
                 e.setCancelled(true);
                 return;

@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.PlayerData;
@@ -47,7 +48,12 @@ public abstract class Role implements Cloneable, Listener {
     
     public static void UpdatePlayerAbilities(Player player, Role role, int upgradeLevel) {
         ResetUtils.globalResetPlayerStats(player);
-        role.setPlayer(player, upgradeLevel);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                role.setPlayer(player, upgradeLevel);
+            }
+        }.runTaskLater(Nftilation.getInstance(), 1);
     }
 
     protected ItemStack getSword(int level) {
@@ -94,7 +100,7 @@ public abstract class Role implements Cloneable, Listener {
     protected ItemStack getHelmet(Player player, int level) {
         ItemStack helmet = new ItemStack(DefaultEquipment.DEFAULT_HELMET);
         LeatherArmorMeta meta = (LeatherArmorMeta) helmet.getItemMeta();
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
+        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
         meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
         meta.setUnbreakable(true);
         helmet.setItemMeta(meta);
@@ -103,7 +109,7 @@ public abstract class Role implements Cloneable, Listener {
     protected ItemStack getChestplate(Player player, int level) {
         ItemStack chestplate = new ItemStack(DefaultEquipment.DEFAULT_CHEST);
         LeatherArmorMeta meta = (LeatherArmorMeta) chestplate.getItemMeta();
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
+        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
         meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
         meta.setUnbreakable(true);
         chestplate.setItemMeta(meta);
@@ -112,7 +118,7 @@ public abstract class Role implements Cloneable, Listener {
     protected ItemStack getLeggins(Player player, int level) {
         ItemStack leggins = new ItemStack(DefaultEquipment.DEFAULT_LEGS);
         LeatherArmorMeta meta = (LeatherArmorMeta) leggins.getItemMeta();
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
+        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
         meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
         meta.setUnbreakable(true);
         leggins.setItemMeta(meta);
@@ -121,7 +127,7 @@ public abstract class Role implements Cloneable, Listener {
     protected ItemStack getBoots(Player player, int level) {
         ItemStack boots = new ItemStack(DefaultEquipment.DEFAULT_BOOTS);
         LeatherArmorMeta meta = (LeatherArmorMeta) boots.getItemMeta();
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getName());
+        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
         meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
         meta.setUnbreakable(true);
         boots.setItemMeta(meta);
@@ -179,6 +185,7 @@ public abstract class Role implements Cloneable, Listener {
 
     private static void SetOwner(Player owner, ItemStack... itemStacks) {
         for (ItemStack stack : itemStacks) {
+            if(stack == null || stack.getAmount() < 1 || stack.getType() == Material.AIR) continue;
             NBT.modify(stack, nbt -> {
                 nbt.setString("owner", owner.getUniqueId().toString());
             });

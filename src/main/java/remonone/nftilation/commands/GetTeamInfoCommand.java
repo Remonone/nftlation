@@ -20,7 +20,7 @@ public class GetTeamInfoCommand implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
-        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getName()))) {
+        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
             return true;
         }
         Collection<TeamSpawnPoint> teamSpawnPoints = ConfigManager.getInstance().getTeamSpawnList();

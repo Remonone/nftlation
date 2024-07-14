@@ -19,7 +19,7 @@ public class SetRoboSybylSpawnPointCommand implements CommandExecutor {
             return true;
         }
         Player player = (Player) commandSender;
-        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getName()))) {
+        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
             return true;
         }
         Location location = player.getLocation();

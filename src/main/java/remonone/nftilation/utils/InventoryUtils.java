@@ -25,7 +25,7 @@ public class InventoryUtils {
     
     public static void giveRoleSelector(Player player) {
         DataInstance instance = Store.getInstance().getDataInstance();
-        Role role = instance.getPlayerRole(player.getName());
+        Role role = instance.getPlayerRole(player.getUniqueId());
         Material material = role != null ? role.getMaterial() : Material.RED_GLAZED_TERRACOTTA;
         
         ItemStack roleSelector = new ItemStack(material);

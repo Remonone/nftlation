@@ -9,21 +9,21 @@ import remonone.nftilation.Store;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.utils.ConfigUtils;
-import remonone.nftilation.utils.Logger;
-import remonone.nftilation.utils.VectorUtils;
 
-public class SetCenterPositionCommand implements CommandExecutor {
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) return true;
+public class AddIronGolemPositonCommand implements CommandExecutor {
+    @Override
+    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if(!Store.getInstance().getGameStage().getStage().equals(Stage.IDLE)) return true;
-        Player player = (Player) sender;
+        if(!(commandSender instanceof Player)) {
+            commandSender.sendMessage("You must be a player to use this command.");
+            return true;
+        }
+        Player player = (Player) commandSender;
         if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
             return true;
         }
-        Location loc = player.getLocation();
-        ConfigManager.getInstance().setCenterLocation(loc);
-        Logger.log("Center location has been set to position " + VectorUtils.convertRoundVectorString(loc.toVector()));
-        player.sendMessage("You set center position to " + VectorUtils.convertRoundVectorString(loc.toVector()));
+        Location location = player.getLocation();
+        ConfigManager.getInstance().addIronGolemPos(location);
         return true;
     }
 }

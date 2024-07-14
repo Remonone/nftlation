@@ -39,7 +39,7 @@ public class DataInstance {
         initialized = true;
     }
 
-    private final List<PlayerData> players = new ArrayList<>();
+    private final List<PlayerInfo> players = new ArrayList<>();
     @Getter
     private final List<TeamData> teamData = new ArrayList<>();
     
@@ -48,7 +48,8 @@ public class DataInstance {
     
     public LoginState TryAddPlayerToGame(PlayerData playerData, Player player) {
         if(playerData.getRole().equals(PlayerRole.PLAYER) && playerData.getTeam().getTeamName().isEmpty()) return LoginState.EMPTY_TEAM;
-        if(players.contains(playerData)) {
+//        if(players.contains(playerData)) {
+        if(players.stream().anyMatch(playerData1 -> playerData1.getPlayerId().equals(player.getUniqueId()))) {
             return LoginState.ALREADY_LOGGED_IN;
         }
         
@@ -66,31 +67,31 @@ public class DataInstance {
                 teams.get(playerData.getTeam().getTeamName()).add(new PlayerInfo(playerData, null, player.getUniqueId(), new HashMap<>()));
             }
         }
-        players.add(playerData);
+        players.add(new PlayerInfo(playerData, null, player.getUniqueId(), new HashMap<>()));
         
         Logger.log("Player " + playerData.getLogin() + " has authenticated to the game");
         return LoginState.LOGGED_IN;
     }
     
-    public String getPlayerTeam(String playerName) {
-        PlayerData data = FindPlayerByName(playerName);
-        if(data == null) return "";
-        return data.getTeam().getTeamName();
+    public String getPlayerTeam(UUID playerId) {
+        PlayerInfo info = FindPlayerByName(playerId);
+        if(info == null) return "";
+        return info.getData().getTeam().getTeamName();
     }
     
-    public void DisconnectPlayer(String playerName) {
-        PlayerData data = players.stream().filter(p -> p.getLogin().equals(playerName)).findFirst().orElse(null);
-        if(data == null) {
-            Logger.warn("Player " + playerName + " has not been authenticated to the game");
+    public void DisconnectPlayer(UUID playerId) {
+        PlayerInfo info = players.stream().filter(p -> p.getPlayerId().equals(playerId)).findFirst().orElse(null);
+        if(info == null) {
+            Logger.warn("Player " + playerId + " has not been authenticated to the game");
             return;
         }
-        players.remove(data);
+        players.remove(info);
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) {
-            if (data.getRole().equals(PlayerRole.PLAYER)) {
-                teams.get(data.getTeam().getTeamName()).removeIf(playerInfo -> playerInfo.data.getLogin().equals(data.getLogin()));
+            if (info.data.getRole().equals(PlayerRole.PLAYER)) {
+                teams.get(info.data.getTeam().getTeamName()).removeIf(playerInfo -> playerInfo.data.getLogin().equals(info.data.getLogin()));
             }
         }
-        Logger.log("Player " + data.getLogin() + " has been disconnected");
+        Logger.log("Player " + info.data.getLogin() + " has been disconnected");
     }
     
     public List<PlayerInfo> getTeamPlayers(String teamName) {
@@ -101,9 +102,9 @@ public class DataInstance {
         return teams.get(teamName);
     }
 
-    public PlayerData FindPlayerByName(final String name) {
-        for(PlayerData player : players) {
-            if(player.getLogin().equals(name)) {
+    public PlayerInfo FindPlayerByName(final UUID playerId) {
+        for(PlayerInfo player : players) {
+            if(player.getPlayerId().equals(playerId)) {
                 return player;
             }
         }
@@ -111,8 +112,8 @@ public class DataInstance {
     }
     
     
-    public Map<String, Object> getPlayerParams(String playerName) {
-        PlayerInfo info = getPlayerInfo(playerName);
+    public Map<String, Object> getPlayerParams(UUID playerId) {
+        PlayerInfo info = FindPlayerByName(playerId);
         if(info == null) return null;
         return info.params;
     }
@@ -121,22 +122,12 @@ public class DataInstance {
         return teams.containsKey(team);
     }
     
-    public Role getPlayerRole(String playerName) {
-        PlayerInfo info = getPlayerInfo(playerName);
+    public Role getPlayerRole(UUID playerId) {
+        PlayerInfo info = FindPlayerByName(playerId);
         if(info == null) {
             return null;
         }
         return info.getRole();
-    }
-    
-    private PlayerInfo getPlayerInfo(String playerName) {
-        PlayerData data = FindPlayerByName(playerName);
-        if(data == null || !data.getRole().equals(PlayerRole.PLAYER)) {
-            return null;
-        }
-        return teams.get(data.getTeam().getTeamName())
-                .stream().filter(playerInfo -> playerInfo.data.getLogin().equals(data.getLogin()))
-                .findFirst().orElse(null);
     }
 
     private PlayerInfo getPlayerInfo(PlayerData playerData) {
@@ -148,27 +139,21 @@ public class DataInstance {
                 .findFirst().orElse(null);
     }
     
-    public boolean updatePlayerRole(Role role, String playerName) {
-        PlayerData playerData = FindPlayerByName(playerName);
+    public boolean updatePlayerRole(Role role, UUID playerId) {
+        PlayerInfo info = FindPlayerByName(playerId);
         if(role == null) {
             Logger.error("Role is undefined!");
             return false;
         }
-        if(playerData == null) {
-            Logger.warn("Player " + playerName + " has not been authenticated to the game");
-            return false;
-        }
-        
-        PlayerInfo info = getPlayerInfo(playerName);
         if(info == null) {
-            Logger.error("Player " + playerName + " has not been found!");
-            throw new RuntimeException("Player " + playerName + " has not been found!");
+            Logger.warn("Player " + playerId + " has not been authenticated to the game");
+            return false;
         }
         if(info.getRole() != null && info.getRole().equals(role)) {
-            Logger.warn("Role was already has been set to " + playerName);
+            Logger.warn("Role was already has been set to " + info.getData().getLogin());
             return false;
         }
-        if(teams.get(playerData.getTeam().getTeamName()).stream().map(PlayerInfo::getRole).anyMatch(role::equals)) {
+        if(teams.get(info.getData().getTeam().getTeamName()).stream().map(PlayerInfo::getRole).anyMatch(role::equals)) {
             Logger.warn("This role has been reserved before!");
             return false;
         }

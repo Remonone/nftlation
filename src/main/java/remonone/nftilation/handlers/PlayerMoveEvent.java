@@ -19,6 +19,6 @@ public class PlayerMoveEvent implements Listener {
     
     private boolean isNotAuthenticated(final Player player) {
         DataInstance dataInstance = Store.getInstance().getDataInstance();
-        return ObjectUtils.equals(dataInstance.FindPlayerByName(player.getName()), null);
+        return ObjectUtils.equals(dataInstance.FindPlayerByName(player.getUniqueId()), null);
     }
 }

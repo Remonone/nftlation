@@ -9,6 +9,7 @@ import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.TeamData;
 import remonone.nftilation.config.ConfigManager;
+import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.events.OnPhaseUpdateEvent;
 import remonone.nftilation.game.GameInstance;
@@ -29,6 +30,11 @@ public class PhaseUpdateHandler implements Listener {
         switch (stage) {
             case 1: {
                 Logger.broadcast("Stage 1 has begun!");
+                new BukkitRunnable() {
+                    public void run() {
+                        ActionContainer.InitAction(ActionType.CHECKER, new HashMap<>());
+                    }
+                }.runTaskLater(Nftilation.getInstance(), 200);
                 break;
             }
             case 2: {
@@ -40,19 +46,20 @@ public class PhaseUpdateHandler implements Listener {
             case 3: {
                 Logger.broadcast("Stage 3 has begun!");
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_INVULNERABLE, false);
-                ActionContainer.InitAction(ActionType.HAMSTER, new HashMap<>());
+                ActionContainer.InitAction(ActionType.ROBOSYBYL_ATTACK, new HashMap<>());
                 break;
             }
             case 4: {
                 Logger.broadcast("Stage 4 has begun!");
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_AVAILABLE_TIER, 3);
+                ActionContainer.InitAction(ActionType.HAMSTER, new HashMap<>());
                 BukkitRunnable runnable = new BukkitRunnable() {
                     @Override
                     public void run() {
                         ActionContainer.InitAction(ActionType.CRYPT_DROP, new HashMap<>());
                     }
                 };
-                runnable.runTaskLater(Nftilation.getInstance(), 100);
+                runnable.runTaskLater(Nftilation.getInstance(), 10 * DataConstants.TICKS_IN_MINUTE);
                 break;
             }
             case 5: {

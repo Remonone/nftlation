@@ -9,6 +9,7 @@ public class PropertyConstant {
     public static final String CENTER_LOCATION = "centerLocation";
     public static final String DIAMOND_POSITION = "diamondsList";
     public static final String ROBO_SYBYL_SPAWN_POINTS = "roboSybylSpawnPoints";
+    public static final String IRON_GOLEM_SPAWN_POINTS = "ironGolemSpawnPoints";
 
     public static final String RULE_CORE_INVULNERABLE = "isCoreInvulnerable";
     public static final String RULE_RESOURCE_RESPAWNABLE = "isResourcesRespawnable";
@@ -19,10 +20,6 @@ public class PropertyConstant {
     public static final String RULE_RESOURCE_SPAWN_AUTO_ENABLE_AT = "autoEnableResourceSpawnAt";
     public static final String RULE_AVAILABLE_TIER = "availableTier";
 
-    public static final String NBT_PRODUCT_TYPE = "product-type";
-    public static final String NBT_CATEGORY_NAME = "category-type";
-    public static final String NBT_SERVICE_NAME = "service-type";
-    public static final String NBT_PRICE = "product-price";
     public static final String NBT_ROLE = "role-name";
     public static final String NBT_ROLE_RESERVED = "role-reserved";
 }

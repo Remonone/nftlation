@@ -3,9 +3,9 @@ version: '${project.version}'
 main: remonone.nftilation.Nftilation
 authors: [ Remonone ]
 commands: 
-  switchStage:
+  switchstage:
     description: Change stage of the game
-    usage: /switchStage [stage]
+    usage: /switchstage [stage]
   login:
     description: Authenticate to the server
     usage: /login [password]
@@ -49,3 +49,12 @@ commands:
   addDiamondPosition:
     description: Set diamond spawn point
     usage: /addDiamondPosition    
+  addRoboSybylPos:
+    description: Set Robo Sybyl Position
+    usage: /addRoboSybylPos
+  addIronGolemPos:
+    description: Set Iron Golem Position
+    usage: /addIronGolemPos
+  setCheckerTeamPosition:
+    description: Set Checker chest position
+    usage: /setCheckerTeamPosition [teamId]

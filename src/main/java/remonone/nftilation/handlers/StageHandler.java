@@ -4,7 +4,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.scheduler.BukkitRunnable;
+import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
+import remonone.nftilation.application.models.TeamData;
 import remonone.nftilation.application.services.MiddlewareService;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.constants.MessageConstant;
@@ -12,6 +15,8 @@ import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.StageEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.utils.Logger;
+
+import java.util.List;
 
 public class StageHandler implements Listener {
     
@@ -24,21 +29,30 @@ public class StageHandler implements Listener {
             return;
         }
         if(e.getNewStage() == Stage.LOBBY) {
-            MiddlewareService.fetchTeams((teams) -> {
-                if(ConfigManager.getInstance().positionsSize() != teams.size()) {
-                    Bukkit.broadcastMessage(ChatColor.RED + MessageConstant.TEAM_NOT_EQUALS);
-                    Logger.warn("Team count is not same as reserved! Reserved: " + ConfigManager.getInstance().positionsSize() + ". Received: " + teams.size() + ". Aborting...");
-                    e.setCancelled(true);
-                    return null;
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    List<TeamData> data = MiddlewareService.fetchTeams();
+                    if(data == null) {
+                        e.setCancelled(true);
+                        Logger.log("Fetch was failed aborting...");
+                        return;
+                    }
+                    if(ConfigManager.getInstance().positionsSize() != data.size()) {
+                        Bukkit.broadcastMessage(ChatColor.RED + MessageConstant.TEAM_NOT_EQUALS);
+                        Logger.warn("Team count is not same as reserved! Reserved: " + ConfigManager.getInstance().positionsSize() + ". Received: " + data.size() + ". Aborting...");
+                        e.setCancelled(true);
+                        return;
+                    }
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            Store.getInstance().getDataInstance().Init(data, e.getWorld());
+                            Store.getInstance().getGameStage().setStage(e.getNewStage());
+                        }
+                    }.runTask(Nftilation.getInstance());
                 }
-                Store.getInstance().getDataInstance().Init(teams, e.getWorld());
-                Store.getInstance().getGameStage().setStage(e.getNewStage());
-                return null;
-            }, (err) -> {
-                e.setCancelled(true);
-                Logger.error(err);
-                return null;
-            });
+            }.runTaskAsynchronously(Nftilation.getInstance());
         }
         if(e.getNewStage() == Stage.IN_GAME) {
             GameInstance.getInstance().startGame();

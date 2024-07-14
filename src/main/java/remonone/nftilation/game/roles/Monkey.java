@@ -133,12 +133,12 @@ public class Monkey extends Role {
         Player attacker = (Player) e.getDamager();
         Player victim = (Player) e.getEntity();
         ItemStack weapon = attacker.getInventory().getItemInMainHand();
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(attacker.getName()) instanceof Monkey)) return;
+        if(!(Store.getInstance().getDataInstance().getPlayerRole(attacker.getUniqueId()) instanceof Monkey)) return;
         String isStick = NBT.get(weapon, nbt -> (String) nbt.getString("monkey"));
         if(StringUtils.isBlank(isStick) || !isStick.equals("stick")) return;
         GameInstance instance = GameInstance.getInstance();
         DataInstance dataInstance = Store.getInstance().getDataInstance();
-        String team = dataInstance.getPlayerTeam(attacker.getName());
+        String team = dataInstance.getPlayerTeam(attacker.getUniqueId());
         GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(team, attacker);
         if(model == null) return;
         int level = model.getUpgradeLevel();
@@ -154,7 +154,7 @@ public class Monkey extends Role {
     public void onPlayerFlight(final PlayerToggleFlightEvent e) {
         Player accessor = e.getPlayer();
         DataInstance data = Store.getInstance().getDataInstance();
-        Role role = data.getPlayerRole(accessor.getName());
+        Role role = data.getPlayerRole(accessor.getUniqueId());
         if(!(role instanceof Monkey)) {
             return;
         }
@@ -174,7 +174,7 @@ public class Monkey extends Role {
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
         Player accessor = e.getPlayer();
         DataInstance data = Store.getInstance().getDataInstance();
-        Role role = data.getPlayerRole(accessor.getName());
+        Role role = data.getPlayerRole(accessor.getUniqueId());
         if(!(role instanceof Monkey)) {
             return;
         }
@@ -198,7 +198,7 @@ public class Monkey extends Role {
         if (item == null || item.getAmount() < 1 || item.getType() == Material.AIR) {
             return;
         }
-        if (!(Store.getInstance().getDataInstance().getPlayerRole(player.getName()) instanceof Monkey)) return;
+        if (!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Monkey)) return;
         String isInvisiblity = NBT.get(item, nbt -> (String) nbt.getString("monkey"));
         if (StringUtils.isEmpty(isInvisiblity) || !isInvisiblity.equals("invisibility")) return;
         long cooldown = NBT.get(item, nbt -> (Long) nbt.getLong("cooldown"));
@@ -209,7 +209,7 @@ public class Monkey extends Role {
         }
         GameInstance instance = GameInstance.getInstance();
         DataInstance dataInstance = Store.getInstance().getDataInstance();
-        String team = dataInstance.getPlayerTeam(player.getName());
+        String team = dataInstance.getPlayerTeam(player.getUniqueId());
         GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(team, player);
         int length = 1 + model.getUpgradeLevel() * 2;
         World world = player.getWorld();

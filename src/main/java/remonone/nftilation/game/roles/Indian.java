@@ -141,7 +141,7 @@ public class Indian extends Role {
         if(item == null || item.getAmount() < 0 || item.getType() == Material.AIR) {
             return;
         }
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getName()) instanceof Indian)) return;
+        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Indian)) return;
         String block = NBT.get(item, nbt -> (String)nbt.getString("block-type"));
         if(StringUtils.isEmpty(block)) return;
         event.setCancelled(true);
@@ -164,12 +164,12 @@ public class Indian extends Role {
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
         Player accessor = e.getPlayer();
         DataInstance data = Store.getInstance().getDataInstance();
-        Role role = data.getPlayerRole(accessor.getName());
+        Role role = data.getPlayerRole(accessor.getUniqueId());
         if(!(role instanceof Indian)) {
             return;
         }
         if(e.getFrom().toVector().distance(e.getTo().toVector()) < .1f) return;
-        Map<String, Object> params = data.getPlayerParams(accessor.getName());
+        Map<String, Object> params = data.getPlayerParams(accessor.getUniqueId());
         if(!params.containsKey("recall")) return;
         int taskId = (int)params.get("recall");
         params.remove("recall");
@@ -184,19 +184,19 @@ public class Indian extends Role {
         if(item == null || item.getAmount() < 0 || item.getType() == Material.AIR) {
             return;
         }
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getName()) instanceof Indian)) return;
+        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Indian)) return;
         String isRecall = NBT.get(item, nbt -> (String) nbt.getString("indian"));
         if(StringUtils.isEmpty(isRecall) || !isRecall.equals("recall")) return;
         event.setCancelled(true);
         GameInstance instance = GameInstance.getInstance();
         DataInstance dataInstance = Store.getInstance().getDataInstance();
-        Map<String, Object> params = dataInstance.getPlayerParams(player.getName());
+        Map<String, Object> params = dataInstance.getPlayerParams(player.getUniqueId());
         if(params.containsKey("recall")) {
             player.sendMessage(ChatColor.GOLD + RoleConstant.INDIAN_RECALL_ACTIVE);
             return;
         }
         player.sendMessage(ChatColor.GOLD + MessageConstant.START_RECALL);
-        String team = dataInstance.getPlayerTeam(player.getName());
+        String team = dataInstance.getPlayerTeam(player.getUniqueId());
         GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(team, player);
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override

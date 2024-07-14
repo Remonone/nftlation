@@ -8,4 +8,5 @@ import lombok.Data;
 public class PlayerCredentials {
     public String login;
     public String password;
+    public String team;
 }

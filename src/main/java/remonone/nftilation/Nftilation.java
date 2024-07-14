@@ -8,6 +8,7 @@ import remonone.nftilation.config.TeamSpawnPoint;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
+import remonone.nftilation.game.ingame.actions.world.Checker;
 import remonone.nftilation.game.ingame.actions.world.CryptDrop;
 import remonone.nftilation.game.ingame.actions.world.Hamster;
 import remonone.nftilation.game.ingame.actions.world.RoboSybyl;
@@ -19,6 +20,7 @@ import remonone.nftilation.game.shop.content.ItemElement;
 import remonone.nftilation.game.shop.content.ServiceElement;
 import remonone.nftilation.game.shop.content.ShopItemPosition;
 import remonone.nftilation.handlers.*;
+import remonone.nftilation.utils.CustomEntities;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
 
@@ -36,6 +38,7 @@ public final class Nftilation extends JavaPlugin {
         InitCommands();
         RegisterRoles();
         InitActions();
+        CustomEntities.registerEntities();
     }
 
     private void InitActions() {
@@ -43,6 +46,7 @@ public final class Nftilation extends JavaPlugin {
         ActionContainer.registerAction(ActionType.CRYPT_DROP, new CryptDrop());
         ActionContainer.registerAction(ActionType.HAMSTER, new Hamster());
         ActionContainer.registerAction(ActionType.ROBOSYBYL_ATTACK, new RoboSybyl());
+        ActionContainer.registerAction(ActionType.CHECKER, new Checker());
     }
 
     private void SerializeProperties() {
@@ -81,6 +85,7 @@ public final class Nftilation extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new OnPlayerDieHandler(), this);
         getServer().getPluginManager().registerEvents(new ShopInteractHandler(), this);
         getServer().getPluginManager().registerEvents(new ExplosionDestructionDisable(), this);
+        getServer().getPluginManager().registerEvents(new OnChunkUnloadHandler(), this);
     }
     
     private void InitCommands() {
@@ -101,6 +106,9 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("skipPhase").setExecutor(new SkipPhaseCommand());
         this.getCommand("setCenterPosition").setExecutor(new SetCenterPositionCommand());
         this.getCommand("addDiamondPosition").setExecutor(new AddDiamondPlaceSpawnCommand());
+        this.getCommand("addRoboSybylPos").setExecutor(new SetRoboSybylSpawnPointCommand());
+        this.getCommand("addIronGolemPos").setExecutor(new AddIronGolemPositonCommand());
+        this.getCommand("setCheckerTeamPosition").setExecutor(new CheckerChestCommand());
     }
     
     public static Nftilation getInstance() {
@@ -110,7 +118,9 @@ public final class Nftilation extends JavaPlugin {
     @Override
     public void onDisable() {
         Logger.log("Disabling...");
-        GameInstance.getInstance().getCounter().bar.setVisible(false);
+        if(GameInstance.getInstance().getCounter() != null) {
+            GameInstance.getInstance().getCounter().bar.setVisible(false);
+        }
         EntityList.clearEntities();
     }
     

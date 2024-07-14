@@ -124,7 +124,7 @@ public class Cryptan extends Role {
     public void onPlayerInteract(PlayerFishEvent event) {
         Player player = event.getPlayer();
         ItemStack stack = player.getInventory().getItemInMainHand();
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getName()) instanceof Cryptan)) return;
+        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Cryptan)) return;
         if(InventoryUtils.isCooldownRemain(stack)) {
             InventoryUtils.notifyAboutCooldown(player, stack);
             event.setCancelled(true);
@@ -168,7 +168,7 @@ public class Cryptan extends Role {
             }
         }
         
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
         int setCooldown = model.getUpgradeLevel() == 3 ? RoleConstant.CRYPTAN_COOLDOWN_MAX_RANK : RoleConstant.CRYPTAN_COOLDOWN_LOW_RANK;
         InventoryUtils.setCooldownForItem(stack, setCooldown);
@@ -179,8 +179,8 @@ public class Cryptan extends Role {
         if(!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
         if(player.getHealth() - event.getFinalDamage() > 6D) return;
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getName()) instanceof Cryptan)) return;
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getName());
+        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Cryptan)) return;
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
         World world = player.getWorld();
         world.playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, .5f, 1f);

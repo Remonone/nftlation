@@ -16,7 +16,7 @@ public class RoleSelectHandler implements Listener {
     public void onRoleSelect(final OnRoleSelectEvent event) {
         Player player = event.getPlayer();
         Role role = event.getRole();
-        boolean isUpdated = Store.getInstance().getDataInstance().updatePlayerRole(event.getRole(), player.getName());
+        boolean isUpdated = Store.getInstance().getDataInstance().updatePlayerRole(event.getRole(), player.getUniqueId());
         if(!isUpdated) {    
             player.sendMessage(MessageConstant.ROLE_ERROR);
             return;
