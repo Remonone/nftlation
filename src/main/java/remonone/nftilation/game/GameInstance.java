@@ -13,6 +13,7 @@ import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.TeamData;
+import remonone.nftilation.application.services.SkinCache;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
@@ -31,6 +32,7 @@ import remonone.nftilation.game.scoreboard.ScoreboardHandler;
 import remonone.nftilation.utils.ColorUtils;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
+import remonone.nftilation.utils.PlayerNMSUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -91,7 +93,12 @@ public class GameInstance {
 
 
     private void initPlayerRoles(List<PlayerModel> models) {
-        models.forEach(info -> Role.UpdatePlayerAbilities(info.reference, Role.getRoleByID(info.roleId), info.getUpgradeLevel()));
+        models.forEach(info -> {
+            String texture = SkinCache.getInstance().getTexture(info.getRoleId());
+            String signature = SkinCache.getInstance().getSignature(info.getRoleId());
+            PlayerNMSUtil.changePlayerSkin(info.reference, texture, signature);
+            Role.UpdatePlayerAbilities(info.reference, Role.getRoleByID(info.roleId), info.getUpgradeLevel());
+        });
     }
 
     private void constructTeamData(Map<String, List<DataInstance.PlayerInfo>> teams) {
@@ -241,6 +248,7 @@ public class GameInstance {
     }
     
     public List<PlayerModel> getTeamPlayers(String teamName) {
+        if(!teamData.containsKey(teamName)) return Collections.emptyList();
         return this.teamData.get(teamName).players;
     } 
     

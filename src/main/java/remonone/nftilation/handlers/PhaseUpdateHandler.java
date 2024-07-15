@@ -32,7 +32,9 @@ public class PhaseUpdateHandler implements Listener {
                 Logger.broadcast("Stage 1 has begun!");
                 new BukkitRunnable() {
                     public void run() {
-                        ActionContainer.InitAction(ActionType.CHECKER, new HashMap<>());
+                        ActionContainer.InitAction(ActionType.CHECKER, new HashMap<String, Object>() {{
+                            put("global", true);
+                        }});
                     }
                 }.runTaskLater(Nftilation.getInstance(), 200);
                 break;
@@ -46,7 +48,9 @@ public class PhaseUpdateHandler implements Listener {
             case 3: {
                 Logger.broadcast("Stage 3 has begun!");
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_INVULNERABLE, false);
-                ActionContainer.InitAction(ActionType.ROBOSYBYL_ATTACK, new HashMap<>());
+                ActionContainer.InitAction(ActionType.ROBOSYBYL_ATTACK, new HashMap<String, Object>() {{
+                    put("global", true);
+                }});
                 break;
             }
             case 4: {
@@ -56,7 +60,9 @@ public class PhaseUpdateHandler implements Listener {
                 BukkitRunnable runnable = new BukkitRunnable() {
                     @Override
                     public void run() {
-                        ActionContainer.InitAction(ActionType.CRYPT_DROP, new HashMap<>());
+                        ActionContainer.InitAction(ActionType.CRYPT_DROP, new HashMap<String, Object>() {{
+                            put("global", true);
+                        }});
                     }
                 };
                 runnable.runTaskLater(Nftilation.getInstance(), 10 * DataConstants.TICKS_IN_MINUTE);

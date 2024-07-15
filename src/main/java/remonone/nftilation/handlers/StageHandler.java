@@ -55,8 +55,21 @@ public class StageHandler implements Listener {
             }.runTaskAsynchronously(Nftilation.getInstance());
         }
         if(e.getNewStage() == Stage.IN_GAME) {
-            GameInstance.getInstance().startGame();
-            Store.getInstance().getGameStage().setStage(e.getNewStage());
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+//                    if(!MiddlewareService.applyPlayers()) {
+//                        return;
+//                    }
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            GameInstance.getInstance().startGame();
+                            Store.getInstance().getGameStage().setStage(e.getNewStage());
+                        }
+                    }.runTask(Nftilation.getInstance());
+                }
+            }.runTaskAsynchronously(Nftilation.getInstance());
         }
     }
 }

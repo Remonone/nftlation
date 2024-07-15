@@ -1,7 +1,11 @@
 package remonone.nftilation;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import remonone.nftilation.application.models.PlayerData;
+import remonone.nftilation.application.services.MiddlewareService;
 import remonone.nftilation.commands.*;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
@@ -23,6 +27,7 @@ import remonone.nftilation.handlers.*;
 import remonone.nftilation.utils.CustomEntities;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
+import remonone.nftilation.utils.PlayerNMSUtil;
 
 
 public final class Nftilation extends JavaPlugin {
@@ -37,8 +42,14 @@ public final class Nftilation extends JavaPlugin {
         InitHandlers();
         InitCommands();
         RegisterRoles();
+        FetchRoleSkins();
         InitActions();
         CustomEntities.registerEntities();
+    }
+
+    private void FetchRoleSkins() {
+        Logger.log("Fetching role skins...");
+        MiddlewareService.loadSkins();
     }
 
     private void InitActions() {
@@ -120,6 +131,10 @@ public final class Nftilation extends JavaPlugin {
         Logger.log("Disabling...");
         if(GameInstance.getInstance().getCounter() != null) {
             GameInstance.getInstance().getCounter().bar.setVisible(false);
+        }
+        for(Player p : Bukkit.getOnlinePlayers()) {
+            PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(p.getUniqueId()).getData();
+            PlayerNMSUtil.changePlayerName(p, data.getLogin());
         }
         EntityList.clearEntities();
     }

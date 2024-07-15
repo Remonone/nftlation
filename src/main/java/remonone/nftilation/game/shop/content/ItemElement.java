@@ -6,9 +6,6 @@ import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import remonone.nftilation.utils.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,16 +22,6 @@ public class ItemElement implements IShopElement, IPurchasableItem, Configuratio
     private final ItemStack element;
     private final boolean shouldCopyMeta;
     private final int price;
-
-    public ItemElement(Material material, String displayName, int amount, int price, boolean copyMeta, String id) {
-        this.element = new ItemStack(material, amount);
-        ItemMeta meta = this.element.getItemMeta();
-        meta.setDisplayName(displayName);
-        this.element.setItemMeta(meta);
-        this.shouldCopyMeta = copyMeta;
-        this.price = price;
-        this.id = id;
-    }
     
     public ItemElement(String id, ItemStack item, int price) {
         this.id = id;
