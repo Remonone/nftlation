@@ -19,12 +19,11 @@ public class ShopBuilder {
     @Getter
     private final static ShopBuilder instance = new ShopBuilder();
 
-    private File file;
     private YamlConfiguration configuration;
     
     public void Load() {
         Logger.log("Loading shop info...");
-        file = new File(Nftilation.getInstance().getDataFolder(), "shop.yml");
+        File file = new File(Nftilation.getInstance().getDataFolder(), "shop.yml");
         if(!file.exists()) {
             Nftilation.getInstance().saveResource("shop.yml", false);
         }
@@ -39,7 +38,8 @@ public class ShopBuilder {
 
         LoadData();
     }
-
+    
+    @SuppressWarnings("unchecked")
     private void LoadData() {
         List<ItemElement> itemElements = (List<ItemElement>) configuration.getList("itemElements");
         if(itemElements == null) {

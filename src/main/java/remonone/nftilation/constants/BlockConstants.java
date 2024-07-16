@@ -10,9 +10,9 @@ import java.util.*;
 public class BlockConstants {
     
     private static final Map<Material, BlockDetails> RESPAWNABLE_BLOCKS = new HashMap<Material, BlockDetails>() {{
-        put(Material.COAL_ORE, new BlockDetails(20, 1));
-        put(Material.IRON_ORE, new BlockDetails(20, 2));
-        put(Material.DIAMOND_ORE, new BlockDetails(20, 4));
+        put(Material.COAL_ORE, new BlockDetails(20, 2));
+        put(Material.IRON_ORE, new BlockDetails(20, 4));
+        put(Material.DIAMOND_ORE, new BlockDetails(40, 20));
         put(Material.GRAVEL, new BlockDetails(10, 0));
         put(Material.MELON_BLOCK, new BlockDetails(10, 0));
         put(Material.HAY_BLOCK, new BlockDetails(10, 0));

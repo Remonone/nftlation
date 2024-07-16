@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import remonone.nftilation.Store;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.StageEvent;
+import remonone.nftilation.utils.CommandUtils;
 import remonone.nftilation.utils.Logger;
 
 import static org.bukkit.Bukkit.getServer;
@@ -15,14 +16,10 @@ import static org.bukkit.Bukkit.getServer;
 public class StageSwitchCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(!(sender instanceof Player)) return true;
+        CommandUtils.State state = CommandUtils.verifyPlayerSender(sender, args, 1);
+        Logger.log(state.toString());
+        if(!state.equals(CommandUtils.State.NONE)) return state.getValue();
         Player player = (Player) sender;
-        if (!player.isOp()) {
-            return false;
-        }
-        if (args.length == 0) {
-            return false;
-        }
         String stage = args[0];
         try {
             Stage value = Stage.valueOf(stage);

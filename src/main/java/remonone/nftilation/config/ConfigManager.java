@@ -36,7 +36,7 @@ public class ConfigManager {
     @Getter
     private List<Location> diamondSpawnList;
     @Getter
-    private List<Location> roboSybylsSpawnList;
+    private List<Location> roboSybilsSpawnList;
     @Getter
     private List<Location> ironGolemPositions;
     
@@ -76,11 +76,11 @@ public class ConfigManager {
         }
         diamondSpawnList = diamondPositions;
         centerLocation = (Location) configuration.get(PropertyConstant.CENTER_LOCATION);
-        List<Location> roboSybylPoints = (List<Location>) configuration.getList(PropertyConstant.ROBO_SYBYL_SPAWN_POINTS);
-        if(roboSybylPoints == null) {
-            roboSybylPoints = new ArrayList<>();
+        List<Location> roboSybilPoints = (List<Location>) configuration.getList(PropertyConstant.ROBO_SYBIL_SPAWN_POINTS);
+        if(roboSybilPoints == null) {
+            roboSybilPoints = new ArrayList<>();
         }
-        roboSybylsSpawnList = roboSybylPoints;
+        roboSybilsSpawnList = roboSybilPoints;
         List<Location> ironGolemPos = (List<Location>) configuration.getList(PropertyConstant.IRON_GOLEM_SPAWN_POINTS);
         if(ironGolemPos == null) {
             ironGolemPos = new ArrayList<>();
@@ -135,9 +135,9 @@ public class ConfigManager {
         SetValue(PropertyConstant.TEAMS_SPAWN_POINTS, teamSpawnList.toArray());
     }
 
-    public void addRoboSybylPoint(Location coords) {
-        roboSybylsSpawnList.add(coords);
-        SetValue(PropertyConstant.ROBO_SYBYL_SPAWN_POINTS, roboSybylsSpawnList.toArray());
+    public void addRoboSybilPoint(Location coords) {
+        roboSybilsSpawnList.add(coords);
+        SetValue(PropertyConstant.ROBO_SYBIL_SPAWN_POINTS, roboSybilsSpawnList.toArray());
     }
     
     public boolean trySetTeamSpawnCore(String id, Vector pos) {

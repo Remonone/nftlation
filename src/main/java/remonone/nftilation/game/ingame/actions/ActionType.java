@@ -2,7 +2,7 @@ package remonone.nftilation.game.ingame.actions;
 
 public enum ActionType {
     CHECKER,
-    ROBOSYBYL_ATTACK,
+    ROBOSYBIL_ATTACK,
     HAMSTER,
     CRYPT_DROP,
     INSPIRATION,

@@ -137,7 +137,7 @@ public class RuslanBlaze extends EntityBlaze implements EntityOwnable {
 
                     if (this.b > 1) {
                         float var10 = MathHelper.c(MathHelper.sqrt(var2)) * 0.5F;
-                        this.a.world.a((EntityHuman)null, 1018, new BlockPosition((int)this.a.locX, (int)this.a.locY, (int)this.a.locZ), 0);
+                        this.a.world.a(null, 1018, new BlockPosition((int)this.a.locX, (int)this.a.locY, (int)this.a.locZ), 0);
 
                         for(int var11 = 0; var11 < 1; ++var11) {
                             EntitySmallFireball var12 = new EntitySmallFireball(this.a.world, this.a, var4 + this.a.getRandom().nextGaussian() * (double)var10, var6, var8 + this.a.getRandom().nextGaussian() * (double)var10);

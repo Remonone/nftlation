@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SybylAttacker extends Role {
+public class SybilAttacker extends Role {
     
     @Override
     public Material getMaterial() {
@@ -39,7 +39,7 @@ public class SybylAttacker extends Role {
 
     @Override
     public List<String> getRoleDescription() {
-        return Arrays.asList(RoleConstant.SYBYL_DESCRIPTION_1, RoleConstant.SYBYL_DESCRIPTION_2, RoleConstant.SYBYL_DESCRIPTION_3);
+        return Arrays.asList(RoleConstant.SYBIL_DESCRIPTION_1, RoleConstant.SYBIL_DESCRIPTION_2, RoleConstant.SYBIL_DESCRIPTION_3);
     }
 
     @Override
@@ -82,13 +82,13 @@ public class SybylAttacker extends Role {
                 break;
         }
         ItemMeta bowMeta = bow.getItemMeta();
-        bowMeta.setDisplayName(RoleConstant.SYBYL_BOW_NAME);
+        bowMeta.setDisplayName(RoleConstant.SYBIL_BOW_NAME);
         bowMeta.setUnbreakable(true);
         bowMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         bow.setItemMeta(bowMeta);
         items.add(bow);
         ItemStack arrows = new ItemStack(Material.ARROW);
-        arrows.setAmount(RoleConstant.SYBYL_ARROW_AMOUNT);
+        arrows.setAmount(RoleConstant.SYBIL_ARROW_AMOUNT);
         items.add(arrows);
         return items;
     }
@@ -101,7 +101,7 @@ public class SybylAttacker extends Role {
         DataInstance data = Store.getInstance().getDataInstance();
         Role role = data.getPlayerRole(accessor.getUniqueId());
         EntityHandleComponent.setEntityOwner(e.getEntity(), accessor);
-        if(!(role instanceof SybylAttacker)) {
+        if(!(role instanceof SybilAttacker)) {
             return;
         }
         int amount = NBT.get(e.getBow(), nbt -> (Integer) nbt.getInteger("arrow-per-side"));
@@ -120,7 +120,7 @@ public class SybylAttacker extends Role {
         Player shooter = (Player) e.getEntity().getShooter();
         DataInstance data = Store.getInstance().getDataInstance();
         Role role = data.getPlayerRole(shooter.getUniqueId());
-        if(!(role instanceof SybylAttacker)) return;
+        if(!(role instanceof SybilAttacker)) return;
         String team = Store.getInstance().getDataInstance().getPlayerTeam(shooter.getUniqueId());
         GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, shooter);
         if(model == null) return;
@@ -135,7 +135,7 @@ public class SybylAttacker extends Role {
         }
         if(location != null) {
             TNTPrimed entity = e.getEntity().getWorld().spawn(location, TNTPrimed.class);
-            entity.setYield(RoleConstant.SYBYL_EXPLOSION_ARROW_STRENGTH);
+            entity.setYield(RoleConstant.SYBIL_EXPLOSION_ARROW_STRENGTH);
             entity.setFuseTicks(0);
             EntityHandleComponent.setEntityOwner(entity, shooter);
             entity.setIsIncendiary(true);

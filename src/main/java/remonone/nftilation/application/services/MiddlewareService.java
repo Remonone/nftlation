@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class MiddlewareService {
 
-    public static List<TeamData> teams = new ArrayList<TeamData>() {{
+    public final static List<TeamData> teams = new ArrayList<TeamData>() {{
         add(new TeamData("Blue", "BL", ChatColor.BLUE.getChar()));
         add(new TeamData("Red", "RD", ChatColor.RED.getChar()));
         add(new TeamData("Green", "GR", ChatColor.GREEN.getChar()));

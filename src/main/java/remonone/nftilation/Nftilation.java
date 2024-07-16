@@ -4,18 +4,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import remonone.nftilation.application.models.PlayerData;
-import remonone.nftilation.application.services.MiddlewareService;
 import remonone.nftilation.commands.*;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
+import remonone.nftilation.game.ingame.actions.donate.*;
 import remonone.nftilation.game.ingame.actions.world.Checker;
 import remonone.nftilation.game.ingame.actions.world.CryptDrop;
 import remonone.nftilation.game.ingame.actions.world.Hamster;
-import remonone.nftilation.game.ingame.actions.world.RoboSybyl;
+import remonone.nftilation.game.ingame.actions.world.RoboSybil;
 import remonone.nftilation.game.lobby.LobbyDisposer;
 import remonone.nftilation.game.roles.*;
 import remonone.nftilation.game.shop.ShopBuilder;
@@ -27,7 +26,6 @@ import remonone.nftilation.handlers.*;
 import remonone.nftilation.utils.CustomEntities;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
-import remonone.nftilation.utils.PlayerNMSUtil;
 
 
 public final class Nftilation extends JavaPlugin {
@@ -49,15 +47,22 @@ public final class Nftilation extends JavaPlugin {
 
     private void FetchRoleSkins() {
         Logger.log("Fetching role skins...");
-        MiddlewareService.loadSkins();
+//        MiddlewareService.loadSkins();
     }
 
     private void InitActions() {
         Logger.log("Initializing actions...");
         ActionContainer.registerAction(ActionType.CRYPT_DROP, new CryptDrop());
         ActionContainer.registerAction(ActionType.HAMSTER, new Hamster());
-        ActionContainer.registerAction(ActionType.ROBOSYBYL_ATTACK, new RoboSybyl());
+        ActionContainer.registerAction(ActionType.ROBOSYBIL_ATTACK, new RoboSybil());
         ActionContainer.registerAction(ActionType.CHECKER, new Checker());
+        ActionContainer.registerAction(ActionType.INSPIRATION, new Inspiration());
+        ActionContainer.registerAction(ActionType.AIRSTRIKE, new AirStrike());
+        ActionContainer.registerAction(ActionType.AIR_DROP, new AirDrop());
+        ActionContainer.registerAction(ActionType.CRYPT_ARISE, new CryptRaise());
+        ActionContainer.registerAction(ActionType.METEOR_FALL, new MeteorFall());
+        ActionContainer.registerAction(ActionType.DDOS_ATTACK, new DDoSAttack());
+        ActionContainer.registerAction(ActionType.GAS_ATTACK, new GasAttack());
     }
 
     private void SerializeProperties() {
@@ -71,7 +76,7 @@ public final class Nftilation extends JavaPlugin {
 
     private void RegisterRoles() {
         Logger.log("Registering roles...");
-        Role.registerRole(SybylAttacker.class);
+        Role.registerRole(SybilAttacker.class);
         Role.registerRole(Cryptan.class);
         Role.registerRole(Cryptomarine.class);
         Role.registerRole(RuslanEth.class);
@@ -113,12 +118,11 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("setShopKeeper").setExecutor(new SetShopKeeperCommand());
         this.getCommand("setDieCenter").setExecutor(new SetDieCenterSpawnCommand());
         this.getCommand("addTokens").setExecutor(new AddTokenCommand());
-        this.getCommand("getLevel").setExecutor(new GetUpgradeLevelCommand());
         this.getCommand("skipPhase").setExecutor(new SkipPhaseCommand());
         this.getCommand("setCenterPosition").setExecutor(new SetCenterPositionCommand());
         this.getCommand("addDiamondPosition").setExecutor(new AddDiamondPlaceSpawnCommand());
-        this.getCommand("addRoboSybylPos").setExecutor(new SetRoboSybylSpawnPointCommand());
-        this.getCommand("addIronGolemPos").setExecutor(new AddIronGolemPositonCommand());
+        this.getCommand("addRoboSybilPos").setExecutor(new SetRoboSybilSpawnPointCommand());
+        this.getCommand("addIronGolemPos").setExecutor(new AddIronGolemPositionCommand());
         this.getCommand("setCheckerTeamPosition").setExecutor(new CheckerChestCommand());
     }
     
@@ -133,10 +137,10 @@ public final class Nftilation extends JavaPlugin {
             GameInstance.getInstance().getCounter().bar.setVisible(false);
         }
         for(Player p : Bukkit.getOnlinePlayers()) {
-            PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(p.getUniqueId()).getData();
-            PlayerNMSUtil.changePlayerName(p, data.getLogin());
+            p.kickPlayer("Сервер в данный момент перезагружается, перезайдите позже...");
         }
         EntityList.clearEntities();
+        CustomEntities.unregisterEntities();
     }
     
 }

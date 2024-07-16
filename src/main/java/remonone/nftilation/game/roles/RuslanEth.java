@@ -89,9 +89,18 @@ public class RuslanEth extends Role {
     }
     
     @Override
-    public void killPlayer(Player player, int upgradeLevel) {
+    public void killPlayer(Player player) {
         entitiesList.get(player.getUniqueId()).forEach(Entity::remove);
         entitiesList.get(player.getUniqueId()).clear();
+        RemoveRuslanActionItems(player);
+        if(player.getInventory().contains(Material.SNOW_BALL)) {
+            player.getInventory().remove(Material.SNOW_BALL);
+        }
+        Map<String, Object> params = Store.getInstance().getDataInstance().getPlayerParams(player.getUniqueId());
+        int taskId = (int) params.getOrDefault("taskId", -1);
+        if(taskId != -1) return;
+        getServer().getScheduler().cancelTask(taskId);
+        params.remove("taskId");
     }
     
     @EventHandler
@@ -171,7 +180,7 @@ public class RuslanEth extends Role {
         ItemStack itemStack = new ItemStack(Material.FIREBALL);
         itemStack.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(ChatColor.DARK_RED + "CABOOM");
+        itemMeta.setDisplayName(ChatColor.DARK_RED + "БА-БАХ");
         itemStack.setItemMeta(itemMeta);
         ItemStatModifierComponent.markItemAsUncraftable(itemStack);
         ItemStatModifierComponent.markItemAsUnstorable(itemStack);
@@ -186,7 +195,7 @@ public class RuslanEth extends Role {
         ItemStack itemStack = new ItemStack(Material.BLAZE_ROD);
         itemStack.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(ChatColor.BLUE + "Recall team");
+        itemMeta.setDisplayName(ChatColor.BLUE + "Мобилизация");
         itemStack.setItemMeta(itemMeta);
         ItemStatModifierComponent.markItemAsUncraftable(itemStack);
         ItemStatModifierComponent.markItemAsUnstorable(itemStack);
@@ -197,6 +206,7 @@ public class RuslanEth extends Role {
         return itemStack;
     }
     
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void onBlazeShoot(final EntityDamageByEntityEvent e) {
         if(!(e.getDamager() instanceof Fireball)) return;
@@ -280,11 +290,21 @@ public class RuslanEth extends Role {
     }
     
     private void RemoveRuslanActionItems(Player player) {
-        ItemStack[] stacks = (ItemStack[])Store.getInstance().getDataInstance().getPlayerParams(player.getUniqueId()).getOrDefault("actions", new ItemStack[0]);
-        for(ItemStack stack : stacks) {
-            player.getInventory().remove(stack);
-        }
-        Store.getInstance().getDataInstance().getPlayerParams(player.getUniqueId()).remove("actions");
-        
+//        ItemStack[] stacks = (ItemStack[])Store.getInstance().getDataInstance().getPlayerParams(player.getUniqueId()).getOrDefault("actions", new ItemStack[0]);
+//        for(ItemStack stack : stacks) {
+//            player.getInventory().remove(stack);
+//        }
+//        Store.getInstance().getDataInstance().getPlayerParams(player.getUniqueId()).remove("actions");
+        Spliterator<ItemStack> itemStackSpliterator = player.getInventory().spliterator();
+        while(itemStackSpliterator.tryAdvance(itemStack -> {
+            if(itemStack == null || itemStack.getType().equals(Material.AIR) || itemStack.getAmount() < 1) return;
+            if(!StringUtils.isEmpty(NBT.get(itemStack, (nbt) -> (String)nbt.getString("ruslan_action")))) {
+                player.getInventory().remove(itemStack);
+            }
+            ItemStack offHand = player.getInventory().getItemInMainHand();
+            if(!StringUtils.isEmpty(NBT.get(offHand, (nbt) -> (String)nbt.getString("ruslan_action")))) {
+                player.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
+            }
+        }));
     }
 }

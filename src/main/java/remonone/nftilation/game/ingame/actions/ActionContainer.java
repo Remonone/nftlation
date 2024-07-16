@@ -31,6 +31,7 @@ public class ActionContainer {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static void NotifyActionStart(IAction action, ActionType type, Map<String, Object> parameters) {
         List<Player> players;
         if(parameters.containsKey("team")) {

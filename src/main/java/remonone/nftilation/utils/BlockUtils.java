@@ -26,6 +26,6 @@ public class BlockUtils {
                 }
             }
         }
-        return null;// no empty space within a cube of (2*(maxradius+1))^3
+        return null;
     }
 }

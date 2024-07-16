@@ -17,6 +17,7 @@ public class ResetUtils {
         player.setExp(0);
         player.setLevel(0);
         player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(0);
+        player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(4D);
         player.setWalkSpeed(DataConstants.PLAYER_SPEED);
         for(PotionEffect effect : player.getActivePotionEffects()) {
             player.removePotionEffect(effect.getType());

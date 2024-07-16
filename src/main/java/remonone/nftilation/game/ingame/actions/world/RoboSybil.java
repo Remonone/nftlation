@@ -13,51 +13,56 @@ import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.game.ingame.actions.IAction;
-import remonone.nftilation.utils.ChunkUtils;
 import remonone.nftilation.utils.EntityList;
+import remonone.nftilation.utils.Logger;
 
 import java.util.List;
 import java.util.Map;
 
-public class RoboSybyl implements IAction {
+public class RoboSybil implements IAction {
     @Override
     public void Init(Map<String, Object> params) {
-        List<Location> spawnPoints = ConfigManager.getInstance().getRoboSybylsSpawnList();
+        List<Location> spawnPoints = ConfigManager.getInstance().getRoboSybilsSpawnList();
         spawnPoints.forEach(spawnPoint -> {
-            ChunkUtils.loadChunkForTime(spawnPoint, 10);
-            for(int i = 0; i < DataConstants.ACTION_ROBO_SYBYL_COUNT_PER_POINT; i++) {
-                Zombie zombie = spawnPoint.getWorld().spawn(spawnPoint, Zombie.class);
-                zombie.setBaby(true);
-                zombie.setCustomName(ChatColor.MAGIC + "" + spawnPoint.getBlockX() + spawnPoint.getBlockZ() + "RoboSybyl" + i);
-                zombie.setCustomNameVisible(false);
-                SetSybylAttackerItems(zombie);
-                EntityHandleComponent.setEntityHostile(zombie);
-                EntityHandleComponent.setEntityUnloadLocked(zombie);
-                EntityList.addEntity(zombie);
+            spawnPoint.getChunk().load();
+            if(spawnPoint.getChunk().isLoaded()) {
+                for (int i = 0; i < DataConstants.ACTION_ROBO_SYBIL_COUNT_PER_POINT; i++) {
+                    Zombie zombie = spawnPoint.getWorld().spawn(spawnPoint, Zombie.class);
+                    zombie.setBaby(true);
+                    zombie.setCustomName(ChatColor.MAGIC + "" + spawnPoint.getBlockX() + spawnPoint.getBlockZ() + "RoboSybil" + i);
+                    zombie.setCustomNameVisible(false);
+                    zombie.setRemoveWhenFarAway(false);
+                    SetSybilAttackerItems(zombie);
+                    EntityHandleComponent.setEntityHostile(zombie);
+                    EntityHandleComponent.setEntityUnloadLocked(zombie);
+                    EntityList.addEntity(zombie);
+                }
+            } else {
+                Logger.error("Chunk have not been loaded properly!");
             }
         });
     }
 
-    private void SetSybylAttackerItems(LivingEntity entity) {
+    private void SetSybilAttackerItems(LivingEntity entity) {
         EntityEquipment equipment = entity.getEquipment();
         ItemStack helmet = new ItemStack(Material.IRON_HELMET);
-        SetItemMeta(helmet, "sybyl_helmet");
+        SetItemMeta(helmet, "sybil_helmet");
         equipment.setHelmet(helmet);
 
         ItemStack chestplate = new ItemStack(Material.IRON_CHESTPLATE);
-        SetItemMeta(chestplate, "sybyl_chestplate");
+        SetItemMeta(chestplate, "sybil_chestplate");
         equipment.setChestplate(chestplate);
 
         ItemStack leggings = new ItemStack(Material.IRON_LEGGINGS);
-        SetItemMeta(leggings, "sybyl_leggings");
+        SetItemMeta(leggings, "sybil_leggings");
         equipment.setLeggings(leggings);
 
         ItemStack boots = new ItemStack(Material.IRON_BOOTS);
-        SetItemMeta(boots, "sybyl_boots");
+        SetItemMeta(boots, "sybil_boots");
         equipment.setBoots(boots);
 
         ItemStack weapon = new ItemStack(Material.IRON_AXE);
-        SetItemMeta(weapon, "sybyl_weapon");
+        SetItemMeta(weapon, "sybil_weapon");
         equipment.setItemInMainHand(weapon);
     }
 

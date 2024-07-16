@@ -1,15 +1,13 @@
 package remonone.nftilation.utils;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class EntityList {
-    private static List<LivingEntity> livingEntities = new ArrayList<LivingEntity>();
+    private static final List<LivingEntity> livingEntities = new ArrayList<>();
     
-    public EntityList() {}
     public static void addEntity(LivingEntity entity) {
         livingEntities.add(entity);
     }

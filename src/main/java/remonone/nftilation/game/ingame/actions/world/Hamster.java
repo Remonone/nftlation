@@ -15,6 +15,7 @@ import remonone.nftilation.Nftilation;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.game.ingame.actions.IAction;
+import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
 
 import java.util.Map;
@@ -29,12 +30,14 @@ public class Hamster implements IAction, Listener {
             Logger.error("Chunk wasn't loaded properly!");
         }
         Zombie zombie = location.getWorld().spawn(location, Zombie.class);
-        zombie.setCustomName(ChatColor.BLUE + "" + ChatColor.BOLD + "Hamster");
+        zombie.setCustomName(ChatColor.BLUE + "" + ChatColor.BOLD + "Хомяк");
         zombie.setCustomNameVisible(true);
         zombie.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(400.0D);
         zombie.setHealth(400.0D);
+        zombie.setRemoveWhenFarAway(false);
         EntityHandleComponent.setEntityHostile(zombie);
         EntityHandleComponent.setEntityUnloadLocked(zombie);
+        EntityList.addEntity(zombie);
         GiveArmorToBoss(zombie);
         getServer().getPluginManager().registerEvents(this, Nftilation.getInstance());
     }
@@ -69,7 +72,7 @@ public class Hamster implements IAction, Listener {
     public void OnHamsterDamage(EntityDamageByEntityEvent e) {
         if(!(e.getEntity() instanceof Zombie)) return;
         Zombie zombie = (Zombie) e.getEntity();
-        if(!zombie.getCustomName().equals(ChatColor.BLUE + "" + ChatColor.BOLD + "Hamster")) return;
+        if(!zombie.getCustomName().equals(ChatColor.BLUE + "" + ChatColor.BOLD + "Хомяк")) return;
         if(zombie.getHealth() - e.getFinalDamage() <= 0.0D) {
             for(int i = 0; i < 4; i++) {
                 ItemStack stack = new Dye(DyeColor.BLUE).toItemStack(64);

@@ -5,6 +5,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftIronGolem;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -29,6 +30,7 @@ import remonone.nftilation.game.phase.PhaseCounter;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.scoreboard.ScoreboardHandler;
+import remonone.nftilation.handlers.OnPlayerDieHandler;
 import remonone.nftilation.utils.ColorUtils;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
@@ -48,6 +50,8 @@ public class GameInstance {
     private Map<String, Team> teamData;
     @Getter
     private PhaseCounter counter;
+    
+    private boolean isFinished;
     
     public void startGame() {
         Map<String, List<DataInstance.PlayerInfo>> teams = Store.getInstance().getDataInstance().getTeams();
@@ -76,6 +80,7 @@ public class GameInstance {
             EntityHandleComponent.setEntityHostile(golem.getBukkitEntity());
             EntityList.addEntity((LivingEntity) golem.getBukkitEntity());
             golem.setCustomName("Angry Golem");
+            ((CraftIronGolem)golem.getBukkitEntity()).setRemoveWhenFarAway(false);
         }
     }
 
@@ -117,7 +122,9 @@ public class GameInstance {
             }
             Core teamCore = SetCore(teamName, point);
             SpawnShopKeeper(point);
-            Team team = new Team(teamPlayers, point, true, true, teamName);
+            Team team = new Team(teamPlayers, point, teamName);
+            team.isActive = true;
+            team.isCoreAlive = true;
             team.core = teamCore;
             teamData.put(teamName, team);
         }
@@ -141,10 +148,13 @@ public class GameInstance {
         model.tokens += tokens;
         ScoreboardHandler.updateScoreboard(model);
     }
+    public boolean haveEnoughMoney(String teamName, Player player, int amount) {
+        return getPlayerModelFromTeam(teamName, player).tokens >= amount;
+    }
     
     public boolean withdrawFunds(String teamName, Player player, int amount) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        if(model.tokens < amount) return false;
+        if(!haveEnoughMoney(teamName, player, amount)) return false;
         model.tokens -= amount;
         ScoreboardHandler.updateScoreboard(model);
         return true;
@@ -158,9 +168,7 @@ public class GameInstance {
 
     public void increasePlayerDeathCounter(String teamName, Player player) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        Logger.debug(model.toString());
         model.deathCounter = model.deathCounter + 1;
-        Logger.debug(model.toString());
         ScoreboardHandler.updateScoreboard(model);
     }
     
@@ -175,11 +183,13 @@ public class GameInstance {
     private void SpawnShopKeeper(TeamSpawnPoint point) {
         World world = Store.getInstance().getDataInstance().getMainWorld();
         Location location = point.getShopKeeperPosition();
+        location.getChunk().load();
         Villager villager = world.spawn(location, Villager.class);
         villager.setAI(false);
         villager.setCustomName("Shop keeper");
         villager.setCustomNameVisible(false);
         villager.setInvulnerable(true);
+        villager.setRemoveWhenFarAway(false);
         EntityHandleComponent.setEntityUnloadLocked(villager);
         EntityList.addEntity(villager);
     }
@@ -203,10 +213,11 @@ public class GameInstance {
             player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_STAGE_FOR_UPGRADE);
             return;
         }
-        if(!withdrawFunds(teamName, player, price)) {
+        if(!haveEnoughMoney(teamName, player, price)) {
             player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
             return;
         }
+        withdrawFunds(teamName, player, price);
         player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, .5f, 1f);
         model.upgradeLevel = level;
         Role role = Role.getRoleByID(model.roleId);
@@ -217,9 +228,8 @@ public class GameInstance {
 
     private void disposePlayers() {
         for(Team team : teamData.values()) {
-            team.players.forEach(playerModel -> {
-                setPlayerToPosition(team, playerModel.reference);
-            });
+            team.players.forEach(playerModel -> setPlayerToPosition(team, playerModel.reference)
+            );
         }
     }
     
@@ -252,23 +262,27 @@ public class GameInstance {
         return this.teamData.get(teamName).players;
     } 
     
-    public boolean damageCore(String teamName) {
+    public boolean damageCore(String teamName, boolean isPlayerDamager) {
         Team team = teamData.get(teamName);
         if(team == null) return false;
-        boolean isDamaged = team.core.TakeDamage();
+        boolean isDestroyed = team.core.TakeDamage(isPlayerDamager);
         team.players.forEach(ScoreboardHandler::updateScoreboard);
-        return isDamaged;
+        return isDestroyed;
     }
     
     public void healCore(Player player, String teamName, int price) {
         Team team = teamData.get(teamName);
         if(team == null) return;
         if(team.core == null) return;
+        if(!haveEnoughMoney(teamName, player, price)) {
+            player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
+            return;
+        }
         if(!team.core.Heal()) {
-            awardPlayer(teamName, player, price);
             player.sendMessage(ChatColor.RED + MessageConstant.CANNOT_HEAL_CORE);
             return;
         }
+        withdrawFunds(teamName, player, price);
         team.players.forEach(ScoreboardHandler::updateScoreboard);
         World world = player.getWorld();
         world.playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, 1f, 1f);
@@ -282,18 +296,24 @@ public class GameInstance {
         Location location = team.spawnPoint.getCoreCenter().toLocation(world);
         location.getBlock().setType(Material.AIR);
         notifyDestruction(team);
+        
         if(team.players.stream().noneMatch(PlayerModel::isAlive)) {
             team.isActive = false;
             checkOnActiveTeams();
         }
+        if((Boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_IMMINENT_DEATH, false) && !isFinished) {
+            team.players.forEach(playerModel -> OnPlayerDieHandler.OnDeath(playerModel.getReference()));
+        }
         for(Team activeTeam : teamData.values()) {
             activeTeam.players.stream().filter(playerModel -> activeTeam.isCoreAlive || playerModel.isAlive).forEach(ScoreboardHandler::updateScoreboard);
         }
+        
     }
 
     private void checkOnActiveTeams() {
         List<Team> aliveTeams = teamData.values().stream().filter(Team::isActive).collect(Collectors.toList());
         if(aliveTeams.size() < 2) {
+            isFinished = true;
             announceTeamWinner(aliveTeams.get(0));
         }
     }
@@ -370,11 +390,8 @@ public class GameInstance {
         if(team == null) return;
         if(team.isCoreAlive) {
             setPlayerToPosition(team, player);
-            // BUG: Check on model
             PlayerModel model = getPlayerModelFromTeam(teamName, player);
-            Logger.debug("Check model availability on respawn: " + (model != null));
             if(model == null) return;
-            Logger.debug(model.toString());
             model.isAlive = true;
             Role.UpdatePlayerAbilities(player, Role.getRoleByID(model.getRoleId()), model.getUpgradeLevel());
         }
@@ -397,9 +414,7 @@ public class GameInstance {
         private Core core;
         @NonNull
         private TeamSpawnPoint spawnPoint;
-        @NonNull
         private boolean isCoreAlive;
-        @NonNull
         private boolean isActive;
         @NonNull
         private String name;

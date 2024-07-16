@@ -19,9 +19,12 @@ import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.utils.Logger;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class PhaseUpdateHandler implements Listener {
+    
+    int taskId = -1;
     
     @EventHandler
     public void onPhaseUpdate(final OnPhaseUpdateEvent event) {
@@ -36,7 +39,7 @@ public class PhaseUpdateHandler implements Listener {
                             put("global", true);
                         }});
                     }
-                }.runTaskLater(Nftilation.getInstance(), 200);
+                }.runTaskLater(Nftilation.getInstance(), 10 * DataConstants.TICKS_IN_MINUTE);
                 break;
             }
             case 2: {
@@ -48,7 +51,7 @@ public class PhaseUpdateHandler implements Listener {
             case 3: {
                 Logger.broadcast("Stage 3 has begun!");
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_INVULNERABLE, false);
-                ActionContainer.InitAction(ActionType.ROBOSYBYL_ATTACK, new HashMap<String, Object>() {{
+                ActionContainer.InitAction(ActionType.ROBOSYBIL_ATTACK, new HashMap<String, Object>() {{
                     put("global", true);
                 }});
                 break;
@@ -72,20 +75,46 @@ public class PhaseUpdateHandler implements Listener {
                 Logger.broadcast("Stage 5 has begun!");
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_SELF_DESTRUCTIVE, true);
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_INVENTORY_AUTO_CLEAR, false);
+                RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_DAMAGE_INTAKE, 4);
                 BukkitRunnable runnable = new BukkitRunnable() {
                     @Override
                     public void run() {
                         List<TeamData> teams = Store.getInstance().getDataInstance().getTeamData();
                         for(TeamData team : teams) {
                             if(GameInstance.getInstance().isTeamAlive(team.getTeamName())) {
-                                GameInstance.getInstance().damageCore(team.getTeamName());
+                                GameInstance.getInstance().damageCore(team.getTeamName(), false);
                             }
                         }
                     }
                 };
                 
                 runnable.runTaskTimer(Nftilation.getInstance(), 0, (long) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, 9 * 20));
+                taskId = runnable.getTaskId();
                 break;
+            }
+            case 6: {
+                RuleManager.getInstance().setRule(PropertyConstant.RULE_IMMINENT_DEATH, true);
+                RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, DataConstants.TICKS_IN_SECOND);
+                Iterator<String> teamIt = GameInstance.getInstance().getTeamIterator();
+                while(teamIt.hasNext()) {
+                    String team = teamIt.next();
+                    if(!GameInstance.getInstance().isTeamAlive(team)) {
+                        GameInstance.getInstance().getTeamPlayers(team).forEach(playerModel -> OnPlayerDieHandler.OnDeath(playerModel.getReference()));
+                    }
+                }
+                BukkitRunnable runnable = new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        List<TeamData> teams = Store.getInstance().getDataInstance().getTeamData();
+                        for(TeamData team : teams) {
+                            if(GameInstance.getInstance().isTeamAlive(team.getTeamName())) {
+                                GameInstance.getInstance().damageCore(team.getTeamName(), false);
+                            }
+                        }
+                    }
+                };
+
+                runnable.runTaskTimer(Nftilation.getInstance(), 0, (int) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, 20));
             }
         }
     }

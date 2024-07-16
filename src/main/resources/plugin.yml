@@ -49,9 +49,9 @@ commands:
   addDiamondPosition:
     description: Set diamond spawn point
     usage: /addDiamondPosition    
-  addRoboSybylPos:
-    description: Set Robo Sybyl Position
-    usage: /addRoboSybylPos
+  addRoboSybilPos:
+    description: Set Robo Sybil Position
+    usage: /addRoboSybilPos
   addIronGolemPos:
     description: Set Iron Golem Position
     usage: /addIronGolemPos

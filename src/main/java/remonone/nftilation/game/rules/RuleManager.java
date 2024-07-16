@@ -24,6 +24,8 @@ public class RuleManager {
         inGameRules.put(PropertyConstant.RULE_RESPAWN_TIMER, (long) 5 * 20);
         inGameRules.put(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, (long) 9 * DataConstants.TICKS_IN_SECOND);
         inGameRules.put(PropertyConstant.RULE_AVAILABLE_TIER, 1);
+        inGameRules.put(PropertyConstant.RULE_CORE_DAMAGE_INTAKE, 2);
+        inGameRules.put(PropertyConstant.RULE_IMMINENT_DEATH, false);
     }
     
     public Object getRuleOrDefault(String rule, Object defaultValue) {

@@ -94,7 +94,7 @@ public class Monkey extends Role {
     }
 
     @Override
-    protected ItemStack getLeggins(Player player, int upgradeLevel) {
+    protected ItemStack getLeggings(Player player, int upgradeLevel) {
         return new ItemStack(Material.AIR);
     }
 
@@ -158,7 +158,7 @@ public class Monkey extends Role {
         if(!(role instanceof Monkey)) {
             return;
         }
-        if(Store.getInstance().getGameStage().getStage() == Stage.LOBBY) {
+        if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) {
             return;
         }
         e.setCancelled(true);

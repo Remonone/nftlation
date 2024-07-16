@@ -22,6 +22,8 @@ import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
+import remonone.nftilation.utils.Logger;
+import remonone.nftilation.utils.PlayerDamageByPlayerLog;
 import remonone.nftilation.utils.ResetUtils;
 
 import java.util.Objects;
@@ -38,6 +40,10 @@ public class OnPlayerDieHandler implements Listener {
         if(player.getHealth() - event.getFinalDamage() <= 0) {
             event.setCancelled(true);
             OnDeath(player);
+            Player attacker = PlayerDamageByPlayerLog.getEventLogForPlayer(player.getUniqueId());
+            Logger.debug("Checking for attacker: " + (attacker != null ? attacker.getName() : ""));
+            if(attacker == null) return;
+            countKill(player, attacker);
         }
     }
     
@@ -87,7 +93,9 @@ public class OnPlayerDieHandler implements Listener {
             }
             attacker = owner;
         }
-        if(attacker == null) return;
+        if(attacker == null) {
+            return;
+        }
         if(GameInstance.getInstance().checkIfPlayersInSameTeam(target, attacker)) {
             event.setCancelled(true);
             return;
@@ -95,19 +103,25 @@ public class OnPlayerDieHandler implements Listener {
         if(target.getHealth() - event.getFinalDamage() <= 0) {
             event.setCancelled(true);
             OnDeath(target);
-            String attackerTeam = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getUniqueId());
-            GameInstance.getInstance().awardPlayer(attackerTeam, attacker, DataConstants.TOKEN_PER_KILL);
-            String targetTeam =Store.getInstance().getDataInstance().getPlayerTeam(target.getUniqueId());
-            GameInstance.getInstance().increasePlayerKillCounter(attackerTeam, attacker);
-            GameInstance.getInstance().increasePlayerDeathCounter(targetTeam, target);
+            countKill(target, attacker);
+        } else {
+            PlayerDamageByPlayerLog.insertLogEvent(target, attacker);
         }
     }
+    
+    public void countKill(Player target, Player attacker) {
+        String attackerTeam = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getUniqueId());
+        GameInstance.getInstance().awardPlayer(attackerTeam, attacker, DataConstants.TOKEN_PER_KILL);
+        String targetTeam =Store.getInstance().getDataInstance().getPlayerTeam(target.getUniqueId());
+        GameInstance.getInstance().increasePlayerKillCounter(attackerTeam, attacker);
+        GameInstance.getInstance().increasePlayerDeathCounter(targetTeam, target);
+    }
 
-    private void OnDeath(Player player) {
+    public static void OnDeath(Player player) {
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         GameInstance.getInstance().setPlayerDead(teamName, player);
         GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
-        Role.OnDie(player, Role.getRoleByID(model.getRoleId()), model.getUpgradeLevel());
+        Role.OnDie(player, Role.getRoleByID(model.getRoleId()));
         Vector pos = ConfigManager.getInstance().getCenterDeadZoneCoords();
         Location location = pos.toLocation(Store.getInstance().getDataInstance().getMainWorld());
         player.teleport(location);

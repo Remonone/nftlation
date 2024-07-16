@@ -8,7 +8,7 @@ public class PropertyConstant {
     public static final String CENTER_DEAD_POINT = "center";
     public static final String CENTER_LOCATION = "centerLocation";
     public static final String DIAMOND_POSITION = "diamondsList";
-    public static final String ROBO_SYBYL_SPAWN_POINTS = "roboSybylSpawnPoints";
+    public static final String ROBO_SYBIL_SPAWN_POINTS = "roboSybilSpawnPoints";
     public static final String IRON_GOLEM_SPAWN_POINTS = "ironGolemSpawnPoints";
 
     public static final String RULE_CORE_INVULNERABLE = "isCoreInvulnerable";
@@ -19,6 +19,8 @@ public class PropertyConstant {
     public static final String RULE_RESPAWN_TIMER = "respawnTimer";
     public static final String RULE_RESOURCE_SPAWN_AUTO_ENABLE_AT = "autoEnableResourceSpawnAt";
     public static final String RULE_AVAILABLE_TIER = "availableTier";
+    public static final String RULE_CORE_DAMAGE_INTAKE = "coreDamageIntake";
+    public static final String RULE_IMMINENT_DEATH = "imminentDeath";
 
     public static final String NBT_ROLE = "role-name";
     public static final String NBT_ROLE_RESERVED = "role-reserved";

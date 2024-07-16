@@ -3,6 +3,7 @@ package remonone.nftilation.game;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import remonone.nftilation.Store;
@@ -56,18 +57,22 @@ public class DataInstance {
         if(!initialized && playerData.getRole().equals(PlayerRole.PLAYER)) {
             return LoginState.NOT_ALLOWED;
         }
-        
+        PlayerInfo playerInfo;
         if(playerData.getRole().equals(PlayerRole.PLAYER)) {
             if(!isTeamPresented(playerData.getTeam().getTeamName())) return LoginState.NOT_PRESENTED;
             if(Store.getInstance().getGameStage().getStage() == Stage.IN_GAME) {
                 PlayerInfo info = getPlayerInfo(playerData);
                 if(info == null) return LoginState.NOT_ALLOWED;
                 info.data = playerData;
+                playerInfo = info;
             } else {
-                teams.get(playerData.getTeam().getTeamName()).add(new PlayerInfo(playerData, null, player.getUniqueId(), new HashMap<>()));
+                playerInfo = new PlayerInfo(playerData, null, player.getUniqueId(), new HashMap<>());
+                teams.get(playerData.getTeam().getTeamName()).add(playerInfo);
             }
+        } else {
+            playerInfo = new PlayerInfo(playerData, null, player.getUniqueId(), new HashMap<>());
         }
-        players.add(new PlayerInfo(playerData, null, player.getUniqueId(), new HashMap<>()));
+        players.add(playerInfo);
         
         Logger.log("Player " + playerData.getLogin() + " has authenticated to the game");
         return LoginState.LOGGED_IN;
@@ -165,6 +170,7 @@ public class DataInstance {
 
     @AllArgsConstructor
     @Getter
+    @ToString
     public static class PlayerInfo {
         private PlayerData data;
         @Setter

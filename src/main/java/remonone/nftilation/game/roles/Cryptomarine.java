@@ -102,7 +102,7 @@ public class Cryptomarine extends Role {
         return itemStack;
     }
     @Override
-    protected ItemStack getLeggins(Player player, int upgradeLevel){
+    protected ItemStack getLeggings(Player player, int upgradeLevel){
         ItemStack itemStack = new ItemStack(Material.LEATHER_LEGGINGS);
         switch(upgradeLevel){
             case 1:
@@ -145,14 +145,17 @@ public class Cryptomarine extends Role {
         switch(upgradeLevel){
             case 1:
                 itemStack = new ItemStack(Material.IRON_AXE);
+                itemStack.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
                 break;
             case 2:
                 itemStack = new ItemStack(Material.IRON_AXE);
                 itemStack.addEnchantment(Enchantment.DAMAGE_ALL, 2);
+                itemStack.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
                 break;
             case 3:
-                itemStack = new ItemStack(Material.IRON_AXE);
-                itemStack.addEnchantment(Enchantment.DAMAGE_ALL, 2);
+                itemStack = new ItemStack(Material.DIAMOND_AXE);
+                itemStack.addEnchantment(Enchantment.DAMAGE_ALL, 1);
+                itemStack.addEnchantment(Enchantment.FIRE_ASPECT, 1);
                 NBT.modify(itemStack, nbt -> {nbt.setString("cryptomarine", "axe");});
                 break;
         }
@@ -182,6 +185,7 @@ public class Cryptomarine extends Role {
         float speed = DataConstants.PLAYER_SPEED;
         float modifier = upgradeLevel == 3 ? 10 : 20;
         player.setWalkSpeed(speed - (speed / 100) * modifier);
+        player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(RoleConstant.CRYPTOMARINE_ATTACK_SPEED);
         if(upgradeLevel > 1) {
             player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(1);
             player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, DataConstants.CONSTANT_POTION_DURATION, 1, false, false));
@@ -189,7 +193,7 @@ public class Cryptomarine extends Role {
     }
     
     @Override
-    protected void killPlayer(Player player, int upgradeLevel) {
+    protected void killPlayer(Player player) {
         if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Cryptomarine)) return;
         String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
@@ -203,6 +207,7 @@ public class Cryptomarine extends Role {
         entity.setIsIncendiary(true);
     }
     
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void onDamage(EntityDamageByEntityEvent e) {
         if(!(e.getDamager() instanceof Player)) return;

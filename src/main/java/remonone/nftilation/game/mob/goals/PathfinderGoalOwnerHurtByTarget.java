@@ -5,13 +5,13 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import remonone.nftilation.game.mob.RuslanBlaze;
 
 public class PathfinderGoalOwnerHurtByTarget extends PathfinderGoalTarget {
-    EntityOwnable a;
+    final EntityOwnable a;
     EntityLiving b;
     private int c;
 
-    public PathfinderGoalOwnerHurtByTarget(RuslanBlaze entitytameableanimal) {
-        super(entitytameableanimal, false);
-        this.a = entitytameableanimal;
+    public PathfinderGoalOwnerHurtByTarget(RuslanBlaze ruslanBlaze) {
+        super(ruslanBlaze, false);
+        this.a = ruslanBlaze;
         this.a(1);
     }
 

@@ -12,10 +12,12 @@ public enum CustomEntities {
     RUSLAN_BLAZE("RuslanBlaze", 34,EntityType.BLAZE, EntityBlaze.class, RuslanBlaze.class);
     @Getter
     private final String name;
+    @Getter
     private final int id;
     @Getter
     private final EntityType entityType;
     private final Class<? extends Entity> nmsClass;
+    @Getter
     private final Class<? extends Entity> customClass;
     private final MinecraftKey key;
     private final MinecraftKey oldKey;
@@ -43,11 +45,4 @@ public enum CustomEntities {
         EntityTypes.b.a(EntityTypes.b.a(nmsClass), oldKey, nmsClass);
     }
 
-    public int getID() {
-        return id;
-    }
-
-    public Class<?> getCustomClass() {
-        return customClass;
-    }
 }

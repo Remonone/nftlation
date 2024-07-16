@@ -18,8 +18,7 @@ import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.PlayerData;
 import remonone.nftilation.components.ItemStatModifierComponent;
-import remonone.nftilation.constants.ItemConstant;
-import remonone.nftilation.game.equipment.DefaultEquipment;
+import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.utils.ColorUtils;
 import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.ResetUtils;
@@ -44,7 +43,7 @@ public abstract class Role implements Cloneable, Listener {
     public abstract int getRoleIndex();
     
     protected abstract void setPlayer(Player player, int upgradeLevel);
-    protected void killPlayer(Player player, int upgradeLevel) {}
+    protected void killPlayer(Player player) {}
     
     public static void UpdatePlayerAbilities(Player player, Role role, int upgradeLevel) {
         ResetUtils.globalResetPlayerStats(player);
@@ -57,36 +56,40 @@ public abstract class Role implements Cloneable, Listener {
     }
 
     protected ItemStack getSword(int level) {
-        ItemStack stack = new ItemStack(DefaultEquipment.DEFAULT_SWORD);
+        Material mat = level > 1 ? Material.IRON_SWORD : Material.STONE_SWORD;
+        ItemStack stack = new ItemStack(mat);
         ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName(ItemConstant.SWORD_NAME);
+        meta.setDisplayName(RoleConstant.DEFAULT_SWORD_NAME);
         meta.setUnbreakable(true);
         stack.setItemMeta(meta);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         return stack;
     }
     protected ItemStack getPickaxe(int level) {
-        ItemStack stack = new ItemStack(DefaultEquipment.DEFAULT_PICKAXE);
+        Material mat = level > 1 ? Material.IRON_PICKAXE : Material.STONE_PICKAXE;
+        ItemStack stack = new ItemStack(mat);
         ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName(ItemConstant.PICKAXE_NAME);
+        meta.setDisplayName(RoleConstant.DEFAULT_PICKAXE_NAME);
         meta.setUnbreakable(true);
         stack.setItemMeta(meta);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         return stack;
     }
     protected ItemStack getAxe(int level) {
-        ItemStack stack = new ItemStack(DefaultEquipment.DEFAULT_AXE);
+        Material mat = level > 1 ? Material.IRON_AXE : Material.STONE_AXE;
+        ItemStack stack = new ItemStack(mat);
         ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName(ItemConstant.AXE_NAME);
+        meta.setDisplayName(RoleConstant.DEFAULT_AXE_NAME);
         meta.setUnbreakable(true);
         stack.setItemMeta(meta);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         return stack;
     }
     protected ItemStack getShovel(int level) {
-        ItemStack stack = new ItemStack(DefaultEquipment.DEFAULT_SHOVEL);
+        Material mat = level > 1 ? Material.IRON_SPADE : Material.STONE_SPADE;
+        ItemStack stack = new ItemStack(mat);
         ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName(ItemConstant.SHOVEL_NAME);
+        meta.setDisplayName(RoleConstant.DEFAULT_SHOVEL_NAME);
         meta.setUnbreakable(true);
         stack.setItemMeta(meta);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
@@ -98,40 +101,33 @@ public abstract class Role implements Cloneable, Listener {
     }
     
     protected ItemStack getHelmet(Player player, int level) {
-        ItemStack helmet = new ItemStack(DefaultEquipment.DEFAULT_HELMET);
-        LeatherArmorMeta meta = (LeatherArmorMeta) helmet.getItemMeta();
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
-        meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
-        meta.setUnbreakable(true);
-        helmet.setItemMeta(meta);
+        ItemStack helmet = new ItemStack(Material.LEATHER_HELMET);
+        setMetaToDefaultArmor(player, helmet);
         return helmet;
     }
     protected ItemStack getChestplate(Player player, int level) {
-        ItemStack chestplate = new ItemStack(DefaultEquipment.DEFAULT_CHEST);
-        LeatherArmorMeta meta = (LeatherArmorMeta) chestplate.getItemMeta();
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
-        meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
-        meta.setUnbreakable(true);
-        chestplate.setItemMeta(meta);
+        ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
+        setMetaToDefaultArmor(player, chestplate);
         return chestplate;
     }
-    protected ItemStack getLeggins(Player player, int level) {
-        ItemStack leggins = new ItemStack(DefaultEquipment.DEFAULT_LEGS);
-        LeatherArmorMeta meta = (LeatherArmorMeta) leggins.getItemMeta();
-        PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
-        meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
-        meta.setUnbreakable(true);
-        leggins.setItemMeta(meta);
-        return leggins;
+    protected ItemStack getLeggings(Player player, int level) {
+        ItemStack leggings = new ItemStack(Material.LEATHER_LEGGINGS);
+        setMetaToDefaultArmor(player, leggings);
+        return leggings;
     }
     protected ItemStack getBoots(Player player, int level) {
-        ItemStack boots = new ItemStack(DefaultEquipment.DEFAULT_BOOTS);
-        LeatherArmorMeta meta = (LeatherArmorMeta) boots.getItemMeta();
+        ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);
+        setMetaToDefaultArmor(player, boots);
+        return boots;
+    }
+    
+    private void setMetaToDefaultArmor(Player player, ItemStack stack) {
+        ItemStatModifierComponent.markItemAsDefault(stack);
+        LeatherArmorMeta meta = (LeatherArmorMeta) stack.getItemMeta();
         PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
         meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
         meta.setUnbreakable(true);
-        boots.setItemMeta(meta);
-        return boots;
+        stack.setItemMeta(meta);
     }
     
     public static void registerRole(Class<? extends Role> role) {
@@ -178,9 +174,9 @@ public abstract class Role implements Cloneable, Listener {
         }
     }
     
-    public static void OnDie(Player player, Role role, int upgradeLevel) {
+    public static void OnDie(Player player, Role role) {
         ResetUtils.globalResetPlayerStats(player);
-        role.killPlayer(player, upgradeLevel);
+        role.killPlayer(player);
     }
 
     private static void SetOwner(Player owner, ItemStack... itemStacks) {
@@ -192,6 +188,7 @@ public abstract class Role implements Cloneable, Listener {
         }
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     private static void clearPlayerItems(Player player) {
         Spliterator<ItemStack> itemStackSpliterator = player.getInventory().spliterator();
         while(itemStackSpliterator.tryAdvance(itemStack -> {
@@ -207,7 +204,7 @@ public abstract class Role implements Cloneable, Listener {
         EntityEquipment equipment = player.getEquipment();
         ItemStack helmet = role.getHelmet(player, upgradeLevel);
         ItemStack chestplate = role.getChestplate(player, upgradeLevel);
-        ItemStack leggins = role.getLeggins(player, upgradeLevel);
+        ItemStack leggins = role.getLeggings(player, upgradeLevel);
         ItemStack boots = role.getBoots(player, upgradeLevel);
         SetOwner(player, helmet, chestplate, leggins, boots);
         ItemStatModifierComponent.markItemAsUnstorable(helmet);
@@ -231,7 +228,6 @@ public abstract class Role implements Cloneable, Listener {
     @Override
     public Role clone() {
         try {
-            // TODO: copy mutable state here, so the clone can't change the internals of the original
             return (Role) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

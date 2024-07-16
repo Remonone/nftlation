@@ -5,7 +5,7 @@ import remonone.nftilation.game.ingame.actions.IAction;
 
 import java.util.Map;
 
-public class AirDrop implements IAction {
+public class AirStrike implements IAction {
     @Override
     public void Init(Map<String, Object> params) {
         

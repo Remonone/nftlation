@@ -8,7 +8,10 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
+import remonone.nftilation.Nftilation;
 import remonone.nftilation.components.ItemStatModifierComponent;
+import remonone.nftilation.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,15 @@ public class OnItemManipulateHandler implements Listener {
         ItemStack stack = e.getItemDrop().getItemStack();
         if(ItemStatModifierComponent.checkItemIfUndroppable(stack)) {
             e.setCancelled(true);
+            if(ItemStatModifierComponent.checkItemIfDefault(stack)) {
+                Logger.log("trying to remove item...");
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        e.getPlayer().getInventory().removeItem(stack);
+                    }
+                }.runTaskLater(Nftilation.getInstance(), 2);
+            }
         }
     }
     

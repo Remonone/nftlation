@@ -24,7 +24,6 @@ import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.rules.RuleManager;
-import remonone.nftilation.utils.Logger;
 
 import java.util.*;
 
@@ -85,10 +84,9 @@ public class OnBlockDestroyHandler implements Listener {
         }
         if(block.getType() == Material.BEACON) {
             TeamData teamData = GameInstance.getInstance().getTeamByCorePosition(block.getLocation().toVector());
-            Logger.debug(teamData.toString());
             String playerTeam = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
+            e.setCancelled(true);
             if(teamData.getTeamName().equals(playerTeam)) {
-                e.setCancelled(true);
                 return;
             }
             boolean isInvulnerable = (boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_CORE_INVULNERABLE, false);
@@ -96,11 +94,12 @@ public class OnBlockDestroyHandler implements Listener {
                 player.sendMessage(ChatColor.RED + MessageConstant.CORE_INVULNERABLE);
                 return;
             }
-            if(GameInstance.getInstance().damageCore(playerTeam)) {
+            if(GameInstance.getInstance().damageCore(teamData.getTeamName(), true)) {
                 List<GameInstance.PlayerModel> players = GameInstance.getInstance().getTeamPlayers(playerTeam);
                 for(GameInstance.PlayerModel model : players) {
                     GameInstance.getInstance().awardPlayer(playerTeam, model.getReference(), DataConstants.TOKEN_PER_DESTRUCTION);
                 }
+                block.setType(Material.AIR);
             }
         }
     }

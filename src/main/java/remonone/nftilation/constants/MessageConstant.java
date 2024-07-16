@@ -26,9 +26,9 @@ public class MessageConstant {
     public static final String PLAYER_ON_DIE = "Вы были убиты!";
     public static final String NOT_ENOUGH_MONEY = "У вас недостаточно токенов для покупки!";
     public static final String ITEM_COOLDOWN = "Предмет на перезарядке! Попробуйте позже. Перезарядка через: ";
-    public static final String START_RECALL = "Recall has been started!";
-    public static final String INCORRECT_UPGRADE_LEVEL = "You cannot buy this level! Try another one!";
-    public static final String INCORRECT_STAGE_FOR_UPGRADE = "You cannot buy this upgrade at current phase!";
-    public static final String CANNOT_HEAL_CORE = "You cannot heal core right now!";
-    public static final String CANNOT_SPAWN_BLAZE = "Cannot spawn blazes, please try again!";
+    public static final String START_RECALL = "Возвращение на базу началось!";
+    public static final String INCORRECT_UPGRADE_LEVEL = "Вы не можете купить конкретный апгрейд! Попробуйте другой!";
+    public static final String INCORRECT_STAGE_FOR_UPGRADE = "Этот апгрейд недоступен для покупки на этой фазе!";
+    public static final String CANNOT_HEAL_CORE = "Вы не можете исцелить ядро вашей команды сейчас!";
+    public static final String CANNOT_SPAWN_BLAZE = "Невозможно заспавнить блейзов! Попробуйте еще раз!";
 }

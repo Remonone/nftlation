@@ -60,7 +60,8 @@ public class CategoryElement implements IShopElement, IExpandable, Configuration
         map.put("display_name", displayItem.getItemMeta().getDisplayName());
         return map;
     }
-
+    
+    @SuppressWarnings("unchecked")
     public static CategoryElement deserialize(Map<String, Object> map) {
         String id = (String) map.get("id");
         Material mat = Material.getMaterial((String)map.get("display_material"));

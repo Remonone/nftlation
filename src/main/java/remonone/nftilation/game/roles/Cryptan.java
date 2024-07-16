@@ -2,6 +2,7 @@ package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,7 +17,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.DataConstants;
-import remonone.nftilation.constants.ItemConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.utils.InventoryUtils;
@@ -53,7 +53,9 @@ public class Cryptan extends Role {
     
 
     @Override
-    public void setPlayer(Player player, int upgradeLevel) {}
+    public void setPlayer(Player player, int upgradeLevel) {
+        player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(RoleConstant.CRYPTAN_ATTACK_SPEED);
+    }
 
     @Override
     protected ItemStack getSword(int upgradeLevel) {
@@ -73,7 +75,7 @@ public class Cryptan extends Role {
                 break;
         }
         ItemMeta meta = itemStack.getItemMeta();
-        meta.setDisplayName(ItemConstant.CRYPTAN_SWORD);
+        meta.setDisplayName(RoleConstant.CRYPTAN_SWORD);
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
@@ -120,6 +122,7 @@ public class Cryptan extends Role {
         return items;
     }
     
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void onPlayerInteract(PlayerFishEvent event) {
         Player player = event.getPlayer();

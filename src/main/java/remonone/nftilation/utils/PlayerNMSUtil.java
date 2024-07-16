@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.util.StringUtil;
 import remonone.nftilation.Nftilation;
 
 import java.lang.reflect.Field;
@@ -29,12 +28,13 @@ public class PlayerNMSUtil {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public static void changePlayerName(Player p, String newName){
         for(Player pl : Bukkit.getOnlinePlayers()) {
             if (pl == p) continue;
             //CHANGES THE PLAYER'S GAME PROFILE
             GameProfile gp = ((CraftPlayer)p).getProfile();
-            pl.hidePlayer(Nftilation.getInstance(), p);
+            pl.hidePlayer(p);
             try {
                 Field nameField = GameProfile.class.getDeclaredField("name");
                 nameField.setAccessible(true);
@@ -44,7 +44,7 @@ public class PlayerNMSUtil {
                 modifiersField.setInt(nameField, nameField.getModifiers() & ~Modifier.FINAL);
                 if(newName.length() > 16) newName = newName.substring(0, 16);
                 nameField.set(gp, ChatColor.translateAlternateColorCodes('&', newName));
-                pl.showPlayer(Nftilation.getInstance(), p);
+                pl.showPlayer(p);
             } catch (IllegalAccessException | NoSuchFieldException ex) {
                 throw new IllegalStateException(ex);
             }

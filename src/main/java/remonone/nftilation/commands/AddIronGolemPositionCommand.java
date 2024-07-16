@@ -10,7 +10,7 @@ import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.utils.ConfigUtils;
 
-public class AddIronGolemPositonCommand implements CommandExecutor {
+public class AddIronGolemPositionCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if(!Store.getInstance().getGameStage().getStage().equals(Stage.IDLE)) return true;

@@ -7,9 +7,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.constants.DataConstants;
-import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.events.OnPhaseUpdateEvent;
-import remonone.nftilation.game.rules.RuleManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,8 +71,8 @@ public class PhaseCounter {
     private void Next() {
         Bukkit.getScheduler().cancelTask(this.barTask);
         secondsCounter = 0;
-        if(++phaseCounter == phases.size()) {
-            RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, DataConstants.TICKS_IN_SECOND);
+        if(++phaseCounter >= phases.size()) {
+            getServer().getPluginManager().callEvent(new OnPhaseUpdateEvent(phaseCounter + 1));
             return;
         }
         getServer().getPluginManager().callEvent(new OnPhaseUpdateEvent(phaseCounter + 1));
