@@ -15,4 +15,6 @@ public class DataConstants {
     public static final int CONSTANT_POTION_DURATION = Integer.MAX_VALUE;
 
     public static final int ACTION_ROBO_SYBIL_COUNT_PER_POINT = 4;
+
+    public static final int SERVER_PORT = 3000;
 }

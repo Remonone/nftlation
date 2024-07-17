@@ -1,12 +1,16 @@
 package remonone.nftilation;
 
+import com.sun.net.httpserver.HttpServer;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.reflections.Reflections;
+import remonone.nftilation.application.controllers.BaseController;
 import remonone.nftilation.commands.*;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
+import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
@@ -27,13 +31,22 @@ import remonone.nftilation.utils.CustomEntities;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.util.Set;
+
 
 public final class Nftilation extends JavaPlugin {
+
+    HttpServer server;
         
     @Override
     public void onEnable() {
         // Plugin startup logic
         Logger.log("Starting...");
+        this.server = InitServer();
+        InitControllers();
         SerializeProperties();
         ShopBuilder.getInstance().Load();
         ConfigManager.getInstance().Load();
@@ -45,9 +58,47 @@ public final class Nftilation extends JavaPlugin {
         CustomEntities.registerEntities();
     }
 
+    private void InitControllers() {
+        Reflections reflections = new Reflections("remonone.nftilation.application.controllers");
+        Set<Class<? extends BaseController>> classes = reflections.getSubTypesOf(BaseController.class);
+        for (Class<? extends BaseController> c : classes) {
+            try {
+                BaseController.StartContext(this.server, c);
+            } catch (InstantiationException e) {
+                Logger.error(c.getName() + " have invalid empty constructor!");
+                throw new RuntimeException("Cannot instantiate BaseController class: " + c.getName());
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     private void FetchRoleSkins() {
         Logger.log("Fetching role skins...");
 //        MiddlewareService.loadSkins();
+    }
+
+    private HttpServer InitServer() {
+        try {
+
+            Logger.log("Starting listener server at port " + DataConstants.SERVER_PORT);
+            HttpServer instance = HttpServer.create(new InetSocketAddress(DataConstants.SERVER_PORT), 0);
+            instance.createContext("/", (httpExchange) -> {
+                httpExchange.getResponseHeaders().add("Content-Type", "text/html");
+                httpExchange.sendResponseHeaders(200, 0);
+                OutputStream stream = httpExchange.getResponseBody();
+                stream.write(("This is an sample request").getBytes());
+                stream.flush();
+                httpExchange.close();
+            });
+            instance.setExecutor(null);
+            instance.start();
+            Logger.log("Server was successfully started at port " + DataConstants.SERVER_PORT);
+            return instance;
+        } catch (IOException e) {
+            Logger.error("Cannot start server listener on port: " + DataConstants.SERVER_PORT + ". Cause: " + e.toString());
+            throw new RuntimeException("Server was not started. Aborting...");
+        }
     }
 
     private void InitActions() {
@@ -141,6 +192,7 @@ public final class Nftilation extends JavaPlugin {
         }
         EntityList.clearEntities();
         CustomEntities.unregisterEntities();
+        this.server.stop(0);
     }
     
 }
