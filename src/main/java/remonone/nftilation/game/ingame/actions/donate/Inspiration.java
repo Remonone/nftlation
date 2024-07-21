@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.IAction;
 import remonone.nftilation.utils.Logger;
@@ -17,11 +18,10 @@ public class Inspiration implements IAction {
 
     @Override
     public void Init(Map<String, Object> params) {
-        if(!params.containsKey("team")) {
-            Logger.warn("Couldn't initiate Inspiration action. Team is missing!");
-            return;
+        if(!params.containsKey(PropertyConstant.ACTION_TEAM)) {
+            throw new NullPointerException("Couldn't initiate Inspiration action. Team is missing!");
         }
-        String team = (String) params.get("team");
+        String team = (String) params.get(PropertyConstant.ACTION_TEAM);
         List<Player> players = GameInstance.getInstance().getTeamPlayers(team).stream().map(GameInstance.PlayerModel::getReference).collect(Collectors.toList());
         if(players.isEmpty()) {
             Logger.warn("Inspiration task failed. Team name has not been found!");

@@ -155,7 +155,7 @@ public class Cryptomarine extends Role {
             case 3:
                 itemStack = new ItemStack(Material.DIAMOND_AXE);
                 itemStack.addEnchantment(Enchantment.DAMAGE_ALL, 1);
-                itemStack.addEnchantment(Enchantment.FIRE_ASPECT, 1);
+                itemStack.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
                 NBT.modify(itemStack, nbt -> {nbt.setString("cryptomarine", "axe");});
                 break;
         }
@@ -179,13 +179,11 @@ public class Cryptomarine extends Role {
     
     @Override
     public void setPlayer(Player player, int upgradeLevel) {
-        player.setHealthScaled(true);
         float health = DataConstants.PLAYER_HEALTH + upgradeLevel * 2;
-        player.setHealthScale(health);
+        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(health);
         float speed = DataConstants.PLAYER_SPEED;
         float modifier = upgradeLevel == 3 ? 10 : 20;
         player.setWalkSpeed(speed - (speed / 100) * modifier);
-        player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(RoleConstant.CRYPTOMARINE_ATTACK_SPEED);
         if(upgradeLevel > 1) {
             player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(1);
             player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, DataConstants.CONSTANT_POTION_DURATION, 1, false, false));
@@ -217,7 +215,9 @@ public class Cryptomarine extends Role {
         Player attacker = (Player)e.getDamager();
         Player victim = (Player)e.getEntity();
         if(!(Store.getInstance().getDataInstance().getPlayerRole(attacker.getUniqueId()) instanceof Cryptomarine)) return;
-        String axe = NBT.get(attacker.getInventory().getItemInMainHand(), nbt -> (String) nbt.getString("cryptomarine"));
+        ItemStack itemStack = attacker.getInventory().getItemInMainHand();
+        if(itemStack == null || itemStack.getAmount() < 1 || itemStack.getType().equals(Material.AIR)) return;
+        String axe = NBT.get(itemStack, nbt -> (String) nbt.getString("cryptomarine"));
         if(StringUtils.isEmpty(axe) || !axe.equals("axe")) return;
         if(RANDOM.nextFloat() > RoleConstant.CRYPTOMARINE_LIGHTNING_CHANCE) return;
         World world = attacker.getWorld();

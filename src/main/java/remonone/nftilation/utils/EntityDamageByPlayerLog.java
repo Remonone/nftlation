@@ -2,6 +2,7 @@ package remonone.nftilation.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Setter;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import remonone.nftilation.constants.DataConstants;
 
@@ -9,13 +10,13 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 
-public class PlayerDamageByPlayerLog {
+public class EntityDamageByPlayerLog {
     
     private final static long LIFE_TIME = 10 * DataConstants.ONE_SECOND;
     
     private final static Map<UUID, DamageLog> queueDictionary = new HashMap<>();
     
-    public static void insertLogEvent(Player target, Player damager) {
+    public static void insertLogEvent(LivingEntity target, Player damager) {
         
         UUID uuid = target.getUniqueId();
         if(!queueDictionary.containsKey(uuid)) {
@@ -25,12 +26,12 @@ public class PlayerDamageByPlayerLog {
     }
     
     @Nullable
-    public static Player getEventLogForPlayer(UUID playerId) {
-        if(!queueDictionary.containsKey(playerId)) { return null; }
-        DamageLog log = queueDictionary.get(playerId);
+    public static Player getEventLogForLivingEntity(UUID livingEntity) {
+        if(!queueDictionary.containsKey(livingEntity)) { return null; }
+        DamageLog log = queueDictionary.get(livingEntity);
         if(log == null) { return null; }
         if(log.insertionTime < System.currentTimeMillis()) {
-            queueDictionary.remove(playerId);
+            queueDictionary.remove(livingEntity);
             return null;
         }
         return log.damager;

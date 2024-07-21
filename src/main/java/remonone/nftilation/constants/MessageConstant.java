@@ -1,5 +1,7 @@
 package remonone.nftilation.constants;
 
+import org.bukkit.ChatColor;
+
 public class MessageConstant {
     
     public static final String PERMISSION_LOCKED = "У вас нет прав использовать эту команду";
@@ -10,7 +12,7 @@ public class MessageConstant {
     public static final String NO_TOURNAMENT_PRESENTED = "Ваша команда не представлена на турнире!";
     public static final String ALREADY_LOGGED_IN = "Вы уже авторизованы!";
     public static final String SUCCESSFUL_LOGIN = "Вы успешно авторизовались!";
-    public static final String JOIN_GAME = " присоеденился к серверу.";
+    public static final String JOIN_GAME = " присоединился к серверу.";
     public static final String UNKNOWN_KICK = "Непредвиденная ошибка во время авторизации! Свяжитесь с администрацией для решения проблемы!";
     public static final String ROLE_RESERVED = "Эта роль уже занята!";
     public static final String ROLE_ERROR = "Ошибка при выборе роли. Попробуйте еще раз...";
@@ -31,4 +33,32 @@ public class MessageConstant {
     public static final String INCORRECT_STAGE_FOR_UPGRADE = "Этот апгрейд недоступен для покупки на этой фазе!";
     public static final String CANNOT_HEAL_CORE = "Вы не можете исцелить ядро вашей команды сейчас!";
     public static final String CANNOT_SPAWN_BLAZE = "Невозможно заспавнить блейзов! Попробуйте еще раз!";
+    public static final String FIRST_PHASE_TITLE = ChatColor.GOLD + "Первая стадия";
+    public static final String FIRST_PHASE_SUBTITLE = "Дойдя до конца, люди смеются над страхами, мучившими их в начале";
+    public static final String LINE_SEPARATOR = ChatColor.DARK_RED + "====================";
+    public static final String LINE_STARTED = ChatColor.DARK_RED + "[o] " + ChatColor.RESET;
+    public static final String FIRST_PHASE_DESCRIPTION_1 = ChatColor.RED + "Первая стадия: ";
+    public static final String FIRST_PHASE_DESCRIPTION_2 = "Ядро нельзя атаковать.";
+    public static final String SECOND_PHASE_TITLE = ChatColor.AQUA + "Вторая стадия";
+    public static final String SECOND_PHASE_SUBTITLE = "";
+    public static final String SECOND_PHASE_DESCRIPTION_1 = ChatColor.RED + "Вторая стадия: ";
+    public static final String SECOND_PHASE_DESCRIPTION_2 = "В центре началась аномальная материализация алмазов.";
+    public static final String SECOND_PHASE_DESCRIPTION_3 = "У торговца появился новый ассортимент для классов.";
+    public static final String THIRD_PHASE_TITLE = ChatColor.GREEN + "Третья стадия";
+    public static final String THIRD_PHASE_SUBTITLE = "Середина есть точка, ближайшая к мудрости; не дойти до нее — то же самое, что ее перейти";
+    public static final String THIRD_PHASE_DESCRIPTION_1 = ChatColor.RED + "Третья стадия: ";
+    public static final String THIRD_PHASE_DESCRIPTION_2 = "Ядра стали уязвимыми.";
+    public static final String FOURTH_PHASE_TITLE = ChatColor.DARK_AQUA + "Четвертая стадия";
+    public static final String FOURTH_PHASE_SUBTITLE = "Обычные люди думают, как потратить время, великие люди думают, как его использовать";
+    public static final String FOURTH_PHASE_DESCRIPTION_1 = ChatColor.RED + "Четвертая стадия: ";
+    public static final String FOURTH_PHASE_DESCRIPTION_2 = "У торговца появился новый ассортимент для классов.";
+    public static final String FIFTH_PHASE_TITLE = ChatColor.RED + "Пятая стадия";
+    public static final String FIFTH_PHASE_SUBTITLE = "В конце концов, что такое смерть?";
+    public static final String FIFTH_PHASE_DESCRIPTION_1 = ChatColor.RED + "Пятая стадия: ";
+    public static final String FIFTH_PHASE_DESCRIPTION_2 = "Ядра начали саморазрушаться.";
+    public static final String FIFTH_PHASE_DESCRIPTION_3 = "Ядра стали более хрупкими.";
+    public static final String FIFTH_PHASE_DESCRIPTION_4 = "Игроки после смерти не теряют свои вещи.";
+    public static final String SIXTH_PHASE_TITLE = ChatColor.DARK_RED + "Annihilation";
+    public static final String SIXTH_PHASE_SUBTITLE = "Конец близок.";
+    public static final String TEAM_DAMAGED_MESSAGE = "Вашему ядру нанесли урон! Проучите мерзавца посягнувшего на ваше святилище!";
 }

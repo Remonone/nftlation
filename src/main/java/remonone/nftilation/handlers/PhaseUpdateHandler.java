@@ -1,7 +1,9 @@
 package remonone.nftilation.handlers;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -10,13 +12,13 @@ import remonone.nftilation.Store;
 import remonone.nftilation.application.models.TeamData;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.events.OnPhaseUpdateEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
 import remonone.nftilation.game.rules.RuleManager;
-import remonone.nftilation.utils.Logger;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,47 +34,71 @@ public class PhaseUpdateHandler implements Listener {
         
         switch (stage) {
             case 1: {
-                Logger.broadcast("Stage 1 has begun!");
                 new BukkitRunnable() {
                     public void run() {
-                        ActionContainer.InitAction(ActionType.CHECKER, new HashMap<String, Object>() {{
-                            put("global", true);
-                        }});
+                        ActionContainer.InitAction(ActionType.CHECKER, new HashMap<>());
                     }
                 }.runTaskLater(Nftilation.getInstance(), 10 * DataConstants.TICKS_IN_MINUTE);
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendTitle(MessageConstant.FIRST_PHASE_TITLE, MessageConstant.FIRST_PHASE_SUBTITLE, 10, 80, 10);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.LINE_SEPARATOR);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIRST_PHASE_DESCRIPTION_1);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIRST_PHASE_DESCRIPTION_2);
+                }
                 break;
             }
             case 2: {
-                Logger.broadcast("Stage 2 has begun!");
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_AVAILABLE_TIER, 2);
                 SummonDiamonds();
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendTitle(MessageConstant.SECOND_PHASE_TITLE, MessageConstant.SECOND_PHASE_SUBTITLE, 10, 80, 10);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.LINE_SEPARATOR);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.SECOND_PHASE_DESCRIPTION_1);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.SECOND_PHASE_DESCRIPTION_2);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.SECOND_PHASE_DESCRIPTION_3);
+                }
                 break;
             }
             case 3: {
-                Logger.broadcast("Stage 3 has begun!");
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_INVULNERABLE, false);
-                ActionContainer.InitAction(ActionType.ROBOSYBIL_ATTACK, new HashMap<String, Object>() {{
-                    put("global", true);
-                }});
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendTitle(MessageConstant.THIRD_PHASE_TITLE, MessageConstant.THIRD_PHASE_SUBTITLE, 10, 80, 10);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.LINE_SEPARATOR);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.THIRD_PHASE_DESCRIPTION_1);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.THIRD_PHASE_DESCRIPTION_2);
+                }
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        ActionContainer.InitAction(ActionType.ROBOSYBIL_ATTACK, new HashMap<>());
+                    }
+                }.runTaskLater(Nftilation.getInstance(), 105);
                 break;
             }
             case 4: {
-                Logger.broadcast("Stage 4 has begun!");
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_AVAILABLE_TIER, 3);
-                ActionContainer.InitAction(ActionType.HAMSTER, new HashMap<>());
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendTitle(MessageConstant.FOURTH_PHASE_TITLE, MessageConstant.FOURTH_PHASE_SUBTITLE, 10, 80, 10);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.LINE_SEPARATOR);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FOURTH_PHASE_DESCRIPTION_1);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FOURTH_PHASE_DESCRIPTION_2);
+                }
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        ActionContainer.InitAction(ActionType.HAMSTER, new HashMap<>());
+                    }
+                }.runTaskLater(Nftilation.getInstance(), 105);
                 BukkitRunnable runnable = new BukkitRunnable() {
                     @Override
                     public void run() {
-                        ActionContainer.InitAction(ActionType.CRYPT_DROP, new HashMap<String, Object>() {{
-                            put("global", true);
-                        }});
+                        ActionContainer.InitAction(ActionType.CRYPT_DROP, new HashMap<>());
                     }
                 };
                 runnable.runTaskLater(Nftilation.getInstance(), 10 * DataConstants.TICKS_IN_MINUTE);
                 break;
             }
             case 5: {
-                Logger.broadcast("Stage 5 has begun!");
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_SELF_DESTRUCTIVE, true);
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_INVENTORY_AUTO_CLEAR, false);
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_DAMAGE_INTAKE, 4);
@@ -87,7 +113,14 @@ public class PhaseUpdateHandler implements Listener {
                         }
                     }
                 };
-                
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendTitle(MessageConstant.FIFTH_PHASE_TITLE, MessageConstant.FIFTH_PHASE_SUBTITLE, 10, 80, 10);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.LINE_SEPARATOR);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIFTH_PHASE_DESCRIPTION_1);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIFTH_PHASE_DESCRIPTION_2);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIFTH_PHASE_DESCRIPTION_3);
+                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIFTH_PHASE_DESCRIPTION_4);
+                }
                 runnable.runTaskTimer(Nftilation.getInstance(), 0, (long) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, 9 * 20));
                 taskId = runnable.getTaskId();
                 break;
@@ -99,7 +132,7 @@ public class PhaseUpdateHandler implements Listener {
                 while(teamIt.hasNext()) {
                     String team = teamIt.next();
                     if(!GameInstance.getInstance().isTeamAlive(team)) {
-                        GameInstance.getInstance().getTeamPlayers(team).forEach(playerModel -> OnPlayerDieHandler.OnDeath(playerModel.getReference()));
+                        GameInstance.getInstance().getTeamPlayers(team).forEach(playerModel -> OnEntityDieHandler.OnDeath(playerModel.getReference()));
                     }
                 }
                 BukkitRunnable runnable = new BukkitRunnable() {
@@ -113,7 +146,9 @@ public class PhaseUpdateHandler implements Listener {
                         }
                     }
                 };
-
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendTitle(MessageConstant.SIXTH_PHASE_TITLE, MessageConstant.SIXTH_PHASE_SUBTITLE, 10, 80, 10);
+                }
                 runnable.runTaskTimer(Nftilation.getInstance(), 0, (int) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, 20));
             }
         }

@@ -16,5 +16,5 @@ public class DataConstants {
 
     public static final int ACTION_ROBO_SYBIL_COUNT_PER_POINT = 4;
 
-    public static final int SERVER_PORT = 3000;
+    public static final int INVULNERABILITY_RANGE = 35;
 }

@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.IAction;
 import remonone.nftilation.utils.Logger;
@@ -16,11 +17,10 @@ public class CryptRaise implements IAction {
 
     @Override
     public void Init(Map<String, Object> params) {
-        if(!params.containsKey("team")) {
-            Logger.warn("Couldn't initiate CryptRaise action. Team is missing!");
-            return;
+        if(!params.containsKey(PropertyConstant.ACTION_TEAM)) {
+            throw new NullPointerException("Couldn't initiate CryptRaise action. Team is missing!");
         }
-        String team = (String) params.get("team");
+        String team = (String) params.get(PropertyConstant.ACTION_TEAM);
         List<Player> players = GameInstance.getInstance().getTeamPlayers(team).stream().map(GameInstance.PlayerModel::getReference).collect(Collectors.toList());
         if(players.isEmpty()) {
             Logger.warn("CryptRaise task failed. Team name has not been found!");

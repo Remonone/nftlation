@@ -9,7 +9,7 @@ public class RoleConstant {
     public static final String CRYPTAN_CHESTPLATE_NAME = "Рабочая жилетка";
     public static final String CRYPTAN_SWORD = "Канцелярский нож";
     public static final String CRYPTAN_ABILITY = ChatColor.BLUE + "Тяга";
-    public static final double CRYPTAN_ATTACK_SPEED = 6D;
+    public static final double CRYPTAN_ATTACK_SPEED = 5D;
     public static final double CRYPTAN_HOOK_STRENGTH = 2.5D;
     public static final double CRYPTAN_HOOK_SPEED = .125D;
     public static final double CRYPTAN_HOOK_AIRBORNE_MODIFIER = 1.1D;
@@ -35,11 +35,11 @@ public class RoleConstant {
     public static final float CRYPTOMARINE_LIGHTNING_CHANCE = .3f;
     public static final float CRYPTOMARINE_LIGHTNING_DAMAGE = 4f;
     public static final int CRYPTOMARINE_EXPLOSION_STRENGTH = 10;
-    public static final double CRYPTOMARINE_ATTACK_SPEED = 4D;
 
     public static final String RUSLAN_DESCRIPTION_1 = "Экспериментальный робот.";
     public static final String RUSLAN_DESCRIPTION_2 = "Создан в подвалах неизвестного НИИ.";
     public static final String RUSLAN_DESCRIPTION_3 = "Обладает способностью призывать своих сибилов.";
+    public static final String RUSLAN_ABILITY = "ruslan002.eth";
     public static final int RUSLAN_NEGATIVE_AREA_RADIUS = 5;
     public static final int RUSLAN_CLONE_EXPLOSION_STRENGTH = 4;
     public static final int RUSLAN_SPAWN_CLONES_COOLDOWN = 30;
@@ -48,6 +48,8 @@ public class RoleConstant {
     public static final int INDIAN_BLOCK_COOLDOWN = 60;
     public static final int INDIAN_RECALL_MIN_LEVEL = 10;
     public static final int INDIAN_RECALL_MAX_LEVEL = 7;
+    public static final String INDIAN_BLOCK_ABILITY = "Создать новый оригинальный L2 проект";
+    public static final String INDIAN_RECALL_ABILITY = "Вернуться с заработков";
     public static final String INDIAN_RECALL_CANCEL = "Возврат на базу был отменен";
     public static final String INDIAN_RECALL_ACTIVE = "Вы уже начали возвращаться на базу!";
     public static final String INDIAN_PICKAXE_NAME = "C++ guide";
@@ -57,9 +59,11 @@ public class RoleConstant {
     public static final String INDIAN_DESCRIPTION_4 = "А как насчёт того чтобы самому стать таким индусом?";
     public static final String INDIAN_DESCRIPTION_5 = "Невероятное упорство и трудолюбие - ваш конек.";
 
+    public static final int DOUBLE_JUMP_COOLDOWN = 5;
     public static final String MONKEY_DESCRIPTION_1 = "Зверь из всеми любимых гифок.";
     public static final String MONKEY_DESCRIPTION_2 = "Проворный ворюга, который умеет";
     public static final String MONKEY_DESCRIPTION_3 = "выносить ресурсы, как никто другой.";
+    public static final String MONKEY_ABILITY_ITEM = "Стиль макаки";
 
     public static final String DEFAULT_SWORD_NAME = "Тупой меч";
     public static final String DEFAULT_PICKAXE_NAME = "Хрупкая кирка";

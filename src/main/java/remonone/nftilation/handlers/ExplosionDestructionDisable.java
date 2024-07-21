@@ -1,16 +1,14 @@
 package remonone.nftilation.handlers;
 
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.util.Vector;
-import remonone.nftilation.Nftilation;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
+import remonone.nftilation.constants.DataConstants;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,21 +21,25 @@ public class ExplosionDestructionDisable implements Listener {
             e.setCancelled(true);
             return;
         }
-        float radius = e.getYield() + 1;
         
         Vector explosionPoint = e.getLocation().toVector();
         List<Vector> cores = ConfigManager.getInstance().getTeamSpawnList().stream().map(TeamSpawnPoint::getCoreCenter).collect(Collectors.toList());
         for(Vector core : cores) {
-            if (explosionPoint.isInSphere(core, radius)) {
-                BukkitRunnable task = new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        Location coreCenter = new Location(e.getLocation().getWorld(), core.getX(), core.getY(), core.getZ());
-                        coreCenter.getBlock().setType(Material.BEACON);
-                    }
-                };
-                task.runTaskLater(Nftilation.getInstance(), 4);
+            if (explosionPoint.isInSphere(core, DataConstants.INVULNERABILITY_RANGE)) {
+                e.setCancelled(true);
+                return;
             }
-        } 
+        }
+        if(explosionPoint.isInSphere(ConfigManager.getInstance().getCenterLocation().toVector(), DataConstants.INVULNERABILITY_RANGE)) {
+            e.setCancelled(true);
+        }
+    }
+    
+    @EventHandler
+    public void onPreExplosion(ExplosionPrimeEvent e) {
+        if(!e.getEntity().getMetadata("meteor").isEmpty()) {
+            e.setRadius((float)e.getEntity().getMetadata("meteor").get(0).value());
+            e.setFire(false);
+        }
     }
 }

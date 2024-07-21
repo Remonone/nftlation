@@ -23,6 +23,7 @@ public class TeamSpawnPoint implements Cloneable, ConfigurationSerializable {
     private Vector coreCenter;
     private Location shopKeeperPosition;
     private Location checkerChestPosition;
+    private Location airDropPosition;
     
     @Override
     public String toString() {
@@ -37,6 +38,7 @@ public class TeamSpawnPoint implements Cloneable, ConfigurationSerializable {
         result.put("coreCenter", coreCenter);
         result.put("shopKeeper", shopKeeperPosition);
         result.put("checkerChest", checkerChestPosition);
+        result.put("airDropPosition", airDropPosition);
 
         return result;
     }
@@ -58,6 +60,7 @@ public class TeamSpawnPoint implements Cloneable, ConfigurationSerializable {
         Vector center = new Vector();
         Location shopKeeper = new Location(null, 0, 0, 0);
         Location checkerChest = new Location(null, 0, 0, 0);
+        Location airDropPosition = new Location(null, 0, 0, 0);
 
         if (args.containsKey("id")) {
             id = (String) args.get("id");
@@ -74,7 +77,10 @@ public class TeamSpawnPoint implements Cloneable, ConfigurationSerializable {
         if(args.containsKey("checkerChest")) {
             checkerChest = (Location) args.get("checkerChest");
         }
+        if(args.containsKey("airDropPosition")) {
+            airDropPosition = (Location) args.get("airDropPosition");
+        }
 
-        return new TeamSpawnPoint(id, pos, center, shopKeeper, checkerChest);
+        return new TeamSpawnPoint(id, pos, center, shopKeeper, checkerChest, airDropPosition);
     }
 }

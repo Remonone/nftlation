@@ -3,6 +3,7 @@ package remonone.nftilation.game.roles;
 import de.tr7zw.nbtapi.NBT;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -54,7 +55,6 @@ public class SybilAttacker extends Role {
 
     @Override
     public void setPlayer(Player player, int upgradeLevel) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 1000000, 1, false, false));
         if(upgradeLevel > 1) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, DataConstants.CONSTANT_POTION_DURATION, 1, false, false));
         }
@@ -68,17 +68,21 @@ public class SybilAttacker extends Role {
             case 1:
                 NBT.modify(bow, nbt -> {
                     nbt.setInteger("arrow-per-side", 1);
-                    nbt.setFloat("set-step", 7.5F);
+                    nbt.setFloat("set-step", 4F);
                 });
+                bow.addEnchantment(Enchantment.ARROW_DAMAGE, 1);
                 break;
             case 2:
                 NBT.modify(bow, nbt -> {
                     nbt.setInteger("arrow-per-side", 2);
-                    nbt.setFloat("set-step", 4F);
+                    nbt.setFloat("set-step", 1.5F);
                 });
+                bow.addEnchantment(Enchantment.ARROW_INFINITE, 1);
+                bow.addEnchantment(Enchantment.ARROW_DAMAGE, 2);
                 break;
             case 3:
                 NBT.modify(bow, nbt -> {nbt.setInteger("blowing-arrow", 1);});
+                bow.addEnchantment(Enchantment.ARROW_INFINITE, 1);
                 break;
         }
         ItemMeta bowMeta = bow.getItemMeta();
@@ -88,7 +92,8 @@ public class SybilAttacker extends Role {
         bow.setItemMeta(bowMeta);
         items.add(bow);
         ItemStack arrows = new ItemStack(Material.ARROW);
-        arrows.setAmount(RoleConstant.SYBIL_ARROW_AMOUNT);
+        int arrowAmount = upgradeLevel > 1 ? 1 : RoleConstant.SYBIL_ARROW_AMOUNT;
+        arrows.setAmount(arrowAmount);
         items.add(arrows);
         return items;
     }
@@ -100,7 +105,7 @@ public class SybilAttacker extends Role {
         Player accessor = (Player) e.getEntity();
         DataInstance data = Store.getInstance().getDataInstance();
         Role role = data.getPlayerRole(accessor.getUniqueId());
-        EntityHandleComponent.setEntityOwner(e.getEntity(), accessor);
+        EntityHandleComponent.setEntityOwner(e.getProjectile(), accessor);
         if(!(role instanceof SybilAttacker)) {
             return;
         }
@@ -108,8 +113,8 @@ public class SybilAttacker extends Role {
         if(amount >= 1) {
             float step = NBT.get(e.getBow(), nbt -> (Float) nbt.getFloat("set-step"));
             for(int i = 0; i < amount; i++) {
-                SummonAdditionalArrow(e.getEntity(), e.getProjectile(), -step * (i + 1));
-                SummonAdditionalArrow(e.getEntity(), e.getProjectile(), step * (i + 1));
+                SummonAdditionalArrow(accessor, e.getProjectile(), -step * (i + 1));
+                SummonAdditionalArrow(accessor, e.getProjectile(), step * (i + 1));
             }
         }
     }

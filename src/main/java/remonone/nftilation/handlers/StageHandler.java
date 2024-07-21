@@ -19,7 +19,7 @@ import remonone.nftilation.utils.Logger;
 import java.util.List;
 
 public class StageHandler implements Listener {
-    
+
     @EventHandler
     public void onStageChanged(StageEvent e) {
 

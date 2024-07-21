@@ -124,10 +124,13 @@ public class Indian extends Role {
                 });
                 break;            
         }
+        ItemMeta blockMeta = blocks.getItemMeta();
+        blockMeta.setDisplayName(RoleConstant.INDIAN_BLOCK_ABILITY);
+        blocks.setItemMeta(blockMeta);
         ItemStack itemStack = new ItemStack(Material.TORCH);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName("Recall");
+        meta.setDisplayName(RoleConstant.INDIAN_RECALL_ABILITY);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
         NBT.modify(itemStack, nbt -> {nbt.setString("indian", "recall");});

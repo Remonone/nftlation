@@ -24,4 +24,13 @@ public class PropertyConstant {
 
     public static final String NBT_ROLE = "role-name";
     public static final String NBT_ROLE_RESERVED = "role-reserved";
+    
+    public static final String ACTION_TEAM = "target_team";
+    public static final String ACTION_PLAYER = "target_player";
+    public static final String ACTION_REGION_X = "x";
+    public static final String ACTION_REGION_Z = "z";
+    public static final String ACTION_SENDER = "sender";
+    public static final String ACTION_COMMENT = "comment";
+    public static final String ACTION_SILENT = "silent";
+    public static final String ACTION_SEND_MESSAGE = "should_send_message";
 }

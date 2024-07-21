@@ -13,10 +13,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.TeamData;
+import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.config.TeamSpawnPoint;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.NameConstants;
@@ -90,7 +93,7 @@ public class Checker implements IAction, Listener {
                         }
                     }));
                     int amount = requiredType.stream().mapToInt(ItemStack::getAmount).sum();
-                    if(amount > REQUIRED_AMOUNT) {
+                    if(amount >= REQUIRED_AMOUNT) {
                         chestInventory.removeItem(requiredType.toArray(new ItemStack[0]));
                         Player player = (Player) e.getWhoClicked();
                         String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
@@ -130,13 +133,21 @@ public class Checker implements IAction, Listener {
                 Player player = playerModel.getReference();
                 player.playSound(player.getLocation(), Sound.ENTITY_GHAST_HURT, 1f, .3f);
                 player.sendTitle("Вы были прокляты Браяном!", "", 10, 60, 10);
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 5 * DataConstants.TICKS_IN_MINUTE, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 5 * DataConstants.TICKS_IN_MINUTE, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 5 * DataConstants.TICKS_IN_MINUTE, 1));
             });
             loc.getBlock().setType(Material.AIR);
+            loc.getChunk().load();
             WitherSkeleton skeleton = loc.getWorld().spawn(loc, WitherSkeleton.class);
             EntityList.addEntity(skeleton);
             skeleton.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(100F);
             skeleton.setHealth(100F);
             skeleton.setCustomName(NameConstants.CHECKER_NAME);
+            skeleton.setRemoveWhenFarAway(false);
+            EntityHandleComponent.setEntityBounty(skeleton, 100);
+            EntityHandleComponent.setEntityUnloadLocked(skeleton);
+            EntityHandleComponent.setEntityHostile(skeleton);
             GiveArmorToBoss(skeleton);
         }
     }

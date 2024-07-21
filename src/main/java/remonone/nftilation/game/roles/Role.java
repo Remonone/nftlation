@@ -122,7 +122,6 @@ public abstract class Role implements Cloneable, Listener {
     }
     
     private void setMetaToDefaultArmor(Player player, ItemStack stack) {
-        ItemStatModifierComponent.markItemAsDefault(stack);
         LeatherArmorMeta meta = (LeatherArmorMeta) stack.getItemMeta();
         PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
         meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(data.getTeam().getTeamColor())));
@@ -164,13 +163,19 @@ public abstract class Role implements Cloneable, Listener {
         role.giveAbilityItems(player, upgradeLevel);
     }
     
-    protected void giveAbilityItems(Player player, int upgradeLevel) {
-        for(ItemStack stack : getAbilityItems(upgradeLevel)) {
-            SetOwner(player, stack);
+    private void giveAbilityItems(Player player, int upgradeLevel) {
+        ItemStack[] abilityItems = getAbilityItems(upgradeLevel).toArray(new ItemStack[0]);
+        SetOwner(player, abilityItems);
+        for(int i = 0; i < abilityItems.length; i++) {
+            ItemStack stack = abilityItems[i];
+            ItemStack existingItem = player.getInventory().getItem(8 - i);
             ItemStatModifierComponent.markItemAsUndroppable(stack);
             ItemStatModifierComponent.markItemAsUnstorable(stack);
             ItemStatModifierComponent.markItemAsUncraftable(stack);
-            player.getInventory().addItem(stack);
+            player.getInventory().setItem(8 - i, stack);
+            if(existingItem != null) {
+                player.getInventory().addItem(existingItem);
+            }
         }
     }
     
@@ -198,26 +203,44 @@ public abstract class Role implements Cloneable, Listener {
             if(!owner.equals(player.getUniqueId().toString())) return;
             player.getInventory().remove(itemStack);
         }));
+        ItemStack offHand = player.getInventory().getItemInOffHand();
+        if(offHand == null || offHand.getAmount() < 1 || offHand.getType().equals(Material.AIR)) return;
+        String owner = NBT.get(offHand, nbt -> (String) nbt.getString("owner"));
+        if(StringUtils.isEmpty(owner)) return;
+        if(!owner.equals(player.getUniqueId().toString())) return;
+        player.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
     }
 
     private static void FillEquipment(Player player, Role role, int upgradeLevel) {
         EntityEquipment equipment = player.getEquipment();
         ItemStack helmet = role.getHelmet(player, upgradeLevel);
         ItemStack chestplate = role.getChestplate(player, upgradeLevel);
-        ItemStack leggins = role.getLeggings(player, upgradeLevel);
+        ItemStack leggings = role.getLeggings(player, upgradeLevel);
         ItemStack boots = role.getBoots(player, upgradeLevel);
-        SetOwner(player, helmet, chestplate, leggins, boots);
+        SetOwner(player, helmet, chestplate, leggings, boots);
+        ItemStatModifierComponent.markItemAsDefault(helmet);
+        ItemStatModifierComponent.markItemAsDefault(chestplate);
+        ItemStatModifierComponent.markItemAsDefault(leggings);
+        ItemStatModifierComponent.markItemAsDefault(boots);
         ItemStatModifierComponent.markItemAsUnstorable(helmet);
         ItemStatModifierComponent.markItemAsUnstorable(chestplate);
-        ItemStatModifierComponent.markItemAsUnstorable(leggins);
+        ItemStatModifierComponent.markItemAsUnstorable(leggings);
         ItemStatModifierComponent.markItemAsUnstorable(boots);
         ItemStatModifierComponent.markItemAsUndroppable(helmet);
         ItemStatModifierComponent.markItemAsUndroppable(chestplate);
-        ItemStatModifierComponent.markItemAsUndroppable(leggins);
+        ItemStatModifierComponent.markItemAsUndroppable(leggings);
         ItemStatModifierComponent.markItemAsUndroppable(boots);
+        ItemStack equippedHelmet = equipment.getHelmet();
+        if(equippedHelmet != null && !ItemStatModifierComponent.checkItemIfDefault(equippedHelmet)) player.getInventory().addItem(equippedHelmet.clone());
         equipment.setHelmet(helmet);
+        ItemStack equippedChestplate = equipment.getChestplate();
+        if(equippedChestplate != null && !ItemStatModifierComponent.checkItemIfDefault(equippedChestplate)) player.getInventory().addItem(equippedChestplate.clone());
         equipment.setChestplate(chestplate);
-        equipment.setLeggings(leggins);
+        ItemStack equippedLeggings = equipment.getLeggings();
+        if(equippedLeggings != null && !ItemStatModifierComponent.checkItemIfDefault(equippedLeggings)) player.getInventory().addItem(equippedLeggings.clone());
+        equipment.setLeggings(leggings);
+        ItemStack equippedBoots = equipment.getBoots();
+        if(equippedBoots != null && !ItemStatModifierComponent.checkItemIfDefault(equippedBoots)) player.getInventory().addItem(equippedBoots.clone());
         equipment.setBoots(boots);
     }
     

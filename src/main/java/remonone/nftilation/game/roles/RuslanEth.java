@@ -20,7 +20,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.ItemStatModifierComponent;
@@ -32,6 +31,7 @@ import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.mob.RuslanBlaze;
 import remonone.nftilation.utils.BlockUtils;
 import remonone.nftilation.utils.EntityList;
+import remonone.nftilation.utils.InventoryUtils;
 
 import java.util.*;
 
@@ -84,7 +84,12 @@ public class RuslanEth extends Role {
     
     @Override
     public List<ItemStack> getAbilityItems(int upgradeLevel) {
-        ItemStack snowball = new ItemStack(Material.SNOW_BALL);
+        ItemStack snowball = new ItemStack(Material.BLAZE_POWDER);
+        ItemMeta meta = snowball.getItemMeta();
+        meta.setUnbreakable(true);
+        meta.setDisplayName(RoleConstant.RUSLAN_ABILITY);
+        snowball.setItemMeta(meta);
+        NBT.modify(snowball, (nbt) -> {nbt.setString("ruslan", "summon");});
         return Collections.singletonList(snowball);
     }
     
@@ -104,28 +109,20 @@ public class RuslanEth extends Role {
     }
     
     @EventHandler
-    public void onProjectileLaunch(final ProjectileLaunchEvent e) {
-        Projectile projectile = e.getEntity();
-        if(!(projectile.getShooter() instanceof Player)) return;
-        Player player = (Player) projectile.getShooter();
-        if (!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof RuslanEth)) return;
-        if(projectile.getType() != EntityType.SNOWBALL) return;
+    public void onBlazeSummon(PlayerInteractEvent e) {
+        ItemStack interactee = e.getItem();
+        if(interactee == null || interactee.getType().equals(Material.AIR) || interactee.getAmount() < 1) return;
+        Player player = e.getPlayer();
+        if(!NBT.get(interactee, (nbt) -> (String)nbt.getString("ruslan")).equals("summon")) return;
+        if(InventoryUtils.isCooldownRemain(interactee)) {
+            InventoryUtils.notifyAboutCooldown(player, interactee);
+            return;
+        }
+        Snowball snowball = player.launchProjectile(Snowball.class);
         String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-        EntityHandleComponent.setEntityOwner(projectile, player);
-        projectile.setMetadata("invokerTeam", new FixedMetadataValue(Nftilation.getInstance(), team));
-       
-        BukkitRunnable task = new BukkitRunnable() {
-            @Override
-            public void run() {
-                RemoveRuslanActionItems(player);
-                String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-                GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
-                giveAbilityItems(player, model.getUpgradeLevel());
-            }
-        };
-        task.runTaskLater(Nftilation.getInstance(), RoleConstant.RUSLAN_SPAWN_CLONES_COOLDOWN * DataConstants.TICKS_IN_SECOND);
-        int taskId = task.getTaskId();
-        Store.getInstance().getDataInstance().getPlayerParams(player.getUniqueId()).put("taskId", taskId);
+        EntityHandleComponent.setEntityOwner(snowball, player);
+        snowball.setMetadata("invokerTeam", new FixedMetadataValue(Nftilation.getInstance(), team));
+        InventoryUtils.setCooldownForItem(interactee, RoleConstant.RUSLAN_SPAWN_CLONES_COOLDOWN);
     }
     
     @EventHandler
@@ -133,7 +130,11 @@ public class RuslanEth extends Role {
         Player owner = EntityHandleComponent.getEntityOwner(e.getEntity());
         if(owner == null) return;
         
-        if(!entitiesList.get(owner.getUniqueId()).isEmpty()) {
+        Role role = Store.getInstance().getDataInstance().getPlayerRole(owner.getUniqueId());
+        
+        if(!(role instanceof RuslanEth)) return;
+        
+        if(entitiesList.containsKey(owner.getUniqueId()) || !entitiesList.get(owner.getUniqueId()).isEmpty()) {
             entitiesList.get(owner.getUniqueId()).forEach(EntityList::removeEntity);
             entitiesList.get(owner.getUniqueId()).clear();
         }
@@ -208,6 +209,33 @@ public class RuslanEth extends Role {
     
     @SuppressWarnings("deprecation")
     @EventHandler
+    public void onBlazeHit(final ProjectileHitEvent e) {
+        if(!(e.getEntity() instanceof Fireball)) return;
+        Fireball fireball = (Fireball) e.getEntity();
+        if(!(fireball.getShooter() instanceof Blaze)) return;
+        if(e.getHitBlock() != null) {
+            return;
+        }
+        Entity entity = e.getHitEntity();
+        if (!(entity instanceof LivingEntity)) return;
+        LivingEntity livingEntity = (LivingEntity) entity;
+        if(livingEntity instanceof Blaze) {
+            RuslanBlaze ruslanBlaze = (RuslanBlaze) ((CraftBlaze)fireball.getShooter()).getHandle();
+            String team = ruslanBlaze.getTeam();
+            RuslanBlaze targetBlaze = (RuslanBlaze) ((CraftBlaze)livingEntity).getHandle();
+            EntityDamageByEntityEvent event = new EntityDamageByEntityEvent((Entity)fireball.getShooter(), livingEntity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 2D);
+            if(targetBlaze.getTeam().equals(team)) return;
+            getServer().getPluginManager().callEvent(event);
+            if(!event.isCancelled()) {
+                livingEntity.setHealth(livingEntity.getHealth() - event.getFinalDamage());
+                livingEntity.setLastDamageCause(event);
+                livingEntity.addPotionEffect(new PotionEffect(getRandomNegativeEffect(), 5 * DataConstants.TICKS_IN_SECOND, 1, false, true));
+            }
+        }
+    }
+    
+    @SuppressWarnings("deprecation")
+    @EventHandler
     public void onBlazeShoot(final EntityDamageByEntityEvent e) {
         if(!(e.getDamager() instanceof Fireball)) return;
         Fireball fireball = (Fireball) e.getDamager();
@@ -226,9 +254,11 @@ public class RuslanEth extends Role {
         if(host == null) {
             return;
         }
+        if(livingEntity instanceof Blaze) return;
         if(livingEntity instanceof Player) {
             String teamName = Store.getInstance().getDataInstance().getPlayerTeam(livingEntity.getUniqueId());
             if(StringUtils.isEmpty(teamName) || teamName.equals(team)) {
+                e.setCancelled(true);
                 return;
             }
         }
@@ -284,17 +314,15 @@ public class RuslanEth extends Role {
                     EntityHandleComponent.setEntityOwner(area, player);
                     area.addCustomEffect(new PotionEffect(getRandomNegativeEffect(), 10 * DataConstants.TICKS_IN_SECOND, 1, false, true), true);
                     area.setRadius(RoleConstant.RUSLAN_NEGATIVE_AREA_RADIUS);
+                    area.setDuration(25);
                 }
+                entitiesList.get(player.getUniqueId()).clear();
+                RemoveRuslanActionItems(player);
             }
         }
     }
     
     private void RemoveRuslanActionItems(Player player) {
-//        ItemStack[] stacks = (ItemStack[])Store.getInstance().getDataInstance().getPlayerParams(player.getUniqueId()).getOrDefault("actions", new ItemStack[0]);
-//        for(ItemStack stack : stacks) {
-//            player.getInventory().remove(stack);
-//        }
-//        Store.getInstance().getDataInstance().getPlayerParams(player.getUniqueId()).remove("actions");
         Spliterator<ItemStack> itemStackSpliterator = player.getInventory().spliterator();
         while(itemStackSpliterator.tryAdvance(itemStack -> {
             if(itemStack == null || itemStack.getType().equals(Material.AIR) || itemStack.getAmount() < 1) return;
@@ -302,6 +330,7 @@ public class RuslanEth extends Role {
                 player.getInventory().remove(itemStack);
             }
             ItemStack offHand = player.getInventory().getItemInMainHand();
+            if(offHand == null || offHand.getType().equals(Material.AIR) || offHand.getAmount() < 1) return;
             if(!StringUtils.isEmpty(NBT.get(offHand, (nbt) -> (String)nbt.getString("ruslan_action")))) {
                 player.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
             }

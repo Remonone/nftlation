@@ -3,6 +3,8 @@ package remonone.nftilation.game.mob;
 import com.google.common.base.Predicate;
 import lombok.Getter;
 import net.minecraft.server.v1_12_R1.*;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_12_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
@@ -12,8 +14,10 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.PlayerData;
+import remonone.nftilation.application.models.TeamData;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.enums.PlayerRole;
+import remonone.nftilation.game.DataInstance;
 
 import javax.annotation.Nullable;
 
@@ -53,14 +57,23 @@ public class RuslanBlaze extends EntityBlaze implements EntityOwnable {
                 }
                 if(entity instanceof Player) {
                     Player target = (Player) entity;
-                    PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(target.getUniqueId()).getData();
-                    if(data == null || !data.getRole().equals(PlayerRole.PLAYER)) return false;
+                    DataInstance.PlayerInfo info = Store.getInstance().getDataInstance().FindPlayerByName(target.getUniqueId());
+                    if(info == null) return false;
+                    PlayerData data = info.getData();
+                    if(data == null || !ObjectUtils.notEqual(data.getRole(), PlayerRole.PLAYER)) return false;
+                    TeamData teamData = data.getTeam();
+                    if(teamData == null || StringUtils.isEmpty(teamData.getTeamName())) return false;
                     return !data.getTeam().getTeamName().equals(team);
                 }
+                if(!(entity instanceof LivingEntity)) return false;
                 Player owner = EntityHandleComponent.getEntityOwner(entity);
-                if(owner != null && entity instanceof LivingEntity) {
-                    PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(owner.getUniqueId()).getData();
-                    if(data == null || !data.getRole().equals(PlayerRole.PLAYER)) return false;
+                if(owner != null) {
+                    DataInstance.PlayerInfo info = Store.getInstance().getDataInstance().FindPlayerByName(owner.getUniqueId());
+                    if(info == null) return false;
+                    PlayerData data = info.getData();
+                    if(data == null || !ObjectUtils.notEqual(data.getRole(), PlayerRole.PLAYER)) return false;
+                    TeamData teamData = data.getTeam();
+                    if(teamData == null || StringUtils.isEmpty(teamData.getTeamName())) return false;
                     return !data.getTeam().getTeamName().equals(team);
                 }
                 return false;

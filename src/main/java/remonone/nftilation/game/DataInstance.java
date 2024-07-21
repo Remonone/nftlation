@@ -40,6 +40,7 @@ public class DataInstance {
         initialized = true;
     }
 
+    @Getter
     private final List<PlayerInfo> players = new ArrayList<>();
     @Getter
     private final List<TeamData> teamData = new ArrayList<>();

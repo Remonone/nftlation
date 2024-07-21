@@ -12,6 +12,7 @@ import remonone.nftilation.components.ItemStatModifierComponent;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.DataInstance;
+import remonone.nftilation.game.roles.Guts;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.shop.content.*;
 import remonone.nftilation.game.shop.registry.ShopItemRegistry;
@@ -34,6 +35,11 @@ public class InventoryBuilder {
                 .collect(Collectors.toList());
         List<Role> registeredRoles = Role.getRoles();
         for(Role role : registeredRoles) {
+            if(role instanceof Guts) {
+                if(!player.getDisplayName().contains("Jinrui_Saikyo")) {
+                    continue;
+                }
+            }
             ItemStack itemStack;
             Material mat = roles.contains(role) ?
                     Material.RED_GLAZED_TERRACOTTA

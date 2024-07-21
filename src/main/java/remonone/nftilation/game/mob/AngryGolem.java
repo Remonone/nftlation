@@ -15,7 +15,6 @@ public class AngryGolem extends EntityIronGolem {
         this.setPosition(location.getX(), location.getY(), location.getZ());
         this.setYawPitch(location.getYaw(), location.getPitch());
         this.bukkitEntity = new CraftIronGolem((CraftServer) getServer(), this);
-        
     }
     @Override
     protected void r() {

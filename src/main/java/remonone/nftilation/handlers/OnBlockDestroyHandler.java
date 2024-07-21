@@ -106,7 +106,6 @@ public class OnBlockDestroyHandler implements Listener {
     
     @EventHandler
     public void onPlayerPlaceBlock(final PlayerInteractEvent e) {
-        
         if(!e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
         Player player = e.getPlayer();
         ItemStack stack = player.getInventory().getItemInMainHand();

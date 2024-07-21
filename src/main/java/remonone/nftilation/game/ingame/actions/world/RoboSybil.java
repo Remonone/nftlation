@@ -35,6 +35,7 @@ public class RoboSybil implements IAction {
                     SetSybilAttackerItems(zombie);
                     EntityHandleComponent.setEntityHostile(zombie);
                     EntityHandleComponent.setEntityUnloadLocked(zombie);
+                    EntityHandleComponent.setEntityBounty(zombie, 30);
                     EntityList.addEntity(zombie);
                 }
             } else {

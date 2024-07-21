@@ -27,10 +27,11 @@ import remonone.nftilation.game.ingame.services.ServiceContainer;
 import remonone.nftilation.game.ingame.services.ThirdTierService;
 import remonone.nftilation.game.mob.AngryGolem;
 import remonone.nftilation.game.phase.PhaseCounter;
+import remonone.nftilation.game.roles.Guts;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.scoreboard.ScoreboardHandler;
-import remonone.nftilation.handlers.OnPlayerDieHandler;
+import remonone.nftilation.handlers.OnEntityDieHandler;
 import remonone.nftilation.utils.ColorUtils;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
@@ -78,6 +79,7 @@ public class GameInstance {
             ((CraftWorld)location.getWorld()).getHandle().addEntity(golem, CreatureSpawnEvent.SpawnReason.CUSTOM);
             EntityHandleComponent.setEntityUnloadLocked(golem.getBukkitEntity());
             EntityHandleComponent.setEntityHostile(golem.getBukkitEntity());
+            EntityHandleComponent.setEntityBounty(golem.getBukkitEntity(), 120);
             EntityList.addEntity((LivingEntity) golem.getBukkitEntity());
             golem.setCustomName("Angry Golem");
             ((CraftIronGolem)golem.getBukkitEntity()).setRemoveWhenFarAway(false);
@@ -98,12 +100,16 @@ public class GameInstance {
 
 
     private void initPlayerRoles(List<PlayerModel> models) {
-        models.forEach(info -> {
-            String texture = SkinCache.getInstance().getTexture(info.getRoleId());
-            String signature = SkinCache.getInstance().getSignature(info.getRoleId());
-            PlayerNMSUtil.changePlayerSkin(info.reference, texture, signature);
-            Role.UpdatePlayerAbilities(info.reference, Role.getRoleByID(info.roleId), info.getUpgradeLevel());
-        });
+        for(PlayerModel model : models) {
+            try {
+                String texture = SkinCache.getInstance().getTexture(model.getRoleId());
+                String signature = SkinCache.getInstance().getSignature(model.getRoleId());
+                PlayerNMSUtil.changePlayerSkin(model.reference, texture, signature);
+                Role.UpdatePlayerAbilities(model.reference, Role.getRoleByID(model.roleId), model.getUpgradeLevel());
+            } catch(Exception ex) {
+                Logger.error("Unable load role: " + model.getRoleId() + ". Player: " + model.getReference().getDisplayName());
+            }
+        }
     }
 
     private void constructTeamData(Map<String, List<DataInstance.PlayerInfo>> teams) {
@@ -135,7 +141,7 @@ public class GameInstance {
                 .filter(info -> ObjectUtils.notEqual(info.getRole(), null))
                 .map(roleContainer -> roleContainer.getRole().getRoleID())
                 .collect(Collectors.toList());
-        List<Role> availableRoles = Role.getRoles().stream().filter(role -> !reservedRoles.contains(role.getRoleID())).collect(Collectors.toList());
+        List<Role> availableRoles = Role.getRoles().stream().filter(role -> !reservedRoles.contains(role.getRoleID()) && !role.getRoleName().equals("Guts")).collect(Collectors.toList());
         return availableRoles.get(RANDOM.nextInt(availableRoles.size()));
     }
 
@@ -148,6 +154,7 @@ public class GameInstance {
         model.tokens += tokens;
         ScoreboardHandler.updateScoreboard(model);
     }
+    
     public boolean haveEnoughMoney(String teamName, Player player, int amount) {
         return getPlayerModelFromTeam(teamName, player).tokens >= amount;
     }
@@ -221,6 +228,14 @@ public class GameInstance {
         player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, .5f, 1f);
         model.upgradeLevel = level;
         Role role = Role.getRoleByID(model.roleId);
+        if(role instanceof Guts) {
+            if(level == 2) {
+                Logger.broadcast(ChatColor.RED + "Мишка потерял концентрацию и его внимание расплывчато!");
+            }
+            if(level == 3) {
+                Logger.broadcast(ChatColor.DARK_RED + "Мишка сильно ослаб и находится в предсмертном состоянии!");
+            }
+        }
         Role.SetInventoryItems(player, role, level);
         Role.UpdatePlayerAbilities(player, role, level);
         ScoreboardHandler.updateScoreboard(model);
@@ -265,7 +280,20 @@ public class GameInstance {
     public boolean damageCore(String teamName, boolean isPlayerDamager) {
         Team team = teamData.get(teamName);
         if(team == null) return false;
+        int oldHP = team.core.getHealth();
         boolean isDestroyed = team.core.TakeDamage(isPlayerDamager);
+        int newHP = team.core.getHealth();
+        if(!isDestroyed) {
+            int oldScale = oldHP % 5;
+            int newScale = newHP % 5;
+            if(newScale > oldScale) {
+                team.players.forEach(playerModel -> {
+                    Player player = playerModel.reference;
+                    player.sendMessage(MessageConstant.TEAM_DAMAGED_MESSAGE);
+                    player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_FALL, 1f, .7f);
+                });
+            }
+        }
         team.players.forEach(ScoreboardHandler::updateScoreboard);
         return isDestroyed;
     }
@@ -302,7 +330,7 @@ public class GameInstance {
             checkOnActiveTeams();
         }
         if((Boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_IMMINENT_DEATH, false) && !isFinished) {
-            team.players.forEach(playerModel -> OnPlayerDieHandler.OnDeath(playerModel.getReference()));
+            team.players.forEach(playerModel -> OnEntityDieHandler.OnDeath(playerModel.getReference()));
         }
         for(Team activeTeam : teamData.values()) {
             activeTeam.players.stream().filter(playerModel -> activeTeam.isCoreAlive || playerModel.isAlive).forEach(ScoreboardHandler::updateScoreboard);
@@ -430,6 +458,7 @@ public class GameInstance {
         @Setter
         private int upgradeLevel;
         private String roleId;
+        @Setter
         private int tokens;
         private int killCounter;
         private int deathCounter;

@@ -16,21 +16,21 @@ import java.util.stream.Collectors;
 public class MiddlewareService {
 
     public final static List<TeamData> teams = new ArrayList<TeamData>() {{
-        add(new TeamData("Blue", "BL", ChatColor.BLUE.getChar()));
         add(new TeamData("Red", "RD", ChatColor.RED.getChar()));
-        add(new TeamData("Green", "GR", ChatColor.GREEN.getChar()));
         add(new TeamData("Yellow", "YL", ChatColor.YELLOW.getChar()));
+        add(new TeamData("Green", "GR", ChatColor.GREEN.getChar()));
+        add(new TeamData("Blue", "BL", ChatColor.BLUE.getChar()));
     }};
 
 
-    public static PlayerData logInPlayer(PlayerCredentials credentials) {
+    public static PlayerData logInPlayer(PlayerCredentials credentials, boolean isAdmin) {
         try {
 //                PlayerData data = HttpRequestSender.post(RequestConstant.REQ_PLAYER_LOG_IN, credentials, PlayerData.class);
             TeamData data = teams.stream().filter(teamData -> teamData.getTeamName().equals(credentials.team)).findFirst().orElse(null);
             if(data == null) {
                 throw new Exception("Team name have been not specified or wrong...");
             }
-            return new PlayerData(credentials.getLogin(), PlayerRole.PLAYER, data);
+            return new PlayerData(credentials.getLogin(), isAdmin ? PlayerRole.ADMIN : PlayerRole.PLAYER, isAdmin ? null : data);
         } catch(Exception ex) {
             return null;
         }
@@ -43,7 +43,7 @@ public class MiddlewareService {
     public static void loadSkins() {
         for(Role role : Role.getRoles()) {
             try{
-                SkinResponse response = HttpRequestSender.get(RequestConstant.REQ_GET_SKINS + "?game_role=" + role.getRoleName(), SkinResponse.class);
+                SkinResponse response = HttpRequestSender.get(RequestConstant.REQ_GET_SKINS + "?game_role=" + role.getRoleName().toLowerCase(), SkinResponse.class);
                 SkinCache.getInstance().storeSkin(role.getRoleID(), response.getSkin(), response.getSign());
                 Logger.log("Skin for " + role.getRoleID() + " has been successfully loaded");
             } catch(Exception ex) {
@@ -75,5 +75,13 @@ public class MiddlewareService {
             return false;
         }
     }
+    
+    public static void confirmDonation(Donation donation) {
+        try {
+            HttpRequestSender.get(RequestConstant.REQ_CONFIRM_DONATION + donation.getDonation_id(), Object.class);
 
+        } catch (Exception e) {
+            Logger.error("Failed to update the state of donation with id " + donation.getDonation_id());
+        }
+    }
 }

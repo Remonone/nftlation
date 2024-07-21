@@ -58,3 +58,7 @@ commands:
   setCheckerTeamPosition:
     description: Set Checker chest position
     usage: /setCheckerTeamPosition [teamId]
+  startDonationEvent:
+  addAirDropPos:
+    description: Set AirDrop Position for the team
+    usage: /addAirDropPos [teamId]

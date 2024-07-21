@@ -150,6 +150,14 @@ public class ConfigManager {
         return true;
     }
     
+    public boolean trySetTeamAirDropPosition(String id, Location pos) {
+        TeamSpawnPoint teamSpawnPoint = teamSpawnList.stream().filter(point -> point.getId().equals(id)).findFirst().orElse(null);
+        if(teamSpawnPoint == null) return false;
+        teamSpawnPoint.setAirDropPosition(pos);
+        SetValue(PropertyConstant.TEAMS_SPAWN_POINTS, teamSpawnList.toArray());
+        return true;
+    }
+    
     public boolean trySetShopKeeper(String id, Location pos) {
         TeamSpawnPoint teamPoint = teamSpawnList.stream().filter(point -> point.getId().equals(id)).findFirst().orElse(null);
         if(teamPoint == null) {

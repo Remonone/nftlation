@@ -22,10 +22,12 @@ import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.utils.InventoryUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class Monkey extends Role {
     @Override
@@ -108,7 +110,7 @@ public class Monkey extends Role {
         ItemStack itemStack = new ItemStack(Material.INK_SACK);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName("Invisibility");
+        meta.setDisplayName(RoleConstant.MONKEY_ABILITY_ITEM);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
         NBT.modify(itemStack, nbt -> {nbt.setString("monkey", "invisibility");});
@@ -118,7 +120,7 @@ public class Monkey extends Role {
     @Override
     public void setPlayer(Player player, int upgradeLevel) {
         player.setHealthScaled(true);
-        float healthModifier = upgradeLevel > 1 ? 20 : 40;
+        float healthModifier = upgradeLevel > 2 ? 30 : 40;
         float speedModifier = .05F * upgradeLevel;
         player.setWalkSpeed(DataConstants.PLAYER_SPEED + speedModifier);
         player.setHealthScale(DataConstants.PLAYER_HEALTH - (DataConstants.PLAYER_HEALTH / 100) * healthModifier);
@@ -134,6 +136,7 @@ public class Monkey extends Role {
         Player victim = (Player) e.getEntity();
         ItemStack weapon = attacker.getInventory().getItemInMainHand();
         if(!(Store.getInstance().getDataInstance().getPlayerRole(attacker.getUniqueId()) instanceof Monkey)) return;
+        if(weapon == null || weapon.getAmount() < 1 || !weapon.getType().equals(Material.AIR)) return;
         String isStick = NBT.get(weapon, nbt -> (String) nbt.getString("monkey"));
         if(StringUtils.isBlank(isStick) || !isStick.equals("stick")) return;
         GameInstance instance = GameInstance.getInstance();
@@ -161,12 +164,14 @@ public class Monkey extends Role {
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) {
             return;
         }
+        Map<String, Object> params = Store.getInstance().getDataInstance().getPlayerParams(accessor.getUniqueId());
         e.setCancelled(true);
         accessor.setAllowFlight(false);
         accessor.setFlying(false);
         double acceleration = 2;
         double velocityUp = .5;
         accessor.setVelocity(accessor.getVelocity().multiply(acceleration).setY(velocityUp).add(accessor.getLocation().getDirection().normalize()));
+        params.put("cooldown", System.currentTimeMillis() + RoleConstant.DOUBLE_JUMP_COOLDOWN * DataConstants.ONE_SECOND);
     }
 
     @EventHandler
@@ -182,11 +187,12 @@ public class Monkey extends Role {
     }
 
     private void CheckOnGround(Player accessor, Location from, Location to) {
+        Map<String, Object> params = Store.getInstance().getDataInstance().getPlayerParams(accessor.getUniqueId());
         if((from.getBlockY()>to.getBlockY())
                 && !(accessor.getLocation().add(0, -2, 0)
                 .getBlock()
                 .getType()
-                .equals(Material.AIR))){
+                .equals(Material.AIR)) && (params.containsKey("cooldown") && (((long)params.get("cooldown")) < System.currentTimeMillis()))) {
             accessor.setAllowFlight(true);
         }
     }
@@ -211,10 +217,10 @@ public class Monkey extends Role {
         DataInstance dataInstance = Store.getInstance().getDataInstance();
         String team = dataInstance.getPlayerTeam(player.getUniqueId());
         GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(team, player);
-        int length = 1 + model.getUpgradeLevel() * 2;
+        int length = 1 + model.getUpgradeLevel() * 5;
         World world = player.getWorld();
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, length * DataConstants.TICKS_IN_SECOND, 0, false, false));
         world.playSound(player.getLocation(), Sound.BLOCK_LAVA_EXTINGUISH, .5f, .8f);
-        NBT.modify(item, nbt -> {nbt.setLong("cooldown", System.currentTimeMillis() + 60 * DataConstants.ONE_SECOND);});
+        InventoryUtils.setCooldownForItem(item, 60);
     }
 }

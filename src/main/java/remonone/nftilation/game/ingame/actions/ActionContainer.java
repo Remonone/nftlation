@@ -3,12 +3,13 @@ package remonone.nftilation.game.ingame.actions;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import remonone.nftilation.Store;
+import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.utils.Logger;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ActionContainer {
@@ -26,7 +27,8 @@ public class ActionContainer {
         if(!actions.containsKey(type)) return;
         IAction action = actions.get(type);
         action.Init(parameters);
-        if(!parameters.containsKey("silent") || parameters.get("silent").equals(false)) {
+        
+        if(!parameters.containsKey(PropertyConstant.ACTION_SILENT) || parameters.get(PropertyConstant.ACTION_SILENT).equals(false)) {
             NotifyActionStart(action, type, parameters);
         }
     }
@@ -34,21 +36,34 @@ public class ActionContainer {
     @SuppressWarnings("unchecked")
     private static void NotifyActionStart(IAction action, ActionType type, Map<String, Object> parameters) {
         List<Player> players;
-        if(parameters.containsKey("team")) {
+        if(parameters.containsKey(PropertyConstant.ACTION_TEAM)) {
             players = GameInstance.getInstance()
-                    .getTeamPlayers((String)parameters.get("team"))
+                    .getTeamPlayers((String)parameters.get(PropertyConstant.ACTION_TEAM))
                     .stream()
                     .map(GameInstance.PlayerModel::getReference)
                     .collect(Collectors.toList());
 
+        } else if(parameters.containsKey(PropertyConstant.ACTION_PLAYER)) {
+            String playerName = (String)parameters.get(PropertyConstant.ACTION_PLAYER);
+            DataInstance.PlayerInfo player = Store.getInstance().getDataInstance().getPlayers().stream().filter(playerInfo -> playerInfo.getData().getLogin().equals(playerName)).findFirst().orElse(null);
+            if(player == null) return;
+            players = Collections.singletonList(Bukkit.getPlayer(player.getPlayerId()));
         } else {
             players = (List<Player>) Bukkit.getOnlinePlayers();
         }
         players.forEach(player -> {
             player.sendTitle(action.getTitle(), action.getDescription(), 5, 100, 5);
             player.playSound(player.getLocation(), action.getSound(), 1, 1);
-            if(parameters.containsKey("sender")) {
-                player.sendMessage(ChatColor.AQUA + (String) parameters.get("sender") + "have started action: " + type.toString());
+            if(parameters.containsKey(PropertyConstant.ACTION_SEND_MESSAGE)) {
+                String sender = "Anonymous";
+                if (parameters.containsKey(PropertyConstant.ACTION_SENDER)) {
+                    sender = parameters.get(PropertyConstant.ACTION_SENDER).toString();
+                }
+                player.sendMessage(ChatColor.GOLD + "[DONATION] " + sender + " начал донатное событие: " + type.name());
+                if(parameters.containsKey(PropertyConstant.ACTION_COMMENT)) {
+                    String comment = parameters.get(PropertyConstant.ACTION_COMMENT).toString();
+                    player.sendMessage(ChatColor.GOLD + "[DONATION] " + comment);
+                }
             }
         });
     }
