@@ -24,7 +24,7 @@ public class PlayerNMSUtil {
             player.hidePlayer(Nftilation.getInstance(), p);
             profile.getProperties().removeAll("textures");
             profile.getProperties().put("textures", new Property("textures", texture, signature));
-            player.showPlayer(Nftilation.getInstance(), player);
+            player.showPlayer(Nftilation.getInstance(), p);
         }
     }
 

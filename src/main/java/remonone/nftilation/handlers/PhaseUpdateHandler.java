@@ -139,9 +139,10 @@ public class PhaseUpdateHandler implements Listener {
                     @Override
                     public void run() {
                         List<TeamData> teams = Store.getInstance().getDataInstance().getTeamData();
+                        GameInstance instance = GameInstance.getInstance();
                         for(TeamData team : teams) {
-                            if(GameInstance.getInstance().isTeamAlive(team.getTeamName())) {
-                                GameInstance.getInstance().damageCore(team.getTeamName(), false);
+                            if(instance.isTeamAlive(team.getTeamName())) {
+                                instance.damageCore(team.getTeamName(), false);
                             }
                         }
                     }

@@ -43,7 +43,7 @@ public class MiddlewareService {
     public static void loadSkins() {
         for(Role role : Role.getRoles()) {
             try{
-                SkinResponse response = HttpRequestSender.get(RequestConstant.REQ_GET_SKINS + "?game_role=" + role.getRoleName().toLowerCase(), SkinResponse.class);
+                SkinResponse response = HttpRequestSender.get(RequestConstant.REQ_GET_SKINS + "?game_role=" + role.getRoleID(), SkinResponse.class);
                 SkinCache.getInstance().storeSkin(role.getRoleID(), response.getSkin(), response.getSign());
                 Logger.log("Skin for " + role.getRoleID() + " has been successfully loaded");
             } catch(Exception ex) {

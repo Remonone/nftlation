@@ -47,7 +47,7 @@ public class Guts extends Role {
 
     @Override
     public String getRoleID() {
-        return "EM";
+        return "GT";
     }
 
     @Override

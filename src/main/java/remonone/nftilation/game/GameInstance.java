@@ -59,6 +59,9 @@ public class GameInstance {
         constructTeamData(teams);
         disposePlayers();
         initServices();
+        spawnGolems();
+        counter = new PhaseCounter();
+        counter.Init();
         for(Team team : teamData.values()) {
             initPlayerRoles(team.players);
             fillPlayerItems(team.players);
@@ -66,9 +69,6 @@ public class GameInstance {
                 ScoreboardHandler.buildScoreboard(model.reference);
             }
         }
-        spawnGolems();
-        counter = new PhaseCounter();
-        counter.Init();
     }
 
     private void spawnGolems() {
@@ -104,6 +104,7 @@ public class GameInstance {
             try {
                 String texture = SkinCache.getInstance().getTexture(model.getRoleId());
                 String signature = SkinCache.getInstance().getSignature(model.getRoleId());
+                model.reference.sendMessage(texture + " + " + signature);
                 PlayerNMSUtil.changePlayerSkin(model.reference, texture, signature);
                 Role.UpdatePlayerAbilities(model.reference, Role.getRoleByID(model.roleId), model.getUpgradeLevel());
             } catch(Exception ex) {
@@ -243,8 +244,7 @@ public class GameInstance {
 
     private void disposePlayers() {
         for(Team team : teamData.values()) {
-            team.players.forEach(playerModel -> setPlayerToPosition(team, playerModel.reference)
-            );
+            team.players.forEach(playerModel -> setPlayerToPosition(team, playerModel.reference));
         }
     }
     
@@ -283,14 +283,14 @@ public class GameInstance {
         int oldHP = team.core.getHealth();
         boolean isDestroyed = team.core.TakeDamage(isPlayerDamager);
         int newHP = team.core.getHealth();
-        if(!isDestroyed) {
+        if(!isDestroyed && isPlayerDamager) {
             int oldScale = oldHP % 5;
             int newScale = newHP % 5;
             if(newScale > oldScale) {
                 team.players.forEach(playerModel -> {
                     Player player = playerModel.reference;
                     player.sendMessage(MessageConstant.TEAM_DAMAGED_MESSAGE);
-                    player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_FALL, 1f, .7f);
+                    player.playSound(player.getLocation(), Sound.ENTITY_CAT_HISS, 1f, .7f);
                 });
             }
         }
@@ -335,7 +335,7 @@ public class GameInstance {
         for(Team activeTeam : teamData.values()) {
             activeTeam.players.stream().filter(playerModel -> activeTeam.isCoreAlive || playerModel.isAlive).forEach(ScoreboardHandler::updateScoreboard);
         }
-        
+        checkOnActiveTeams();
     }
 
     private void checkOnActiveTeams() {

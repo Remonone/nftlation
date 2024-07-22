@@ -69,6 +69,18 @@ public class PlayerLoginHandler implements Listener {
             player.setGameMode(GameMode.SURVIVAL);
             Role role = instance.getDataInstance().getPlayerRole(player.getUniqueId());
             DataInstance.PlayerInfo playerData = instance.getDataInstance().FindPlayerByName(player.getUniqueId());
+            if(playerData.getData() == null) {
+                player.kickPlayer(MessageConstant.NO_PERMISSION_TO_JOIN);
+                return;
+            }
+            if(playerData.getData().getTeam() == null || playerData.getData().getTeam().getTeamName() == null) {
+                if(playerData.getData().getRole().equals(PlayerRole.ADMIN)) {
+                    GameInstance.getInstance().getCounter().bar.addPlayer(player);
+                    return;
+                }
+                player.kickPlayer(MessageConstant.NO_PERMISSION_TO_JOIN);
+                return;
+            }
             GameInstance.PlayerModel model = GameInstance.getInstance()
                     .getTeamPlayers(playerData.getData().getTeam().getTeamName())
                     .stream()
@@ -110,6 +122,7 @@ public class PlayerLoginHandler implements Listener {
     @EventHandler
     public void onPlayerDisconnect(final PlayerQuitEvent event) {
         DataInstance dataInstance = Store.getInstance().getDataInstance();
+        Player player = event.getPlayer();
         dataInstance.DisconnectPlayer(event.getPlayer().getUniqueId());
     }
 
