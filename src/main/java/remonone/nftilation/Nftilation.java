@@ -120,7 +120,7 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("startLobbyStage").setExecutor(new StartLobbyCommand());
         this.getCommand("setShopKeeper").setExecutor(new SetShopKeeperCommand());
         this.getCommand("setDieCenter").setExecutor(new SetDieCenterSpawnCommand());
-        this.getCommand("addTokens").setExecutor(new AddTokenCommand());
+        this.getCommand("addTokens").setExecutor(new SetTokenCommand());
         this.getCommand("skipPhase").setExecutor(new SkipPhaseCommand());
         this.getCommand("setCenterPosition").setExecutor(new SetCenterPositionCommand());
         this.getCommand("addDiamondPosition").setExecutor(new AddDiamondPlaceSpawnCommand());
@@ -129,6 +129,7 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("setCheckerTeamPosition").setExecutor(new CheckerChestCommand());
         this.getCommand("startDonationEvent").setExecutor(new StartDonationEventCommand());
         this.getCommand("addAirDropPos").setExecutor(new AddAirDropCommand());
+        this.getCommand("setTeamCoreHealth").setExecutor(new SetTeamCoreHealth());
     }
     
     public static Nftilation getInstance() {

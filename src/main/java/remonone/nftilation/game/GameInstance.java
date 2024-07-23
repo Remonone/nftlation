@@ -20,6 +20,7 @@ import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.game.ingame.core.Core;
 import remonone.nftilation.game.ingame.services.RepairCoreService;
 import remonone.nftilation.game.ingame.services.SecondTierService;
@@ -430,6 +431,21 @@ public class GameInstance {
         Team team = teamData.get(teamName);
         if(team == null) return false;
         return team.isActive;
+    }
+
+    public boolean setHealth(Player applicant, String teamName, int health) {
+        if(applicant == null) return false;
+        DataInstance.PlayerInfo applicantInfo = Store.getInstance().getDataInstance().FindPlayerByName(applicant.getUniqueId());
+        if(applicantInfo == null || applicantInfo.getData() == null || !applicantInfo.getData().getRole().equals(PlayerRole.ADMIN));
+        if(health < 0 || health > 100) return false;
+        for(Team team : teamData.values()) {
+            if(team.name.equals(teamName)) {
+                if(!team.isCoreAlive) return false;
+                team.core.setHealth(health);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Getter
