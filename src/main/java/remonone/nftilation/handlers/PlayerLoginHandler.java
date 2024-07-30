@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.PlayerData;
+import remonone.nftilation.application.services.SkinCache;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
@@ -92,6 +93,7 @@ public class PlayerLoginHandler implements Listener {
                 return;
             }
             model.setReference(player);
+            PlayerNMSUtil.changePlayerSkin(player, SkinCache.getInstance().getTexture(model.getRoleId()), SkinCache.getInstance().getSignature(model.getRoleId()));
             ScoreboardHandler.updateScoreboard(model);
             GameInstance.getInstance().getCounter().bar.addPlayer(player);
             Role.UpdatePlayerAbilities(player, role, model.getUpgradeLevel());

@@ -34,7 +34,7 @@ public class RoleConstant {
     public static final String CTYPTOMARINE_SHIELD = "Щит императора";
     public static final float CRYPTOMARINE_LIGHTNING_CHANCE = .3f;
     public static final float CRYPTOMARINE_LIGHTNING_DAMAGE = 4f;
-    public static final int CRYPTOMARINE_EXPLOSION_STRENGTH = 10;
+    public static final int CRYPTOMARINE_EXPLOSION_STRENGTH = 4;
 
     public static final String RUSLAN_DESCRIPTION_1 = "Экспериментальный робот.";
     public static final String RUSLAN_DESCRIPTION_2 = "Создан в подвалах неизвестного НИИ.";

@@ -9,6 +9,7 @@ import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.RoleConstant;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,6 +40,14 @@ public class ExplosionDestructionDisable implements Listener {
     public void onPreExplosion(ExplosionPrimeEvent e) {
         if(!e.getEntity().getMetadata("meteor").isEmpty()) {
             e.setRadius((float)e.getEntity().getMetadata("meteor").get(0).value());
+            e.setFire(false);
+        }
+        if(!e.getEntity().getMetadata("cryptomarine").isEmpty()) {
+            e.setRadius(RoleConstant.CRYPTOMARINE_EXPLOSION_STRENGTH);
+            e.setFire(false);
+        }
+        if(!e.getEntity().getMetadata("sybil_attacker").isEmpty()) {
+            e.setRadius(RoleConstant.SYBIL_EXPLOSION_ARROW_STRENGTH);
             e.setFire(false);
         }
     }

@@ -105,7 +105,6 @@ public class GameInstance {
             try {
                 String texture = SkinCache.getInstance().getTexture(model.getRoleId());
                 String signature = SkinCache.getInstance().getSignature(model.getRoleId());
-                model.reference.sendMessage(texture + " + " + signature);
                 PlayerNMSUtil.changePlayerSkin(model.reference, texture, signature);
                 Role.UpdatePlayerAbilities(model.reference, Role.getRoleByID(model.roleId), model.getUpgradeLevel());
             } catch(Exception ex) {
@@ -348,7 +347,7 @@ public class GameInstance {
     }
 
     private void announceTeamWinner(Team team) {
-        Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(ChatColor.GREEN + "Team: " + team.core.getTeamData().getTeamName() + "have won the game! Congratulations!"));
+        Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(ChatColor.GREEN + "Команда " + team.core.getTeamData().getTeamName() + " победили в режиме Nftlation! Поздравляем!"));
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
@@ -358,6 +357,7 @@ public class GameInstance {
                     FireworkMeta fireworkMeta = firework.getFireworkMeta();
                     fireworkMeta.setPower(5);
                     fireworkMeta.addEffect(FireworkEffect.builder().flicker(true).trail(true).withColor(ColorUtils.TranslateToColor(ChatColor.getByChar(team.getCore().getTeamData().getTeamColor()))).with(FireworkEffect.Type.BALL_LARGE).build());
+                    firework.setFireworkMeta(fireworkMeta);
                 });
             }
         };
@@ -442,6 +442,7 @@ public class GameInstance {
             if(team.name.equals(teamName)) {
                 if(!team.isCoreAlive) return false;
                 team.core.setHealth(health);
+                team.players.forEach(ScoreboardHandler::updateScoreboard);
                 return true;
             }
         }

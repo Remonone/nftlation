@@ -20,7 +20,7 @@ public class MessageConstant {
     public static final String TEAM_NOT_EQUALS = "Failed to start Lobby stage! Team count is not equal to server preset!";
     public static final String CORE_INVULNERABLE = "Ядро на данный момент неуязвимо! Вы не можете ему навредить сейчас!";
     public static final String CORE_DESTROYED_TITLE = "Ваше ядро было уничтожено!";
-    public static final String CORE_DESTROYED_SUBTITLE = "Теперь вы не можете возрадиться после смерти!";
+    public static final String CORE_DESTROYED_SUBTITLE = "Теперь вы не можете возродиться после смерти!";
     public static final String OTHER_CORE_DESTROYED_TITLE = "Ядро команды %s было уничтожено!";
     public static final String OTHER_CORE_DESTROYED_SUBTITLE = "Вы теперь можете уничтожить их!";
     public static final String CORE_DESTROYED_BROADCAST = "Команда %s потеряло своё ядро!";

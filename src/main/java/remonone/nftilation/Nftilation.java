@@ -130,6 +130,7 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("startDonationEvent").setExecutor(new StartDonationEventCommand());
         this.getCommand("addAirDropPos").setExecutor(new AddAirDropCommand());
         this.getCommand("setTeamCoreHealth").setExecutor(new SetTeamCoreHealth());
+        this.getCommand("giveTokensToPlayer").setExecutor(new GiveTokenToPlayer());
     }
     
     public static Nftilation getInstance() {

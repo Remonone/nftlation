@@ -62,3 +62,9 @@ commands:
   addAirDropPos:
     description: Set AirDrop Position for the team
     usage: /addAirDropPos [teamId]
+  setTeamCoreHealth:
+    description: Set Team Core Health
+    usage: /setTeamCoreHealth
+  giveTokensToPlayer:
+    description: Give tokens to player
+    usage: /giveTokensToPlayer

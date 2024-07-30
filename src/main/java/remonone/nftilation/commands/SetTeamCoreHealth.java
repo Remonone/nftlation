@@ -52,10 +52,8 @@ public class SetTeamCoreHealth implements CommandExecutor, TabCompleter {
             return Collections.emptyList();
         }
         List<String> info = new ArrayList<>();
-        if(args.length == 0) {
-            GameInstance instance = GameInstance.getInstance();
-            instance.getTeamIterator().forEachRemaining(info::add);
-        }
+        GameInstance instance = GameInstance.getInstance();
+        instance.getTeamIterator().forEachRemaining(info::add);
         return info;
     }
 }
