@@ -10,19 +10,23 @@ import remonone.nftilation.Store;
 import remonone.nftilation.application.models.PlayerData;
 import remonone.nftilation.application.services.SkinCache;
 import remonone.nftilation.constants.MessageConstant;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.PlayerLoginEvent;
 import remonone.nftilation.enums.LoginState;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.scoreboard.ScoreboardHandler;
 import remonone.nftilation.game.stage.GameStage;
+import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.PlayerNMSUtil;
 import remonone.nftilation.utils.ResetUtils;
 
 import java.util.EnumSet;
+import java.util.Map;
 
 public class PlayerLoginHandler implements Listener {
 
@@ -82,7 +86,7 @@ public class PlayerLoginHandler implements Listener {
                 player.kickPlayer(MessageConstant.NO_PERMISSION_TO_JOIN);
                 return;
             }
-            GameInstance.PlayerModel model = GameInstance.getInstance()
+            PlayerModel model = GameInstance.getInstance()
                     .getTeamPlayers(playerData.getData().getTeam().getTeamName())
                     .stream()
                     .filter(playerModel -> playerModel.getReference().getUniqueId().equals(playerData.getPlayerId()))
@@ -93,10 +97,23 @@ public class PlayerLoginHandler implements Listener {
                 return;
             }
             model.setReference(player);
-            PlayerNMSUtil.changePlayerSkin(player, SkinCache.getInstance().getTexture(model.getRoleId()), SkinCache.getInstance().getSignature(model.getRoleId()));
+            Map<String, Object> params = model.getParameters();
+            Role playerRole = Role.getRoleByID(params.getOrDefault(PropertyConstant.PLAYER_ROLE_ID, "_").toString());
+            if(playerRole == null) {
+                Logger.warn("Player " + player.getDisplayName() + " have incorrect role id! Kicking...");
+                player.kickPlayer(MessageConstant.NO_PERMISSION_TO_JOIN);
+                return;
+            }
+            int level = (int) params.getOrDefault(PropertyConstant.PLAYER_LEVEL_PARAM, -1);
+            if(level < 0) {
+                Logger.warn("Player " + player.getDisplayName() + " have incorrect level! Kicking...");
+                player.kickPlayer(MessageConstant.NO_PERMISSION_TO_JOIN);
+                return;
+            }
+            PlayerNMSUtil.changePlayerSkin(player, SkinCache.getInstance().getTexture(role.getRoleID()), SkinCache.getInstance().getSignature(role.getRoleID()));
             ScoreboardHandler.updateScoreboard(model);
             GameInstance.getInstance().getCounter().bar.addPlayer(player);
-            Role.UpdatePlayerAbilities(player, role, model.getUpgradeLevel());
+            Role.UpdatePlayerAbilities(player);
         }
             
     }

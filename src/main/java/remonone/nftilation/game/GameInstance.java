@@ -27,21 +27,20 @@ import remonone.nftilation.game.ingame.services.SecondTierService;
 import remonone.nftilation.game.ingame.services.ServiceContainer;
 import remonone.nftilation.game.ingame.services.ThirdTierService;
 import remonone.nftilation.game.mob.AngryGolem;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.phase.PhaseCounter;
 import remonone.nftilation.game.roles.Guts;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.scoreboard.ScoreboardHandler;
 import remonone.nftilation.handlers.OnEntityDieHandler;
-import remonone.nftilation.utils.ColorUtils;
-import remonone.nftilation.utils.EntityList;
-import remonone.nftilation.utils.Logger;
-import remonone.nftilation.utils.PlayerNMSUtil;
+import remonone.nftilation.utils.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.bukkit.Bukkit.*;
+import static remonone.nftilation.game.scoreboard.ScoreboardHandler.validateParams;
 
 public class GameInstance {
     
@@ -67,7 +66,7 @@ public class GameInstance {
             initPlayerRoles(team.players);
             fillPlayerItems(team.players);
             for(PlayerModel model : team.players) {
-                ScoreboardHandler.buildScoreboard(model.reference);
+                ScoreboardHandler.buildScoreboard(model.getReference());
             }
         }
     }
@@ -102,13 +101,18 @@ public class GameInstance {
 
     private void initPlayerRoles(List<PlayerModel> models) {
         for(PlayerModel model : models) {
+            Map<String, Object> params = model.getParameters();
+            if(!PlayerUtils.validateParams(params)) {
+                continue;
+            }
+            String roleId = params.get(PropertyConstant.PLAYER_ROLE_ID).toString();
             try {
-                String texture = SkinCache.getInstance().getTexture(model.getRoleId());
-                String signature = SkinCache.getInstance().getSignature(model.getRoleId());
-                PlayerNMSUtil.changePlayerSkin(model.reference, texture, signature);
-                Role.UpdatePlayerAbilities(model.reference, Role.getRoleByID(model.roleId), model.getUpgradeLevel());
+                String texture = SkinCache.getInstance().getTexture(roleId);
+                String signature = SkinCache.getInstance().getSignature(roleId);
+                PlayerNMSUtil.changePlayerSkin(model.getReference(), texture, signature);
+                Role.UpdatePlayerAbilities(model);
             } catch(Exception ex) {
-                Logger.error("Unable load role: " + model.getRoleId() + ". Player: " + model.getReference().getDisplayName());
+                Logger.error("Unable load role: " + roleId + ". Player: " + model.getReference().getDisplayName());
             }
         }
     }
@@ -125,7 +129,13 @@ public class GameInstance {
                 if(info.getRole() == null) {
                     info.setRole(getRandomRole(entry.getValue()));
                 }
-                teamPlayers.add(new PlayerModel(getPlayer(info.getPlayerId()), true, 1, info.getRole().getRoleID(), 0, 0, 0));
+                Map<String, Object> parameters = new HashMap<>();
+                parameters.put(PropertyConstant.PLAYER_LEVEL_PARAM, 1);
+                parameters.put(PropertyConstant.PLAYER_DEATH_COUNT, 0);
+                parameters.put(PropertyConstant.PLAYER_KILL_COUNT, 0);
+                parameters.put(PropertyConstant.PLAYER_ROLE_ID, info.getRole().getRoleID());
+                parameters.put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, true);
+                teamPlayers.add(new PlayerModel(getPlayer(info.getPlayerId()), 0, parameters));
             }
             Core teamCore = SetCore(teamName, point);
             SpawnShopKeeper(point);
@@ -152,31 +162,35 @@ public class GameInstance {
     
     public void awardPlayer(String teamName, Player player, int tokens) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        model.tokens += tokens;
+        model.setTokens(model.getTokens() + tokens);
         ScoreboardHandler.updateScoreboard(model);
     }
     
     public boolean haveEnoughMoney(String teamName, Player player, int amount) {
-        return getPlayerModelFromTeam(teamName, player).tokens >= amount;
+        return getPlayerModelFromTeam(teamName, player).getTokens() >= amount;
     }
     
     public boolean withdrawFunds(String teamName, Player player, int amount) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
         if(!haveEnoughMoney(teamName, player, amount)) return false;
-        model.tokens -= amount;
+        model.setTokens(model.getTokens() - amount);
         ScoreboardHandler.updateScoreboard(model);
         return true;
     }
     
     public void increasePlayerKillCounter(String teamName, Player player) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        model.killCounter = model.killCounter + 1;
+        Map<String, Object> params = model.getParameters();
+        int killCount = (Integer) params.getOrDefault(PropertyConstant.PLAYER_KILL_COUNT, 0);
+        params.put(PropertyConstant.PLAYER_KILL_COUNT, ++killCount);
         ScoreboardHandler.updateScoreboard(model);
     }
 
     public void increasePlayerDeathCounter(String teamName, Player player) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        model.deathCounter = model.deathCounter + 1;
+        Map<String, Object> params = model.getParameters();
+        int killCount = (Integer) params.getOrDefault(PropertyConstant.PLAYER_DEATH_COUNT, 0);
+        params.put(PropertyConstant.PLAYER_DEATH_COUNT, ++killCount);
         ScoreboardHandler.updateScoreboard(model);
     }
     
@@ -213,7 +227,12 @@ public class GameInstance {
     public void upgradePlayer(Player player, int level, int price) {
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        if(level - model.upgradeLevel != 1) {
+        Map<String, Object> params = model.getParameters();
+        if(!params.containsKey(PropertyConstant.PLAYER_LEVEL_PARAM)) {
+            Logger.error("Cannot fetch upgrade level for player: " + player.getDisplayName());
+            return;
+        }
+        if(level - (int)params.get(PropertyConstant.PLAYER_LEVEL_PARAM) != 1) {
             player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_UPGRADE_LEVEL);
             return;
         }
@@ -227,8 +246,13 @@ public class GameInstance {
         }
         withdrawFunds(teamName, player, price);
         player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, .5f, 1f);
-        model.upgradeLevel = level;
-        Role role = Role.getRoleByID(model.roleId);
+        params.put(PropertyConstant.PLAYER_LEVEL_PARAM, level);
+
+        Role role = Role.getRoleByID(model.getParameters().getOrDefault(PropertyConstant.PLAYER_ROLE_ID, "_").toString());
+        if(role == null) {
+            Logger.error("Cannot upgrade level for player: " + player.getDisplayName());
+            return;
+        }
         if(role instanceof Guts) {
             if(level == 2) {
                 Logger.broadcast(ChatColor.RED + "Мишка потерял концентрацию и его внимание расплывчато!");
@@ -238,13 +262,13 @@ public class GameInstance {
             }
         }
         Role.SetInventoryItems(player, role, level);
-        Role.UpdatePlayerAbilities(player, role, level);
+        Role.UpdatePlayerAbilities(player);
         ScoreboardHandler.updateScoreboard(model);
     }
 
     private void disposePlayers() {
         for(Team team : teamData.values()) {
-            team.players.forEach(playerModel -> setPlayerToPosition(team, playerModel.reference));
+            team.players.forEach(playerModel -> setPlayerToPosition(team, playerModel.getReference()));
         }
     }
     
@@ -260,7 +284,7 @@ public class GameInstance {
     }
 
     private void fillPlayerItems(List<PlayerModel> players) {
-        players.forEach(info -> Role.refillInventoryWithItems(info.reference, Role.getRoleByID(info.roleId), info.upgradeLevel));
+        players.forEach(info -> Role.refillInventoryWithItems(info.getReference(), Role.getRoleByID(info.roleId), info.upgradeLevel));
     }
 
     public TeamData getTeamByCorePosition(Vector position) {
@@ -288,7 +312,7 @@ public class GameInstance {
             int newScale = newHP % 5;
             if(newScale > oldScale) {
                 team.players.forEach(playerModel -> {
-                    Player player = playerModel.reference;
+                    Player player = playerModel.getReference();
                     player.sendMessage(MessageConstant.TEAM_DAMAGED_MESSAGE);
                     player.playSound(player.getLocation(), Sound.ENTITY_CAT_HISS, 1f, .7f);
                 });
@@ -325,15 +349,15 @@ public class GameInstance {
         location.getBlock().setType(Material.AIR);
         notifyDestruction(team);
         
-        if(team.players.stream().noneMatch(PlayerModel::isAlive)) {
+        if(!isTeamHaveAlivePlayers(teamName)) {
             team.isActive = false;
             checkOnActiveTeams();
         }
         if((Boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_IMMINENT_DEATH, false) && !isFinished) {
             team.players.forEach(playerModel -> OnEntityDieHandler.OnDeath(playerModel.getReference()));
         }
-        for(Team activeTeam : teamData.values()) {
-            activeTeam.players.stream().filter(playerModel -> activeTeam.isCoreAlive || playerModel.isAlive).forEach(ScoreboardHandler::updateScoreboard);
+        for(Team currentTeam : teamData.values()) {
+            currentTeam.players.forEach(ScoreboardHandler::updateScoreboard);
         }
         checkOnActiveTeams();
     }
@@ -368,7 +392,7 @@ public class GameInstance {
         Bukkit.getOnlinePlayers().forEach(player -> {
             String title;
             String subTitle;
-            if(team.players.stream().anyMatch(playerModel -> playerModel.reference.getUniqueId().equals(player.getUniqueId()))) {
+            if(team.players.stream().anyMatch(playerModel -> playerModel.getReference().getUniqueId().equals(player.getUniqueId()))) {
                 title = ChatColor.RED + "" + ChatColor.BOLD + MessageConstant.CORE_DESTROYED_TITLE;
                 subTitle = ChatColor.GOLD + MessageConstant.CORE_DESTROYED_SUBTITLE;
             } else {
@@ -383,7 +407,7 @@ public class GameInstance {
     public PlayerModel getPlayerModelFromTeam(String teamName, Player player) {
         Team team = teamData.get(teamName);
         if(team == null) return null;
-        return team.getPlayers().stream().filter(playerModel -> playerModel.reference.getUniqueId().equals(player.getUniqueId())).findFirst().orElse(null);
+        return team.getPlayers().stream().filter(playerModel -> playerModel.getReference().getUniqueId().equals(player.getUniqueId())).findFirst().orElse(null);
     }
     
     public boolean isTeamAlive(String teamName) {
@@ -401,9 +425,10 @@ public class GameInstance {
         if(team == null) return;
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
         if(model == null) return;
-        model.isAlive = false;
+        Map<String, Object> params = model.getParameters();
+        params.put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, false);
         if(!team.isCoreAlive) {
-            if(team.players.stream().noneMatch(playerModel -> playerModel.isAlive)) {
+            if(team.players.stream().noneMatch(playerModel -> (Boolean)playerModel.getParameters().getOrDefault(PropertyConstant.PLAYER_IS_ALIVE_PARAM, false))) {
                 team.isActive = false;
             }
             teamData.values().stream().filter(t -> t.isActive).forEach(temp -> temp.players.forEach(ScoreboardHandler::updateScoreboard));
@@ -449,6 +474,12 @@ public class GameInstance {
         return false;
     }
 
+    private boolean isTeamHaveAlivePlayers(String teamName) {
+        Team team = teamData.getOrDefault(teamName, null);
+        if(team == null) return false;
+        return team.players.stream().anyMatch(model -> (Boolean) model.getParameters().getOrDefault(PropertyConstant.PLAYER_IS_ALIVE_PARAM, false));
+    }
+
     @Getter
     @AllArgsConstructor
     @RequiredArgsConstructor
@@ -463,21 +494,5 @@ public class GameInstance {
         private boolean isActive;
         @NonNull
         private String name;
-    }
-    
-    @Getter
-    @AllArgsConstructor
-    @ToString
-    public static class PlayerModel {
-        @Setter
-        private Player reference;
-        private boolean isAlive;
-        @Setter
-        private int upgradeLevel;
-        private String roleId;
-        @Setter
-        private int tokens;
-        private int killCounter;
-        private int deathCounter;
     }
 }

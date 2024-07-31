@@ -33,4 +33,11 @@ public class PropertyConstant {
     public static final String ACTION_COMMENT = "comment";
     public static final String ACTION_SILENT = "silent";
     public static final String ACTION_SEND_MESSAGE = "should_send_message";
+
+    public static final String PLAYER_LEVEL_PARAM = "playerLevel";
+    public static final String PLAYER_IS_ALIVE_PARAM = "playerAlive";
+    public static final String PLAYER_KILL_COUNT = "killCounter";
+    public static final String PLAYER_DEATH_COUNT = "deathCounter";
+    public static final String PLAYER_ROLE_ID = "role_id";
+
 }

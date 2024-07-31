@@ -30,7 +30,7 @@ public class CommandUtils {
             return State.FAILED_EXECUTION;
         }
         Player player = (Player) commandSender;
-        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
+        if(PlayerUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
             return State.FAILED_EXECUTION;
         }
         

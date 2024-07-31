@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import remonone.nftilation.Store;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.enums.Stage;
-import remonone.nftilation.utils.ConfigUtils;
+import remonone.nftilation.utils.PlayerUtils;
 
 public class AddIronGolemPositionCommand implements CommandExecutor {
     @Override
@@ -19,7 +19,7 @@ public class AddIronGolemPositionCommand implements CommandExecutor {
             return true;
         }
         Player player = (Player) commandSender;
-        if(ConfigUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
+        if(PlayerUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
             return true;
         }
         Location location = player.getLocation();

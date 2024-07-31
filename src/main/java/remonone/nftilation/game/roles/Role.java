@@ -18,7 +18,11 @@ import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.PlayerData;
 import remonone.nftilation.components.ItemStatModifierComponent;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
+import remonone.nftilation.game.DataInstance;
+import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.ColorUtils;
 import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.ResetUtils;
@@ -42,17 +46,29 @@ public abstract class Role implements Cloneable, Listener {
     
     public abstract int getRoleIndex();
     
-    protected abstract void setPlayer(Player player, int upgradeLevel);
+    protected abstract void setPlayer(Player player, Map<String, Object> params);
     protected void killPlayer(Player player) {}
     
-    public static void UpdatePlayerAbilities(Player player, Role role, int upgradeLevel) {
-        ResetUtils.globalResetPlayerStats(player);
+    public static void UpdatePlayerAbilities(PlayerModel model) {
+        ResetUtils.globalResetPlayerStats(model.getReference());
+        Map<String, Object> params = model.getParameters();
+        Role role = getRoleByID(params.getOrDefault(PropertyConstant.PLAYER_ROLE_ID, "_").toString());
+        if(role == null) {
+            Logger.error("Player role were set incorrectly! Skipping...");
+            return;
+        }
         new BukkitRunnable() {
             @Override
             public void run() {
-                role.setPlayer(player, upgradeLevel);
+                role.setPlayer(model.getReference(), params);
             }
         }.runTaskLater(Nftilation.getInstance(), 1);
+    }
+
+    public static void UpdatePlayerAbilities(Player player) {
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
+        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
+        UpdatePlayerAbilities(model);
     }
 
     protected ItemStack getSword(int level) {
