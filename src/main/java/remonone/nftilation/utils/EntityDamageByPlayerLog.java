@@ -12,8 +12,6 @@ import java.util.*;
 
 public class EntityDamageByPlayerLog {
     
-    private final static long LIFE_TIME = 10 * DataConstants.ONE_SECOND;
-    
     private final static Map<UUID, DamageLog> queueDictionary = new HashMap<>();
     
     public static void insertLogEvent(LivingEntity target, Player damager) {
@@ -22,7 +20,7 @@ public class EntityDamageByPlayerLog {
         if(!queueDictionary.containsKey(uuid)) {
             queueDictionary.put(uuid, null);
         }
-        queueDictionary.put(uuid, new DamageLog(damager, System.currentTimeMillis() + LIFE_TIME));
+        queueDictionary.put(uuid, new DamageLog(damager, System.currentTimeMillis() + (DataConstants.DAMAGE_REPORT_LIFETIME * DataConstants.ONE_SECOND)));
     }
     
     @Nullable
@@ -30,7 +28,7 @@ public class EntityDamageByPlayerLog {
         if(!queueDictionary.containsKey(livingEntity)) { return null; }
         DamageLog log = queueDictionary.get(livingEntity);
         if(log == null) { return null; }
-        if(log.insertionTime < System.currentTimeMillis()) {
+        if(log.compareTo(System.currentTimeMillis()) <= 0) {
             queueDictionary.remove(livingEntity);
             return null;
         }
@@ -39,13 +37,13 @@ public class EntityDamageByPlayerLog {
     
     @Setter
     @AllArgsConstructor
-    private static class DamageLog implements Comparable<DamageLog>{
+    private static class DamageLog implements Comparable<Long>{
         Player damager;
         long insertionTime;
 
         @Override
-        public int compareTo(DamageLog log) {
-            return Long.compare(log.insertionTime, insertionTime);
+        public int compareTo(Long time) {
+            return Long.compare(time, insertionTime);
         }
     }
 }

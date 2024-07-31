@@ -21,10 +21,10 @@ public class AirDrop implements IAction {
             throw new NullPointerException("Couldn't initiate AirDrop action. Team is missing!");
         }
         String teamName = (String) params.get(PropertyConstant.ACTION_TEAM);
-        if(!GameInstance.getInstance().isTeamActive(teamName)) {
+        if(!GameInstance.getInstance().getTeam(teamName).isTeamActive()) {
             return;
         }
-        TeamSpawnPoint point = GameInstance.getInstance().getTeamSpawnPoint(teamName);
+        TeamSpawnPoint point = GameInstance.getInstance().getTeam(teamName).getTeamSpawnPoint();
         Location location = point.getAirDropPosition();
         location.getBlock().setType(Material.CHEST);
         Chest chest = (Chest) location.getBlock().getState();

@@ -8,9 +8,9 @@ import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.utils.Logger;
+import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ActionContainer {
     private static final Map<ActionType, IAction> actions = new HashMap<>();
@@ -37,11 +37,8 @@ public class ActionContainer {
     private static void NotifyActionStart(IAction action, ActionType type, Map<String, Object> parameters) {
         List<Player> players;
         if(parameters.containsKey(PropertyConstant.ACTION_TEAM)) {
-            players = GameInstance.getInstance()
-                    .getTeamPlayers((String)parameters.get(PropertyConstant.ACTION_TEAM))
-                    .stream()
-                    .map(GameInstance.PlayerModel::getReference)
-                    .collect(Collectors.toList());
+            String teamName = (String)parameters.get(PropertyConstant.ACTION_TEAM);
+            players = PlayerUtils.getPlayersFromTeam(GameInstance.getInstance().getTeam(teamName));
 
         } else if(parameters.containsKey(PropertyConstant.ACTION_PLAYER)) {
             String playerName = (String)parameters.get(PropertyConstant.ACTION_PLAYER);

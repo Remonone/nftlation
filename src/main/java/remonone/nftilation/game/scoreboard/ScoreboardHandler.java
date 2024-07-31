@@ -10,13 +10,16 @@ import org.bukkit.scoreboard.ScoreboardManager;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.PlayerUtils;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ScoreboardHandler {
     
@@ -42,29 +45,38 @@ public class ScoreboardHandler {
         objective.getScore("Level: " + playerParams.get(PropertyConstant.PLAYER_LEVEL_PARAM)).setScore(++counter);
         objective.getScore("Tokens: " + model.getTokens()).setScore(++counter);
         objective.getScore("Role: " + Role.getRoleByID((String)playerParams.get(PropertyConstant.PLAYER_ROLE_ID)).getRoleName()).setScore(++counter);
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(model.getReference().getUniqueId());
-        objective.getScore("Core Health: " + instance.getCoreHealth(team)).setScore(++counter);
+        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(model.getReference().getUniqueId());
+        ITeam team = GameInstance.getInstance().getTeam(teamName);
+        objective.getScore("Core Health: " + team.getCoreData().getHealth()).setScore(++counter);
         objective.getScore(ChatColor.RED + "" + ChatColor.BOLD + "= Info =").setScore(++counter);
         objective.getScore(ChatColor.RED + "").setScore(++counter);
         objective.getScore("Deaths: " + playerParams.get(PropertyConstant.PLAYER_DEATH_COUNT)).setScore(++counter);
         objective.getScore("Kills: " + playerParams.get(PropertyConstant.PLAYER_KILL_COUNT)).setScore(++counter);
         objective.getScore(ChatColor.RED + "" + ChatColor.BOLD + "= Stats =").setScore(++counter);
         objective.getScore(ChatColor.BLUE + "").setScore(++counter);
-        Iterator<String> it = instance.getTeamIterator();
+        Iterator<ITeam> it = instance.getTeamIterator();
         while(it.hasNext()) {
-            String teamName = it.next();
+            ITeam t = it.next();
             String scoreName = teamName + "[";
-            if(instance.isTeamAlive(teamName)) {
+            if(t.isCoreAlive()) {
                 scoreName += ChatColor.GREEN + "" + ChatColor.BOLD + "✓";
-            } else if(!instance.isTeamActive(teamName)) {
+            } else if(t.isTeamActive()) {
                 scoreName += ChatColor.DARK_RED + "" + ChatColor.BOLD +  "x";
             } else {
-                scoreName += ChatColor.DARK_RED + "" + ChatColor.BOLD +  instance.getTeamPlayersAlive(teamName);
+                scoreName += ChatColor.DARK_RED + "" + ChatColor.BOLD + getTeamMembersAlive(teamName);
             }
             scoreName += ChatColor.RESET + "]";
             objective.getScore(scoreName).setScore(++counter);
         }
         objective.getScore(ChatColor.GOLD + "= Teams =").setScore(++counter);
+    }
+    
+    private static int getTeamMembersAlive(String teamName) {
+        ITeam team = GameInstance.getInstance().getTeam(teamName);
+        if(team == null) return 0;
+        if(team.isCoreAlive()) return team.getPlayers().size();
+        Collection<PlayerModel> alivePlayers = team.getPlayers().stream().filter(playerModel -> (Boolean)playerModel.getParameters().getOrDefault(PropertyConstant.PLAYER_IS_ALIVE_PARAM, false)).collect(Collectors.toList());
+        return alivePlayers.size();
     }
 
     public static void updateScoreboard(PlayerModel model) {

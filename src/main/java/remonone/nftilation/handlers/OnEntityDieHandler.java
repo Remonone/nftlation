@@ -21,9 +21,11 @@ import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.utils.EntityDamageByPlayerLog;
+import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.ResetUtils;
 
 import java.util.Objects;
@@ -144,19 +146,23 @@ public class OnEntityDieHandler implements Listener {
     public static void OnDeath(Player player) {
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         GameInstance.getInstance().setPlayerDead(teamName, player);
-        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
-        Role.OnDie(player, Role.getRoleByID(model.getRoleId()));
+        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
+        if(!PlayerUtils.validateParams(model.getParameters())) {
+            return;
+        }
+        String roleId = model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID).toString();
+        Role.onDie(player, Role.getRoleByID(roleId));
         Vector pos = ConfigManager.getInstance().getCenterDeadZoneCoords();
         Location location = pos.toLocation(Store.getInstance().getDataInstance().getMainWorld());
         player.teleport(location);
         player.setGameMode(GameMode.SPECTATOR);
         player.sendTitle(ChatColor.DARK_RED + MessageConstant.PLAYER_ON_DIE, "", 2, 30, 2);
         getServer().getScheduler().runTaskLater(Nftilation.getInstance(), () -> {
-            if(GameInstance.getInstance().isTeamAlive(teamName)) {
+            if(GameInstance.getInstance().getTeam(teamName).isCoreAlive()) {
                 GameInstance.getInstance().respawnPlayer(player, teamName);
                 ResetUtils.globalResetPlayerStats(player);
                 if((boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_INVENTORY_AUTO_CLEAR, true))
-                    Role.refillInventoryWithItems(player, Role.getRoleByID(model.getRoleId()), model.getUpgradeLevel());
+                    Role.refillInventoryWithItems(model);
             }
         }, (long) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_RESPAWN_TIMER, 5 * DataConstants.TICKS_IN_SECOND));
     }

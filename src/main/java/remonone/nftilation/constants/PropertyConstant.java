@@ -39,5 +39,6 @@ public class PropertyConstant {
     public static final String PLAYER_KILL_COUNT = "killCounter";
     public static final String PLAYER_DEATH_COUNT = "deathCounter";
     public static final String PLAYER_ROLE_ID = "role_id";
+    public static final String PLAYER_TEAM_NAME = "teamName";
 
 }

@@ -16,13 +16,14 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.application.models.TeamData;
 import remonone.nftilation.constants.BlockConstants;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.ITeam;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.rules.RuleManager;
 
 import java.util.*;
@@ -83,10 +84,10 @@ public class OnBlockDestroyHandler implements Listener {
             getServer().getScheduler().runTaskLater(Nftilation.getInstance(), task, timer);
         }
         if(block.getType() == Material.BEACON) {
-            TeamData teamData = GameInstance.getInstance().getTeamByCorePosition(block.getLocation().toVector());
+            ITeam team = GameInstance.getInstance().getTeamByCorePosition(block.getLocation().toVector());
             String playerTeam = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
             e.setCancelled(true);
-            if(teamData.getTeamName().equals(playerTeam)) {
+            if(team.getTeamName().equals(playerTeam)) {
                 return;
             }
             boolean isInvulnerable = (boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_CORE_INVULNERABLE, false);
@@ -94,9 +95,9 @@ public class OnBlockDestroyHandler implements Listener {
                 player.sendMessage(ChatColor.RED + MessageConstant.CORE_INVULNERABLE);
                 return;
             }
-            if(GameInstance.getInstance().damageCore(teamData.getTeamName(), true)) {
-                List<GameInstance.PlayerModel> players = GameInstance.getInstance().getTeamPlayers(playerTeam);
-                for(GameInstance.PlayerModel model : players) {
+            if(GameInstance.getInstance().damageCore(team.getTeamName(), true)) {
+                List<PlayerModel> players = GameInstance.getInstance().getTeam(playerTeam).getPlayers();
+                for(PlayerModel model : players) {
                     GameInstance.getInstance().awardPlayer(playerTeam, model.getReference(), DataConstants.TOKEN_PER_DESTRUCTION);
                 }
                 block.setType(Material.AIR);

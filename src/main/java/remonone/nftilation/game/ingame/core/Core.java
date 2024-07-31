@@ -2,23 +2,18 @@ package remonone.nftilation.game.ingame.core;
 
 import lombok.Getter;
 import lombok.Setter;
-import remonone.nftilation.Store;
-import remonone.nftilation.application.models.TeamData;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.rules.RuleManager;
 
-public class Core {
+public class Core implements ICoreData{
     
     @Getter
     @Setter
     private int health;
-    @Getter
-    private final TeamData teamData;
     
     private final Runnable onDieFunction;
     
-    public Core(String teamName, Runnable onDie) {
-        teamData = Store.getInstance().getDataInstance().getTeamData().stream().filter(teamData -> teamData.getTeamName().equals(teamName)).findFirst().orElse(null);
+    public Core(Runnable onDie) {
         health = 100;
         this.onDieFunction = onDie;
     }
@@ -46,5 +41,4 @@ public class Core {
     private void Die() {
         this.onDieFunction.run();
     }
-    
 }

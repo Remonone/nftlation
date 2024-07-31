@@ -23,7 +23,7 @@ public class SetTeamCoreHealth implements CommandExecutor, TabCompleter {
         if(!state.equals(CommandUtils.State.NONE)) return state.getValue();
         Player player = (Player) sender;
         String teamName = args[0];
-        int health = -1;
+        int health;
         try {
             health = Integer.parseInt(args[1]);
         } catch(NumberFormatException e) {
@@ -53,7 +53,7 @@ public class SetTeamCoreHealth implements CommandExecutor, TabCompleter {
         }
         List<String> info = new ArrayList<>();
         GameInstance instance = GameInstance.getInstance();
-        instance.getTeamIterator().forEachRemaining(info::add);
+        instance.getTeamIterator().forEachRemaining(team -> info.add(team.getTeamName()));
         return info;
     }
 }

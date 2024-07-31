@@ -26,12 +26,15 @@ import remonone.nftilation.components.ItemStatModifierComponent;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.mob.RuslanBlaze;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.BlockUtils;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.InventoryUtils;
+import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.*;
 
@@ -73,17 +76,18 @@ public class RuslanEth extends Role {
     
     
     @Override
-    public void setPlayer(Player player, int upgradeLevel) {
+    public void setPlayer(Player player, Map<String, Object> params) {
         if(!entitiesList.containsKey(player.getUniqueId())) {
             entitiesList.put(player.getUniqueId(), new ArrayList<>());
         }
         player.setHealthScaled(true);
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         float health = 12.0F + 2 * upgradeLevel;
         player.setHealthScale(health);
     }
     
     @Override
-    public List<ItemStack> getAbilityItems(int upgradeLevel) {
+    public List<ItemStack> getAbilityItems(Map<String, Object> params) {
         ItemStack snowball = new ItemStack(Material.BLAZE_POWDER);
         ItemMeta meta = snowball.getItemMeta();
         meta.setUnbreakable(true);
@@ -153,8 +157,10 @@ public class RuslanEth extends Role {
             return;
         }
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(owner.getUniqueId());
-        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, owner);
-        int bodyCount = 2 * model.getUpgradeLevel();
+        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, owner);
+        if(!PlayerUtils.validateParams(model.getParameters())) return;
+        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        int bodyCount = 2 * upgradeLevel;
         nearestEmptyBlock.setX(nearestEmptyBlock.getX() + .5F);
         nearestEmptyBlock.setZ(nearestEmptyBlock.getZ() + .5F);
         for(int i = 0; i < bodyCount; i++) {
@@ -167,7 +173,7 @@ public class RuslanEth extends Role {
         }
         List<ItemStack> stack = new ArrayList<>();
         stack.add(getCallbackItem());
-        if(model.getUpgradeLevel() > 2) {
+        if(upgradeLevel > 2) {
             stack.add(getExplodeItem());
         }
         ItemStack[] stacks = stack.toArray(new ItemStack[0]);

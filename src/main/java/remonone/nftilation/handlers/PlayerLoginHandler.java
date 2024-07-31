@@ -87,7 +87,8 @@ public class PlayerLoginHandler implements Listener {
                 return;
             }
             PlayerModel model = GameInstance.getInstance()
-                    .getTeamPlayers(playerData.getData().getTeam().getTeamName())
+                    .getTeam(playerData.getData().getTeam().getTeamName())
+                    .getPlayers()
                     .stream()
                     .filter(playerModel -> playerModel.getReference().getUniqueId().equals(playerData.getPlayerId()))
                     .findFirst()
@@ -141,7 +142,6 @@ public class PlayerLoginHandler implements Listener {
     @EventHandler
     public void onPlayerDisconnect(final PlayerQuitEvent event) {
         DataInstance dataInstance = Store.getInstance().getDataInstance();
-        Player player = event.getPlayer();
         dataInstance.DisconnectPlayer(event.getPlayer().getUniqueId());
     }
 

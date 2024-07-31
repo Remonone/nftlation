@@ -9,10 +9,10 @@ import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.IAction;
 import remonone.nftilation.utils.Logger;
+import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Inspiration implements IAction {
 
@@ -21,8 +21,8 @@ public class Inspiration implements IAction {
         if(!params.containsKey(PropertyConstant.ACTION_TEAM)) {
             throw new NullPointerException("Couldn't initiate Inspiration action. Team is missing!");
         }
-        String team = (String) params.get(PropertyConstant.ACTION_TEAM);
-        List<Player> players = GameInstance.getInstance().getTeamPlayers(team).stream().map(GameInstance.PlayerModel::getReference).collect(Collectors.toList());
+        String teamName = (String)params.get(PropertyConstant.ACTION_TEAM);
+        List<Player> players = PlayerUtils.getPlayersFromTeam(GameInstance.getInstance().getTeam(teamName));
         if(players.isEmpty()) {
             Logger.warn("Inspiration task failed. Team name has not been found!");
             return;

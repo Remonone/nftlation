@@ -8,9 +8,14 @@ import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
+import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.ITeam;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Role;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PlayerUtils {
     
@@ -34,5 +39,24 @@ public class PlayerUtils {
         return playerParams.containsKey(PropertyConstant.PLAYER_LEVEL_PARAM)
                 && playerParams.containsKey(PropertyConstant.PLAYER_KILL_COUNT)
                 && playerParams.containsKey(PropertyConstant.PLAYER_DEATH_COUNT);
+    }
+    public static List<Player> getPlayersFromTeam(ITeam team) {
+        return team.getPlayers().stream().map(PlayerModel::getReference).collect(Collectors.toList());
+    }
+
+    public static List<Player> getPlayersFromTeam(String teamName) {
+        ITeam team = GameInstance.getInstance().getTeam(teamName);
+        return getPlayersFromTeam(team);
+    }
+
+    public static boolean isTeamHaveAlivePlayers(ITeam team) {
+        if(team == null) return false;
+        return team.getPlayers().stream().anyMatch(model -> (Boolean) model.getParameters().getOrDefault(PropertyConstant.PLAYER_IS_ALIVE_PARAM, false));
+    }
+
+    public static boolean isTeamHaveAlivePlayers(String teamName) {
+        ITeam team = GameInstance.getInstance().getTeam(teamName);
+        if(team == null) return false;
+        return isTeamHaveAlivePlayers(team);
     }
 }

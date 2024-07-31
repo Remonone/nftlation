@@ -18,11 +18,14 @@ import org.bukkit.potion.PotionEffectType;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.InventoryUtils;
+import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,7 +59,8 @@ public class Monkey extends Role {
     }
     
     @Override
-    protected ItemStack getSword(int upgradeLevel) {
+    protected ItemStack getSword(Map<String, Object> params) {
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         ItemStack stack = new ItemStack(Material.STICK);
         switch(upgradeLevel) {
             case 1: 
@@ -86,27 +90,27 @@ public class Monkey extends Role {
     }
     
     @Override
-    protected ItemStack getHelmet(Player player, int upgradeLevel) {
+    protected ItemStack getHelmet(Map<String, Object> params) {
         return new ItemStack(Material.AIR);
     }
 
     @Override
-    protected ItemStack getChestplate(Player player, int upgradeLevel) {
+    protected ItemStack getChestplate(Map<String, Object> params) {
         return new ItemStack(Material.AIR);
     }
 
     @Override
-    protected ItemStack getLeggings(Player player, int upgradeLevel) {
+    protected ItemStack getLeggings(Map<String, Object> params) {
         return new ItemStack(Material.AIR);
     }
 
     @Override
-    protected ItemStack getBoots(Player player, int upgradeLevel) {
+    protected ItemStack getBoots(Map<String, Object> params) {
         return new ItemStack(Material.AIR);
     }
 
     @Override
-    protected List<ItemStack> getAbilityItems(int upgradeLevel){
+    protected List<ItemStack> getAbilityItems(Map<String, Object> params){
         ItemStack itemStack = new ItemStack(Material.INK_SACK);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setUnbreakable(true);
@@ -118,7 +122,8 @@ public class Monkey extends Role {
     }
     
     @Override
-    public void setPlayer(Player player, int upgradeLevel) {
+    public void setPlayer(Player player, Map<String, Object> params) {
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         player.setHealthScaled(true);
         float healthModifier = upgradeLevel > 2 ? 30 : 40;
         float speedModifier = .05F * upgradeLevel;
@@ -142,9 +147,10 @@ public class Monkey extends Role {
         GameInstance instance = GameInstance.getInstance();
         DataInstance dataInstance = Store.getInstance().getDataInstance();
         String team = dataInstance.getPlayerTeam(attacker.getUniqueId());
-        GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(team, attacker);
+        PlayerModel model = instance.getPlayerModelFromTeam(team, attacker);
         if(model == null) return;
-        int level = model.getUpgradeLevel();
+        if(!PlayerUtils.validateParams(model.getParameters())) return;
+        int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         if(level == 2) {
             victim.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10*DataConstants.TICKS_IN_SECOND, 1, false, true));
         } else if(level == 3) {
@@ -216,8 +222,10 @@ public class Monkey extends Role {
         GameInstance instance = GameInstance.getInstance();
         DataInstance dataInstance = Store.getInstance().getDataInstance();
         String team = dataInstance.getPlayerTeam(player.getUniqueId());
-        GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(team, player);
-        int length = 1 + model.getUpgradeLevel() * 5;
+        PlayerModel model = instance.getPlayerModelFromTeam(team, player);
+        if(!PlayerUtils.validateParams(model.getParameters())) return;
+        int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        int length = 1 + level * 5;
         World world = player.getWorld();
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, length * DataConstants.TICKS_IN_SECOND, 0, false, false));
         world.playSound(player.getLocation(), Sound.BLOCK_LAVA_EXTINGUISH, .5f, .8f);

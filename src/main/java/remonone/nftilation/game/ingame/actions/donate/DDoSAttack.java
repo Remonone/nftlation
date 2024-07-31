@@ -10,6 +10,7 @@ import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.IAction;
+import remonone.nftilation.game.models.PlayerModel;
 
 import java.util.List;
 import java.util.Map;
@@ -28,13 +29,13 @@ public class DDoSAttack implements IAction {
         }
         String teamName = (String) params.get(PropertyConstant.ACTION_TEAM);
         if(teamName == null) throw new NullPointerException("Team name is empty");
-        List<GameInstance.PlayerModel> models = GameInstance.getInstance().getTeamPlayers(teamName);
+        List<PlayerModel> models = GameInstance.getInstance().getTeam(teamName).getPlayers();
         if(models.isEmpty()) throw new NullPointerException("Wrong team name");
         BukkitRunnable runnable = new BukkitRunnable() {
             @SuppressWarnings("deprecation")
             @Override
             public void run() {
-                GameInstance.PlayerModel model = models.get(random.nextInt(models.size()));
+                PlayerModel model = models.get(random.nextInt(models.size()));
                 Player target = model.getReference();
                 Location loc = target.getLocation();
                 target.getLocation().getWorld().strikeLightningEffect(loc);

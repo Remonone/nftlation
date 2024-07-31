@@ -18,6 +18,7 @@ import remonone.nftilation.events.OnPhaseUpdateEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
+import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.rules.RuleManager;
 
 import java.util.HashMap;
@@ -105,9 +106,10 @@ public class PhaseUpdateHandler implements Listener {
                 BukkitRunnable runnable = new BukkitRunnable() {
                     @Override
                     public void run() {
-                        List<TeamData> teams = Store.getInstance().getDataInstance().getTeamData();
-                        for(TeamData team : teams) {
-                            if(GameInstance.getInstance().isTeamAlive(team.getTeamName())) {
+                        Iterator<ITeam> teamIterator = GameInstance.getInstance().getTeamIterator();
+                        while(teamIterator.hasNext()) {
+                            ITeam team = teamIterator.next();
+                            if(GameInstance.getInstance().getTeam(team.getTeamName()).isCoreAlive()) {
                                 GameInstance.getInstance().damageCore(team.getTeamName(), false);
                             }
                         }
@@ -128,11 +130,11 @@ public class PhaseUpdateHandler implements Listener {
             case 6: {
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_IMMINENT_DEATH, true);
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, DataConstants.TICKS_IN_SECOND);
-                Iterator<String> teamIt = GameInstance.getInstance().getTeamIterator();
+                Iterator<ITeam> teamIt = GameInstance.getInstance().getTeamIterator();
                 while(teamIt.hasNext()) {
-                    String team = teamIt.next();
-                    if(!GameInstance.getInstance().isTeamAlive(team)) {
-                        GameInstance.getInstance().getTeamPlayers(team).forEach(playerModel -> OnEntityDieHandler.OnDeath(playerModel.getReference()));
+                    String teamName = teamIt.next().getTeamName();
+                    if(!GameInstance.getInstance().getTeam(teamName).isCoreAlive()) {
+                        GameInstance.getInstance().getTeam(teamName).getPlayers().forEach(playerModel -> OnEntityDieHandler.OnDeath(playerModel.getReference()));
                     }
                 }
                 BukkitRunnable runnable = new BukkitRunnable() {
@@ -141,7 +143,7 @@ public class PhaseUpdateHandler implements Listener {
                         List<TeamData> teams = Store.getInstance().getDataInstance().getTeamData();
                         GameInstance instance = GameInstance.getInstance();
                         for(TeamData team : teams) {
-                            if(instance.isTeamAlive(team.getTeamName())) {
+                            if(instance.getTeam(team.getTeamName()).isCoreAlive()) {
                                 instance.damageCore(team.getTeamName(), false);
                             }
                         }

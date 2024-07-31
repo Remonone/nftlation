@@ -19,14 +19,18 @@ import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class SybilAttacker extends Role {
     
@@ -56,16 +60,18 @@ public class SybilAttacker extends Role {
     }
 
     @Override
-    public void setPlayer(Player player, int upgradeLevel) {
+    public void setPlayer(Player player, Map<String, Object> params) {
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         if(upgradeLevel > 1) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, DataConstants.CONSTANT_POTION_DURATION, 1, false, false));
         }
     }
     
     @Override
-    public List<ItemStack> getAbilityItems(int upgradeLevel) {
+    public List<ItemStack> getAbilityItems(Map<String, Object> params) {
         List<ItemStack> items = new ArrayList<>();
         ItemStack bow = new ItemStack(Material.BOW);
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         switch (upgradeLevel) {
             case 1:
                 NBT.modify(bow, nbt -> {
@@ -129,9 +135,11 @@ public class SybilAttacker extends Role {
         Role role = data.getPlayerRole(shooter.getUniqueId());
         if(!(role instanceof SybilAttacker)) return;
         String team = Store.getInstance().getDataInstance().getPlayerTeam(shooter.getUniqueId());
-        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, shooter);
+        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, shooter);
         if(model == null) return;
-        if(model.getUpgradeLevel() < 3) return;
+        if(!PlayerUtils.validateParams(model.getParameters())) return;
+        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        if(upgradeLevel < 3) return;
         Location location = null;
         if(e.getHitEntity() != null) {
             location = e.getHitEntity().getLocation();

@@ -22,9 +22,12 @@ import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.*;
 
@@ -60,7 +63,8 @@ public class Cryptomarine extends Role {
     }
     
     @Override
-    protected ItemStack getHelmet(Player player, int upgradeLevel){
+    protected ItemStack getHelmet(Map<String, Object> params){
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         ItemStack itemStack = new ItemStack(Material.LEATHER_HELMET);
         switch(upgradeLevel){
             case 1:
@@ -82,7 +86,8 @@ public class Cryptomarine extends Role {
         return itemStack;
     }
     @Override
-    protected ItemStack getChestplate(Player player, int upgradeLevel){
+    protected ItemStack getChestplate(Map<String, Object> params){
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         ItemStack itemStack = new ItemStack(Material.LEATHER_CHESTPLATE);
         switch(upgradeLevel){
             case 1:
@@ -104,7 +109,8 @@ public class Cryptomarine extends Role {
         return itemStack;
     }
     @Override
-    protected ItemStack getLeggings(Player player, int upgradeLevel){
+    protected ItemStack getLeggings(Map<String, Object> params){
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         ItemStack itemStack = new ItemStack(Material.LEATHER_LEGGINGS);
         switch(upgradeLevel){
             case 1:
@@ -123,7 +129,8 @@ public class Cryptomarine extends Role {
         return itemStack;
     }
     @Override
-    protected ItemStack getBoots(Player player, int upgradeLevel){
+    protected ItemStack getBoots(Map<String, Object> params){
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         ItemStack itemStack = new ItemStack(Material.LEATHER_BOOTS);
         switch(upgradeLevel){
             case 1:
@@ -142,7 +149,8 @@ public class Cryptomarine extends Role {
         return itemStack;
     }
     @Override
-    protected ItemStack getAxe(int upgradeLevel){
+    protected ItemStack getAxe(Map<String, Object> params){
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         ItemStack itemStack = new ItemStack(Material.LEATHER_LEGGINGS);
         switch(upgradeLevel){
             case 1:
@@ -169,7 +177,7 @@ public class Cryptomarine extends Role {
         return itemStack;
     }
     @Override
-    protected List<ItemStack> getAbilityItems(int upgradeLevel){
+    protected List<ItemStack> getAbilityItems(Map<String, Object> params){
         ItemStack itemStack = new ItemStack(Material.SHIELD);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setUnbreakable(true);
@@ -180,7 +188,9 @@ public class Cryptomarine extends Role {
     }
     
     @Override
-    public void setPlayer(Player player, int upgradeLevel) {
+    public void setPlayer(Player player, Map<String, Object> params) {
+        if(!PlayerUtils.validateParams(params)) return;
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         float health = DataConstants.PLAYER_HEALTH + upgradeLevel * 2;
         player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(health);
         float speed = DataConstants.PLAYER_SPEED;
@@ -196,8 +206,10 @@ public class Cryptomarine extends Role {
     protected void killPlayer(Player player) {
         if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Cryptomarine)) return;
         String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-        GameInstance.PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
-        if(model.getUpgradeLevel() < 3) return;
+        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
+        if(!PlayerUtils.validateParams(model.getParameters())) return;
+        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        if(upgradeLevel < 3) return;
         Location location = player.getLocation();
         player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20, 1000, false, false));
         TNTPrimed entity = player.getWorld().spawn(location, TNTPrimed.class);

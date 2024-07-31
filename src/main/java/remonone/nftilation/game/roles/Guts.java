@@ -21,13 +21,17 @@ import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.InventoryUtils;
+import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.VectorUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class Guts extends Role {
     @Override
@@ -56,7 +60,8 @@ public class Guts extends Role {
     }
 
     @Override
-    protected void setPlayer(Player player, int upgradeLevel) {
+    protected void setPlayer(Player player, Map<String, Object> params) {
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(.5F);
         float genericArmor = 20 - (10 * (upgradeLevel - 1));
         float genericArmorToughness = 20 - (10 * (upgradeLevel - 1));
@@ -69,27 +74,27 @@ public class Guts extends Role {
     }
     
     @Override
-    protected ItemStack getHelmet(Player player, int upgradeLevel) {
+    protected ItemStack getHelmet(Map<String, Object> params) {
         return new ItemStack(Material.AIR);
     }
     
     @Override
-    protected ItemStack getChestplate(Player player, int upgradeLevel) {
+    protected ItemStack getChestplate(Map<String, Object> params) {
         return new ItemStack(Material.AIR);
     }
     
     @Override
-    protected ItemStack getLeggings(Player player, int upgradeLevel) {
+    protected ItemStack getLeggings(Map<String, Object> params) {
         return new ItemStack(Material.AIR);
     }
 
     @Override
-    protected ItemStack getBoots(Player player, int upgradeLevel) {
+    protected ItemStack getBoots(Map<String, Object> params) {
         return new ItemStack(Material.AIR);
     }
     
     @Override
-    protected ItemStack getSword(int upgradeLevel) {
+    protected ItemStack getSword(Map<String, Object> params) {
         ItemStack weapon = new ItemStack(Material.DIAMOND_SWORD);
         weapon.addEnchantment(Enchantment.DAMAGE_ALL, 2);
         ItemMeta meta = weapon.getItemMeta();
@@ -101,7 +106,7 @@ public class Guts extends Role {
     }
     
     @Override
-    protected List<ItemStack> getAbilityItems(int level) {
+    protected List<ItemStack> getAbilityItems(Map<String, Object> params) {
         ItemStack pistol = new ItemStack(Material.TRIPWIRE_HOOK);
         ItemMeta teleportMeta = pistol.getItemMeta();
         teleportMeta.setDisplayName(ChatColor.DARK_PURPLE + "Пушка");
@@ -132,7 +137,10 @@ public class Guts extends Role {
         Vector targetPosition = damagee.getLocation().toVector().clone();
         Vector direction = targetPosition.subtract(attackerPosition);
         String team = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getUniqueId());
-        float knockbackScale = (GameInstance.getInstance().getPlayerModelFromTeam(team, attacker).getUpgradeLevel() > 2) ? 1.5F : 3F;
+        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, attacker);
+        if(!PlayerUtils.validateParams(model.getParameters())) return;
+        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        float knockbackScale = (upgradeLevel > 2) ? 1.5F : 3F;
         damagee.setVelocity(damagee.getVelocity().add(direction.multiply(knockbackScale)));
     }
     
@@ -166,7 +174,9 @@ public class Guts extends Role {
         }
         user.setVelocity(new Vector(0, 1, 0));
         String team = Store.getInstance().getDataInstance().getPlayerTeam(user.getUniqueId());
-        int upgradeLevel = GameInstance.getInstance().getPlayerModelFromTeam(team, user).getUpgradeLevel();
+        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, user);
+        if(!PlayerUtils.validateParams(model.getParameters())) return;
+        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -178,8 +188,7 @@ public class Guts extends Role {
         new BukkitRunnable() {
             @Override
             public void run() {
-                String team = Store.getInstance().getDataInstance().getPlayerTeam(user.getUniqueId());
-                if(GameInstance.getInstance().getPlayerModelFromTeam(team, user).getUpgradeLevel() < 3) {
+                if(upgradeLevel < 3) {
                     TNTPrimed explode = user.getWorld().spawn(user.getLocation(), TNTPrimed.class);
                     explode.setFuseTicks(0);
                     EntityHandleComponent.setEntityOwner(explode, user);
@@ -212,7 +221,9 @@ public class Guts extends Role {
         Arrow arrow = user.launchProjectile(Arrow.class);
         arrow.setVelocity(arrow.getVelocity().multiply(3.2));
         String team = Store.getInstance().getDataInstance().getPlayerTeam(user.getUniqueId());
-        int upgradeLevel = GameInstance.getInstance().getPlayerModelFromTeam(team, user).getUpgradeLevel();
+        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, user);
+        if(!PlayerUtils.validateParams(model.getParameters())) return;
+        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         long cooldown = 2 + upgradeLevel * 3L;
         InventoryUtils.setCooldownForItem(stack, cooldown);
     }

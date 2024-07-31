@@ -19,11 +19,14 @@ import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.InventoryUtils;
+import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -62,14 +65,16 @@ public class Indian extends Role {
     }
 
     @Override
-    public void setPlayer(Player player, int upgradeLevel) {
+    public void setPlayer(Player player, Map<String, Object> params) {
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         float speedAddition = .05F * (upgradeLevel + 1);
         player.setWalkSpeed(DataConstants.PLAYER_SPEED + speedAddition);
     }
     
     @Override
-    public ItemStack getPickaxe(int upgradeLevel) {
+    public ItemStack getPickaxe(Map<String, Object> params) {
         ItemStack stack = new ItemStack(Material.WOOD_PICKAXE);
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         switch (upgradeLevel) {
             case 1:
                 stack = new ItemStack(Material.IRON_PICKAXE);
@@ -99,9 +104,10 @@ public class Indian extends Role {
     }
     
     @Override
-    protected List<ItemStack> getAbilityItems(int upgradeInfo) {
+    protected List<ItemStack> getAbilityItems(Map<String, Object> params) {
+        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         ItemStack blocks = new ItemStack(Material.STONE);
-        switch (upgradeInfo) {
+        switch (upgradeLevel) {
             case 1:
                 blocks = new ItemStack(Material.WOOL);
                 NBT.modify(blocks, nbt -> {
@@ -192,15 +198,17 @@ public class Indian extends Role {
         if(StringUtils.isEmpty(isRecall) || !isRecall.equals("recall")) return;
         event.setCancelled(true);
         GameInstance instance = GameInstance.getInstance();
-        DataInstance dataInstance = Store.getInstance().getDataInstance();
-        Map<String, Object> params = dataInstance.getPlayerParams(player.getUniqueId());
+        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
+        PlayerModel model = instance.getPlayerModelFromTeam(team, player);
+        Map<String, Object> params = model.getParameters();
         if(params.containsKey("recall")) {
             player.sendMessage(ChatColor.GOLD + RoleConstant.INDIAN_RECALL_ACTIVE);
             return;
         }
         player.sendMessage(ChatColor.GOLD + MessageConstant.START_RECALL);
-        String team = dataInstance.getPlayerTeam(player.getUniqueId());
-        GameInstance.PlayerModel model = instance.getPlayerModelFromTeam(team, player);
+        
+        if(!PlayerUtils.validateParams(model.getParameters())) return;
+        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override
             public void run() {
@@ -208,7 +216,7 @@ public class Indian extends Role {
                 GameInstance.getInstance().teleportPlayerToBase(team, player);
             }
         };
-        int delay = model.getUpgradeLevel() > 2 ? RoleConstant.INDIAN_RECALL_MAX_LEVEL : RoleConstant.INDIAN_RECALL_MIN_LEVEL;
+        int delay = upgradeLevel > 2 ? RoleConstant.INDIAN_RECALL_MAX_LEVEL : RoleConstant.INDIAN_RECALL_MIN_LEVEL;
         runnable.runTaskLater(Nftilation.getInstance(), delay * 20);
         int taskId = runnable.getTaskId();
         params.put("recall", taskId);

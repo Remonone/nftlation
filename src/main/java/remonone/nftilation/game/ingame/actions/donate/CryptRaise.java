@@ -8,10 +8,10 @@ import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.IAction;
 import remonone.nftilation.utils.Logger;
+import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CryptRaise implements IAction {
 
@@ -21,7 +21,7 @@ public class CryptRaise implements IAction {
             throw new NullPointerException("Couldn't initiate CryptRaise action. Team is missing!");
         }
         String team = (String) params.get(PropertyConstant.ACTION_TEAM);
-        List<Player> players = GameInstance.getInstance().getTeamPlayers(team).stream().map(GameInstance.PlayerModel::getReference).collect(Collectors.toList());
+        List<Player> players = PlayerUtils.getPlayersFromTeam(GameInstance.getInstance().getTeam(team));
         if(players.isEmpty()) {
             Logger.warn("CryptRaise task failed. Team name has not been found!");
             return;

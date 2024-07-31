@@ -43,7 +43,7 @@ public class Checker implements IAction, Listener {
         List<TeamData> teams = Store.getInstance().getDataInstance().getTeamData();
         for(TeamData data : teams) {
             teamsCompletion.put(data.getTeamName(), false);
-            Location loc = GameInstance.getInstance().getTeamSpawnPoint(data.getTeamName()).getCheckerChestPosition();
+            Location loc = GameInstance.getInstance().getTeam(data.getTeamName()).getTeamSpawnPoint().getCheckerChestPosition();
             if(loc != null) {
                 Block block = loc.getBlock();
                 block.setType(Material.CHEST);
@@ -107,7 +107,7 @@ public class Checker implements IAction, Listener {
     }
 
     private void AwardTeam(String team) {
-        TeamSpawnPoint point = GameInstance.getInstance().getTeamSpawnPoint(team);
+        TeamSpawnPoint point = GameInstance.getInstance().getTeam(team).getTeamSpawnPoint();
         Block block = point.getCheckerChestPosition().getBlock();
         block.setType(Material.AIR);
         block.setType(Material.CHEST);
@@ -128,8 +128,14 @@ public class Checker implements IAction, Listener {
         for(Map.Entry<String, Boolean> entry : teamsCompletion.entrySet()) {
             if(entry.getValue()) continue;
             String team = entry.getKey();
-            Location loc = GameInstance.getInstance().getTeamSpawnPoint(team).getCheckerChestPosition();
-            GameInstance.getInstance().getTeamPlayers(team).forEach(playerModel -> {
+            Location loc = GameInstance.getInstance()
+                    .getTeam(team)
+                    .getTeamSpawnPoint()
+                    .getCheckerChestPosition();
+            GameInstance.getInstance()
+                    .getTeam(team)
+                    .getPlayers()
+                    .forEach(playerModel -> {
                 Player player = playerModel.getReference();
                 player.playSound(player.getLocation(), Sound.ENTITY_GHAST_HURT, 1f, .3f);
                 player.sendTitle("Вы были прокляты Браяном!", "", 10, 60, 10);
