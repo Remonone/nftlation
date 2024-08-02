@@ -20,8 +20,7 @@ import remonone.nftilation.components.ItemStatModifierComponent;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
-import remonone.nftilation.game.models.ITeam;
-import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.models.*;
 import remonone.nftilation.utils.ColorUtils;
 import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.PlayerUtils;
@@ -31,7 +30,7 @@ import java.util.*;
 
 import static org.bukkit.Bukkit.getServer;
 
-public abstract class Role implements Cloneable, Listener {
+public abstract class Role implements Cloneable, Listener, IDamageContainer {
     
     @Getter
     private final static List<Role> roles = new ArrayList<>();
@@ -278,6 +277,16 @@ public abstract class Role implements Cloneable, Listener {
     
     public static Role getRoleByID(String roleID) {
         return roles.stream().filter(role -> role.getRoleID().equals(roleID)).findFirst().orElse(null);
+    }
+    
+    @Override
+    public List<IDamageHandler> getDamageHandlers() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<IDamageInvoker> getDamageInvokers() {
+        return Collections.emptyList();
     }
 
     @Override

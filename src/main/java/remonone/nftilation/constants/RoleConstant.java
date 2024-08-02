@@ -43,6 +43,7 @@ public class RoleConstant {
     public static final int RUSLAN_NEGATIVE_AREA_RADIUS = 5;
     public static final int RUSLAN_CLONE_EXPLOSION_STRENGTH = 4;
     public static final int RUSLAN_SPAWN_CLONES_COOLDOWN = 30;
+    public static final float RUSLAN_BLAZE_DAMAGE = 5f;
     public static final String RUSLAN_AREA_EFFECT_NAME = "Газы руслана";
 
     public static final int INDIAN_BLOCK_COOLDOWN = 60;
@@ -59,11 +60,15 @@ public class RoleConstant {
     public static final String INDIAN_DESCRIPTION_4 = "А как насчёт того чтобы самому стать таким индусом?";
     public static final String INDIAN_DESCRIPTION_5 = "Невероятное упорство и трудолюбие - ваш конек.";
 
-    public static final int DOUBLE_JUMP_COOLDOWN = 5;
+    public static final int DOUBLE_JUMP_COOLDOWN = 3;
     public static final String MONKEY_DESCRIPTION_1 = "Зверь из всеми любимых гифок.";
     public static final String MONKEY_DESCRIPTION_2 = "Проворный ворюга, который умеет";
     public static final String MONKEY_DESCRIPTION_3 = "выносить ресурсы, как никто другой.";
     public static final String MONKEY_ABILITY_ITEM = "Стиль макаки";
+    public static final String MONKEY_NBT_CONTAINER = "monkey_items";
+    public static final String MONKEY_NBT_WAND = "wand";
+    public static final String MONKEY_NBT_INVISIBILITY = "invisibility";
+    public static final String MONKEY_NBT_ITEM_LEVEL = "item_level";
 
     public static final String DEFAULT_SWORD_NAME = "Тупой меч";
     public static final String DEFAULT_PICKAXE_NAME = "Хрупкая кирка";

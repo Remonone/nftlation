@@ -27,10 +27,7 @@ import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.PlayerUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SybilAttacker extends Role {
     

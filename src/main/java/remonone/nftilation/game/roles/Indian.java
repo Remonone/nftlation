@@ -221,5 +221,4 @@ public class Indian extends Role {
         int taskId = runnable.getTaskId();
         params.put("recall", taskId);
     }
-    
 }

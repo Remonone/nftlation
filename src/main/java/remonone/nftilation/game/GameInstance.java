@@ -130,14 +130,11 @@ public class GameInstance {
                 if(info.getRole() == null) {
                     info.setRole(getRandomRole(entry.getValue()));
                 }
-                Map<String, Object> parameters = new HashMap<>();
-                parameters.put(PropertyConstant.PLAYER_LEVEL_PARAM, 1);
-                parameters.put(PropertyConstant.PLAYER_DEATH_COUNT, 0);
-                parameters.put(PropertyConstant.PLAYER_KILL_COUNT, 0);
-                parameters.put(PropertyConstant.PLAYER_ROLE_ID, info.getRole().getRoleID());
-                parameters.put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, true);
-                parameters.put(PropertyConstant.PLAYER_TEAM_NAME, teamName);
-                teamPlayers.add(new PlayerModel(getPlayer(info.getPlayerId()), 0, parameters));
+                Map<String, Object> parameters = getParametersObject(info, teamName);
+                PlayerModel model = new PlayerModel(getPlayer(info.getPlayerId()), 0, parameters);
+                model.getDamageInvokers().addAll(info.getRole().getDamageInvokers());
+                model.getDamageHandlers().addAll(info.getRole().getDamageHandlers());
+                teamPlayers.add(model);
             }
             Core teamCore = SetCore(teamName, point);
             SpawnShopKeeper(point);
@@ -204,6 +201,17 @@ public class GameInstance {
             };
             teamData.put(teamName, team);
         }
+    }
+
+    private static Map<String, Object> getParametersObject(DataInstance.PlayerInfo info, String teamName) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(PropertyConstant.PLAYER_LEVEL_PARAM, 1);
+        parameters.put(PropertyConstant.PLAYER_DEATH_COUNT, 0);
+        parameters.put(PropertyConstant.PLAYER_KILL_COUNT, 0);
+        parameters.put(PropertyConstant.PLAYER_ROLE_ID, info.getRole().getRoleID());
+        parameters.put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, true);
+        parameters.put(PropertyConstant.PLAYER_TEAM_NAME, teamName);
+        return parameters;
     }
 
     private Role getRandomRole(List<DataInstance.PlayerInfo> players) {

@@ -6,7 +6,6 @@ import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
@@ -23,6 +22,8 @@ import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.damage.MonkeyWandDamage;
+import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.InventoryUtils;
 import remonone.nftilation.utils.PlayerUtils;
@@ -62,25 +63,10 @@ public class Monkey extends Role {
     protected ItemStack getSword(Map<String, Object> params) {
         int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         ItemStack stack = new ItemStack(Material.STICK);
-        switch(upgradeLevel) {
-            case 1: 
-            case 2:
-                stack = new ItemStack(Material.STICK);
-                stack.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-                NBT.modify(stack, nbt -> {
-                    nbt.setInteger("level", 2);
-                    nbt.setString("monkey", "stick");
-                });
-                break;
-            case 3:
-                stack = new ItemStack(Material.STICK);
-                stack.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-                NBT.modify(stack, nbt -> {
-                    nbt.setInteger("level", 3);
-                    nbt.setString("monkey", "stick");
-                });
-                break;
-        }
+        stack.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+        NBT.modify(stack, nbt -> {
+            nbt.setString(RoleConstant.MONKEY_NBT_CONTAINER, RoleConstant.MONKEY_NBT_WAND);
+        });
         ItemMeta meta = stack.getItemMeta();
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         String name = upgradeLevel == 3 ? "Monkey King Wand" : "BONK";
@@ -117,7 +103,7 @@ public class Monkey extends Role {
         meta.setDisplayName(RoleConstant.MONKEY_ABILITY_ITEM);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
-        NBT.modify(itemStack, nbt -> {nbt.setString("monkey", "invisibility");});
+        NBT.modify(itemStack, nbt -> {nbt.setString(RoleConstant.MONKEY_NBT_CONTAINER, RoleConstant.MONKEY_NBT_INVISIBILITY);});
         return Collections.singletonList(itemStack);
     }
     
@@ -131,32 +117,6 @@ public class Monkey extends Role {
         player.setHealthScale(DataConstants.PLAYER_HEALTH - (DataConstants.PLAYER_HEALTH / 100) * healthModifier);
         player.setAllowFlight(true);
         player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 1000000, 100, false, false));
-    }
-    
-    @EventHandler
-    public void onPlayerAttack(EntityDamageByEntityEvent e) {
-        if(!(e.getDamager() instanceof Player)) return;
-        if(!(e.getEntity() instanceof Player)) return;
-        Player attacker = (Player) e.getDamager();
-        Player victim = (Player) e.getEntity();
-        ItemStack weapon = attacker.getInventory().getItemInMainHand();
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(attacker.getUniqueId()) instanceof Monkey)) return;
-        if(weapon == null || weapon.getAmount() < 1 || !weapon.getType().equals(Material.AIR)) return;
-        String isStick = NBT.get(weapon, nbt -> (String) nbt.getString("monkey"));
-        if(StringUtils.isBlank(isStick) || !isStick.equals("stick")) return;
-        GameInstance instance = GameInstance.getInstance();
-        DataInstance dataInstance = Store.getInstance().getDataInstance();
-        String team = dataInstance.getPlayerTeam(attacker.getUniqueId());
-        PlayerModel model = instance.getPlayerModelFromTeam(team, attacker);
-        if(model == null) return;
-        if(!PlayerUtils.validateParams(model.getParameters())) return;
-        int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        if(level == 2) {
-            victim.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10*DataConstants.TICKS_IN_SECOND, 1, false, true));
-        } else if(level == 3) {
-            victim.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10*DataConstants.TICKS_IN_SECOND, 2, false, true));
-            victim.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5*DataConstants.TICKS_IN_SECOND, 1, false, true));
-        }
     }
 
     @EventHandler
@@ -230,5 +190,10 @@ public class Monkey extends Role {
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, length * DataConstants.TICKS_IN_SECOND, 0, false, false));
         world.playSound(player.getLocation(), Sound.BLOCK_LAVA_EXTINGUISH, .5f, .8f);
         InventoryUtils.setCooldownForItem(item, 60);
+    }
+
+    @Override
+    public List<IDamageInvoker> getDamageInvokers() {
+        return Collections.singletonList(new MonkeyWandDamage());
     }
 }

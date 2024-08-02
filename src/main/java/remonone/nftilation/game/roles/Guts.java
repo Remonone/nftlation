@@ -23,6 +23,8 @@ import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.IDamageHandler;
+import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.InventoryUtils;
 import remonone.nftilation.utils.PlayerUtils;
@@ -227,5 +229,14 @@ public class Guts extends Role {
         long cooldown = 2 + upgradeLevel * 3L;
         InventoryUtils.setCooldownForItem(stack, cooldown);
     }
-    
+
+    @Override
+    public List<IDamageHandler> getDamageHandlers() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<IDamageInvoker> getDamageInvokers() {
+        return Collections.emptyList();
+    }
 }

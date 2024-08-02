@@ -1,7 +1,6 @@
 package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
-import net.minecraft.server.v1_12_R1.EntityBlaze;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -19,7 +18,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.ItemStatModifierComponent;
@@ -29,7 +27,10 @@ import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.damage.RuslanBlazeDamageInvoker;
 import remonone.nftilation.game.mob.RuslanBlaze;
+import remonone.nftilation.game.models.IDamageHandler;
+import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.BlockUtils;
 import remonone.nftilation.utils.EntityList;
@@ -42,11 +43,8 @@ import static org.bukkit.Bukkit.getServer;
 
 public class RuslanEth extends Role {
     
-    private final Random random = new Random(System.currentTimeMillis());
     
     private final Map<UUID, List<LivingEntity>> entitiesList = new HashMap<>();
-    
-    private final List<PotionEffectType> negativeEffects = Arrays.asList(PotionEffectType.CONFUSION, PotionEffectType.BLINDNESS, PotionEffectType.POISON, PotionEffectType.SLOW, PotionEffectType.SLOW_DIGGING, PotionEffectType.WITHER, PotionEffectType.HARM, PotionEffectType.WEAKNESS, PotionEffectType.HUNGER, PotionEffectType.LEVITATION);
     
     @Override
     public Material getMaterial() {
@@ -72,8 +70,6 @@ public class RuslanEth extends Role {
     public int getRoleIndex() {
         return 29;
     }
-    
-    
     
     @Override
     public void setPlayer(Player player, Map<String, Object> params) {
@@ -229,58 +225,17 @@ public class RuslanEth extends Role {
             RuslanBlaze ruslanBlaze = (RuslanBlaze) ((CraftBlaze)fireball.getShooter()).getHandle();
             String team = ruslanBlaze.getTeam();
             RuslanBlaze targetBlaze = (RuslanBlaze) ((CraftBlaze)livingEntity).getHandle();
-            EntityDamageByEntityEvent event = new EntityDamageByEntityEvent((Entity)fireball.getShooter(), livingEntity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 2D);
             if(targetBlaze.getTeam().equals(team)) return;
-            getServer().getPluginManager().callEvent(event);
-            if(!event.isCancelled()) {
-                livingEntity.setHealth(livingEntity.getHealth() - event.getFinalDamage());
-                livingEntity.setLastDamageCause(event);
-                livingEntity.addPotionEffect(new PotionEffect(getRandomNegativeEffect(), 5 * DataConstants.TICKS_IN_SECOND, 1, false, true));
-            }
         }
-    }
-    
-    @SuppressWarnings("deprecation")
-    @EventHandler
-    public void onBlazeShoot(final EntityDamageByEntityEvent e) {
-        if(!(e.getDamager() instanceof Fireball)) return;
-        Fireball fireball = (Fireball) e.getDamager();
-        if(!(fireball.getShooter() instanceof Blaze)) return;
-        Blaze blaze = (Blaze) fireball.getShooter();
-        
-        if(!(e.getEntity() instanceof LivingEntity)) return;
-        LivingEntity livingEntity = (LivingEntity) e.getEntity();
-        EntityBlaze entityBlaze = ((CraftBlaze)blaze).getHandle();
-        if(!(entityBlaze instanceof RuslanBlaze)) {
-            return;
-        }
-        RuslanBlaze ruslanBlaze = (RuslanBlaze) entityBlaze;
-        Player host = (Player) ruslanBlaze.getOwner().getBukkitEntity();
-        String team = ruslanBlaze.getTeam();
-        if(host == null) {
-            return;
-        }
-        if(livingEntity instanceof Blaze) return;
-        if(livingEntity instanceof Player) {
-            String teamName = Store.getInstance().getDataInstance().getPlayerTeam(livingEntity.getUniqueId());
-            if(StringUtils.isEmpty(teamName) || teamName.equals(team)) {
-                e.setCancelled(true);
-                return;
-            }
-        }
-        e.setCancelled(true);
-        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(host, livingEntity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 2D);
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent((Entity)fireball.getShooter(), livingEntity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 2D);
         getServer().getPluginManager().callEvent(event);
         if(!event.isCancelled()) {
             livingEntity.setHealth(livingEntity.getHealth() - event.getFinalDamage());
             livingEntity.setLastDamageCause(event);
-            livingEntity.addPotionEffect(new PotionEffect(getRandomNegativeEffect(), 5 * DataConstants.TICKS_IN_SECOND, 1, false, true));
+            livingEntity.addPotionEffect(new PotionEffect(RuslanBlazeDamageInvoker.getRandomNegativeEffect(), 5 * DataConstants.TICKS_IN_SECOND, 1, false, true));
         }
     }
     
-    private PotionEffectType getRandomNegativeEffect() {
-        return negativeEffects.get(random.nextInt(negativeEffects.size()));
-    }
     
     @EventHandler
     public void onItemInteract(final PlayerInteractEvent e) {
@@ -318,7 +273,7 @@ public class RuslanEth extends Role {
                     AreaEffectCloud area = player.getWorld().spawn(loc, AreaEffectCloud.class);
                     area.setCustomName(RoleConstant.RUSLAN_AREA_EFFECT_NAME);
                     EntityHandleComponent.setEntityOwner(area, player);
-                    area.addCustomEffect(new PotionEffect(getRandomNegativeEffect(), 10 * DataConstants.TICKS_IN_SECOND, 1, false, true), true);
+                    area.addCustomEffect(new PotionEffect(RuslanBlazeDamageInvoker.getRandomNegativeEffect(), 10 * DataConstants.TICKS_IN_SECOND, 1, false, true), true);
                     area.setRadius(RoleConstant.RUSLAN_NEGATIVE_AREA_RADIUS);
                     area.setDuration(25);
                 }
@@ -341,5 +296,15 @@ public class RuslanEth extends Role {
                 player.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
             }
         }));
+    }
+
+    @Override
+    public List<IDamageHandler> getDamageHandlers() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<IDamageInvoker> getDamageInvokers() {
+        return Collections.singletonList(new RuslanBlazeDamageInvoker());
     }
 }

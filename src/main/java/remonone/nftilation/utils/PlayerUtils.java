@@ -1,9 +1,11 @@
 package remonone.nftilation.utils;
 
+import lombok.AllArgsConstructor;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.PlayerData;
+import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
@@ -58,5 +60,40 @@ public class PlayerUtils {
         ITeam team = GameInstance.getInstance().getTeam(teamName);
         if(team == null) return false;
         return isTeamHaveAlivePlayers(team);
+    }
+    
+    public static AttackerInfo getAttackerPlayer(Entity damager) {
+        if(damager instanceof Player) {
+            return new AttackerInfo((Player) damager, damager);
+        }
+        if(damager instanceof Arrow
+                || damager instanceof TNTPrimed
+                || damager instanceof AreaEffectCloud) {
+            Player player = EntityHandleComponent.getEntityOwner(damager);
+            if(player == null) return null;
+            return new AttackerInfo(player, damager);
+        }
+        if(damager instanceof Fireball) {
+            Fireball fireball = (Fireball) damager;
+            if(fireball.getShooter() instanceof Player) {
+                return new AttackerInfo((Player) fireball.getShooter(), (Player) fireball.getShooter());
+            }
+            Player shooter = EntityHandleComponent.getEntityOwner((Entity)fireball.getShooter());
+            if(shooter == null) return null;
+            return new AttackerInfo(shooter, (Entity)fireball.getShooter());
+        }
+
+        return null;
+    }
+    
+    public static PlayerModel getModelFromPlayer(Player player) {
+        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
+        return GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
+    }
+    
+    @AllArgsConstructor
+    public static class AttackerInfo {
+        public Player attacker;
+        public Entity source;
     }
 }

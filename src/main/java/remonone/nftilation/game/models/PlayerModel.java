@@ -1,21 +1,25 @@
 package remonone.nftilation.game.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-@Getter
-@AllArgsConstructor
-@ToString
+@Data
 public class PlayerModel {
     @Setter
     private Player reference;
     @Setter
     private int tokens;
-    @Getter
-    private Map<String, Object> parameters;
+    private final Map<String, Object> parameters;
+    private final List<IDamageHandler> damageHandlers = new ArrayList<>();
+    private final List<IDamageInvoker> damageInvokers = new ArrayList<>();
+    
+    public PlayerModel(Player reference, int tokens, Map<String, Object> params) {
+        this.reference = reference;
+        this.tokens = tokens;
+        this.parameters = params;
+    }
 }

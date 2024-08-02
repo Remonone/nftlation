@@ -1,41 +1,27 @@
 package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.TNTPrimed;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import remonone.nftilation.Nftilation;
-import remonone.nftilation.Store;
-import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
-import remonone.nftilation.enums.Stage;
-import remonone.nftilation.game.GameInstance;
-import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.damage.CryptomarineAxeDamage;
+import remonone.nftilation.game.damage.CryptomarineDeathHandler;
+import remonone.nftilation.game.models.IDamageHandler;
+import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.*;
 
-import static org.bukkit.Bukkit.getServer;
-
 public class Cryptomarine extends Role {
-    
-    private static final Random RANDOM = new Random();
     
     @Override
     public Material getMaterial() {
@@ -201,46 +187,14 @@ public class Cryptomarine extends Role {
             player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, DataConstants.CONSTANT_POTION_DURATION, 1, false, false));
         }
     }
-    
+
     @Override
-    protected void killPlayer(Player player) {
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Cryptomarine)) return;
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
-        if(!PlayerUtils.validateParams(model.getParameters())) return;
-        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        if(upgradeLevel < 3) return;
-        Location location = player.getLocation();
-        player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20, 1000, false, false));
-        TNTPrimed entity = player.getWorld().spawn(location, TNTPrimed.class);
-        entity.setMetadata("cryptomarine", new FixedMetadataValue(Nftilation.getInstance(), 10));
-        entity.setFuseTicks(0);
-        EntityHandleComponent.setEntityOwner(entity, player);
-        entity.setIsIncendiary(true);
+    public List<IDamageHandler> getDamageHandlers() {
+        return Collections.singletonList(new CryptomarineDeathHandler());
     }
-    
-    @SuppressWarnings("deprecation")
-    @EventHandler
-    public void onDamage(EntityDamageByEntityEvent e) {
-        if(!(e.getDamager() instanceof Player)) return;
-        if(!(e.getEntity() instanceof Player)) return;
-        if(e.getCause() == EntityDamageEvent.DamageCause.LIGHTNING) return;
-        if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
-        Player attacker = (Player)e.getDamager();
-        Player victim = (Player)e.getEntity();
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(attacker.getUniqueId()) instanceof Cryptomarine)) return;
-        ItemStack itemStack = attacker.getInventory().getItemInMainHand();
-        if(itemStack == null || itemStack.getAmount() < 1 || itemStack.getType().equals(Material.AIR)) return;
-        String axe = NBT.get(itemStack, nbt -> (String) nbt.getString("cryptomarine"));
-        if(StringUtils.isEmpty(axe) || !axe.equals("axe")) return;
-        if(RANDOM.nextFloat() > RoleConstant.CRYPTOMARINE_LIGHTNING_CHANCE) return;
-        World world = attacker.getWorld();
-        Location location = e.getEntity().getLocation();
-        world.strikeLightningEffect(location);
-        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(attacker, victim, EntityDamageEvent.DamageCause.LIGHTNING, RoleConstant.CRYPTOMARINE_LIGHTNING_DAMAGE);
-        getServer().getPluginManager().callEvent(event);
-        if(event.isCancelled()) return;
-        victim.setHealth(victim.getHealth() - event.getFinalDamage());
-        victim.setLastDamageCause(event);
+
+    @Override
+    public List<IDamageInvoker> getDamageInvokers() {
+        return Collections.singletonList(new CryptomarineAxeDamage());
     }
 }

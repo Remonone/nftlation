@@ -20,6 +20,8 @@ import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.IDamageHandler;
+import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.InventoryUtils;
 import remonone.nftilation.utils.PlayerUtils;
@@ -201,5 +203,15 @@ public class Cryptan extends Role {
         player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 10 * 20, power, false, false));
         player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 10 * 20, power, false, false));
         player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 10 * 20, power, false, false));
+    }
+
+    @Override
+    public List<IDamageHandler> getDamageHandlers() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<IDamageInvoker> getDamageInvokers() {
+        return Collections.emptyList();
     }
 }

@@ -50,7 +50,6 @@ public class DataInstance {
     
     public LoginState TryAddPlayerToGame(PlayerData playerData, Player player) {
         if(playerData.getRole().equals(PlayerRole.PLAYER) && playerData.getTeam().getTeamName().isEmpty()) return LoginState.EMPTY_TEAM;
-//        if(players.contains(playerData)) {
         if(players.stream().anyMatch(playerData1 -> playerData1.getPlayerId().equals(player.getUniqueId()))) {
             return LoginState.ALREADY_LOGGED_IN;
         }
