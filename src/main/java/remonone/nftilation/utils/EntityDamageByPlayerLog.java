@@ -34,6 +34,11 @@ public class EntityDamageByPlayerLog {
         }
         return log.damager;
     }
+
+    public static void removeLogEvent(UUID uuid) {
+        if(!queueDictionary.containsKey(uuid)) { return; }
+        queueDictionary.remove(uuid);
+    }
     
     @Setter
     @AllArgsConstructor

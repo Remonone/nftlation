@@ -14,12 +14,16 @@ import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
-import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Monkey;
 import remonone.nftilation.utils.PlayerUtils;
 
-public class MonkeyWandDamage implements IDamageInvoker {
+public class MonkeyWandDamage extends BaseDamageInvoker {
+    @Override
+    public int getPriority() {
+        return 1;
+    }
+
     @Override
     public void OnEntityDamageDealing(EntityDamageByEntityEvent e, PlayerUtils.AttackerInfo info) {
         if(!(e.getEntity() instanceof Player)) return;

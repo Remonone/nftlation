@@ -20,14 +20,17 @@ import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.IDamageHandler;
+import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.utils.EntityDamageByPlayerLog;
-import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.ResetUtils;
 
+
+import java.util.PriorityQueue;
 
 import static org.bukkit.Bukkit.getServer;
 
@@ -39,13 +42,21 @@ public class OnEntityDieHandler implements Listener {
             event.setCancelled(true);
             return;
         }
-        if(event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) return;
+
         Player player = (Player) event.getEntity();
+        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
+        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
+        if(model == null) return;
+        PriorityQueue<IDamageHandler> queue = new PriorityQueue<>(model.getDamageHandlers());
+        while(!queue.isEmpty()) {
+            queue.poll().OnDamageHandle(event);
+        }
         if(player.getHealth() - event.getFinalDamage() <= 0) {
             event.setCancelled(true);
             OnDeath(player);
             Player attacker = EntityDamageByPlayerLog.getEventLogForLivingEntity(player.getUniqueId());
             if(attacker == null) return;
+            EntityDamageByPlayerLog.removeLogEvent(player.getUniqueId());
             attacker.playSound(attacker.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f, 1.0f);
             countKill(player, attacker);
         }
@@ -63,36 +74,30 @@ public class OnEntityDieHandler implements Listener {
             Player attacker = EntityDamageByPlayerLog.getEventLogForLivingEntity(entity.getUniqueId());
             if(attacker == null) return;
             String attackerTeam = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getUniqueId());
+            EntityDamageByPlayerLog.removeLogEvent(entity.getUniqueId());
             GameInstance.getInstance().awardPlayer(attackerTeam, attacker, EntityHandleComponent.getEntityBounty(entity));
         }
     }
     
-//    @EventHandler
-//    public void onHostileEntityDamageFromPlayer(final EntityDamageByEntityEvent event) {
-//        if(event.getEntity() instanceof Player) return;
-//        if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
-//        if(!(event.getEntity() instanceof LivingEntity)) return;
-//        LivingEntity target = (LivingEntity) event.getEntity();
-//        if(target == null || !EntityHandleComponent.isEntityHostile(target)) return;
-//        Player attacker = getAttacker(event);
-//
-//        if(!(event.getDamager() instanceof Player) && event.getDamager() instanceof LivingEntity) {
-//            Player owner = EntityHandleComponent.getEntityOwner(event.getDamager());
-//            if(owner == null) {
-//                return;
-//            }
-//            attacker = owner;
-//        }
-//        if(attacker == null) {
-//            return;
-//        }
-//        if(target.getHealth() - event.getFinalDamage() <= 0) {
-//            String team = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getUniqueId());
-//            GameInstance.getInstance().awardPlayer(team, attacker, EntityHandleComponent.getEntityBounty(target));
-//        } else {
-//            EntityDamageByPlayerLog.insertLogEvent(target, attacker);
-//        }
-//    }
+    @EventHandler
+    public void onHostileEntityDamageFromPlayer(final EntityDamageByEntityEvent event) {
+        if(event.getEntity() instanceof Player) return;
+        if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
+        if(!(event.getEntity() instanceof LivingEntity)) return;
+        LivingEntity target = (LivingEntity) event.getEntity();
+        if(target == null || !EntityHandleComponent.isEntityHostile(target)) return;
+        PlayerUtils.AttackerInfo info = PlayerUtils.getAttackerPlayer(event.getDamager());
+        if(info == null) {
+            return;
+        }
+        if(target.getHealth() - event.getFinalDamage() <= 0) {
+            String team = Store.getInstance().getDataInstance().getPlayerTeam(info.attacker.getUniqueId());
+            GameInstance.getInstance().awardPlayer(team, info.attacker, EntityHandleComponent.getEntityBounty(target));
+            EntityDamageByPlayerLog.removeLogEvent(info.attacker.getUniqueId());
+        } else {
+            EntityDamageByPlayerLog.insertLogEvent(target, info.attacker);
+        }
+    }
     
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerTakeDamageFromPlayer(final EntityDamageByEntityEvent event) {
@@ -103,26 +108,24 @@ public class OnEntityDieHandler implements Listener {
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
         Player target = (Player) event.getEntity();
         PlayerUtils.AttackerInfo attackerData = PlayerUtils.getAttackerPlayer(event.getDamager());
-        Logger.debug("Got attacker");
         if(attackerData == null) return;
         PlayerModel targetModel = PlayerUtils.getModelFromPlayer(target);
         PlayerModel attackerModel = PlayerUtils.getModelFromPlayer(attackerData.attacker);
-        Logger.debug("Got models");
         if(targetModel == null || attackerModel == null) return;
         if(GameInstance.getInstance().checkIfPlayersInSameTeam(target, attackerData.attacker)) {
             event.setCancelled(true);
             return;
         }
-        targetModel.getDamageHandlers().forEach(handler -> handler.OnEntityDamageHandle(event));
-        attackerModel.getDamageInvokers().forEach(invoker -> invoker.OnEntityDamageDealing(event, attackerData));
-        
-        
-        if(target.getHealth() - event.getFinalDamage() <= 0) {
-            event.setCancelled(true);
-            OnDeath(target);
-            countKill(target, attackerData.attacker);
-            attackerData.attacker.playSound(attackerData.attacker.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f, 1.0f);
-        } else {
+        PriorityQueue<IDamageHandler> targetQueue = new PriorityQueue<>(targetModel.getDamageHandlers());
+        while(!targetQueue.isEmpty()) {
+            targetQueue.poll().OnDamageHandle(event);
+        }
+        PriorityQueue<IDamageInvoker> queue = new PriorityQueue<>(targetModel.getDamageInvokers());
+        while(!queue.isEmpty()) {
+            queue.poll().OnEntityDamageDealing(event, attackerData);
+        }
+
+        if(target.getHealth() - event.getFinalDamage() > 0) {
             EntityDamageByPlayerLog.insertLogEvent(target, attackerData.attacker);
         }
     }

@@ -20,6 +20,7 @@ import remonone.nftilation.config.TeamSpawnPoint;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
+import remonone.nftilation.game.damage.TeamAttackInvoker;
 import remonone.nftilation.game.ingame.core.Core;
 import remonone.nftilation.game.ingame.core.ICoreData;
 import remonone.nftilation.game.ingame.services.RepairCoreService;
@@ -27,9 +28,7 @@ import remonone.nftilation.game.ingame.services.SecondTierService;
 import remonone.nftilation.game.ingame.services.ServiceContainer;
 import remonone.nftilation.game.ingame.services.ThirdTierService;
 import remonone.nftilation.game.mob.AngryGolem;
-import remonone.nftilation.game.models.IModifiableTeam;
-import remonone.nftilation.game.models.ITeam;
-import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.phase.PhaseCounter;
 import remonone.nftilation.game.roles.Guts;
 import remonone.nftilation.game.roles.Role;
@@ -132,8 +131,8 @@ public class GameInstance {
                 }
                 Map<String, Object> parameters = getParametersObject(info, teamName);
                 PlayerModel model = new PlayerModel(getPlayer(info.getPlayerId()), 0, parameters);
-                model.getDamageInvokers().addAll(info.getRole().getDamageInvokers());
-                model.getDamageHandlers().addAll(info.getRole().getDamageHandlers());
+                model.getDamageInvokers().addAll(constructDamageInvokers(model));
+                model.getDamageHandlers().addAll(constructDamageHandlers(model));
                 teamPlayers.add(model);
             }
             Core teamCore = SetCore(teamName, point);
@@ -201,6 +200,29 @@ public class GameInstance {
             };
             teamData.put(teamName, team);
         }
+    }
+
+    private Collection<? extends IDamageHandler> constructDamageHandlers(PlayerModel model) {
+        List<IDamageHandler> invokers = new ArrayList<>();
+        Role role = Role.getRoleByID(model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID).toString());
+        if(role == null) {
+            Logger.error("Unexpected issue have encountered during construction damage invokers for: " + model.getReference().getDisplayName());
+            return Collections.emptyList();
+        }
+        invokers.addAll(role.getDamageHandlers());
+        return invokers;
+    }
+
+    private Collection<? extends IDamageInvoker> constructDamageInvokers(PlayerModel model) {
+        List<IDamageInvoker> invokers = new ArrayList<>();
+        invokers.add(new TeamAttackInvoker());
+        Role role = Role.getRoleByID(model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID).toString());
+        if(role == null) {
+            Logger.error("Unexpected issue have encountered during construction damage invokers for: " + model.getReference().getDisplayName());
+            return Collections.emptyList();
+        }
+        invokers.addAll(role.getDamageInvokers());
+        return invokers;
     }
 
     private static Map<String, Object> getParametersObject(DataInstance.PlayerInfo info, String teamName) {

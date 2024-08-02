@@ -18,6 +18,8 @@ public class RoleConstant {
     public static final int CRYPTAN_HOOK_BUFF_DURATION = 4;
     public static final int CRYPTAN_COOLDOWN_MAX_RANK = 3;
     public static final int CRYPTAN_COOLDOWN_LOW_RANK = 6;
+    public static final String CRYPTAN_NBT_CONTAINER = "cryptan_items";
+    public static final String CRYPTAN_NBT_HOOK = "hook";
 
     public static final String SYBIL_DESCRIPTION_1 = " \"Одна стрела?\" *усмехается*";
     public static final String SYBIL_DESCRIPTION_2 = "Если он делает что-то, то делает это по";
@@ -35,6 +37,8 @@ public class RoleConstant {
     public static final float CRYPTOMARINE_LIGHTNING_CHANCE = .3f;
     public static final float CRYPTOMARINE_LIGHTNING_DAMAGE = 4f;
     public static final int CRYPTOMARINE_EXPLOSION_STRENGTH = 4;
+    public static final String CRYPTOMARINE_NBT_CONTAINER = "cryptomarine_items";
+    public static final String CRYPTOMARINE_NBT_AXE = "axe";
 
     public static final String RUSLAN_DESCRIPTION_1 = "Экспериментальный робот.";
     public static final String RUSLAN_DESCRIPTION_2 = "Создан в подвалах неизвестного НИИ.";
@@ -68,7 +72,6 @@ public class RoleConstant {
     public static final String MONKEY_NBT_CONTAINER = "monkey_items";
     public static final String MONKEY_NBT_WAND = "wand";
     public static final String MONKEY_NBT_INVISIBILITY = "invisibility";
-    public static final String MONKEY_NBT_ITEM_LEVEL = "item_level";
 
     public static final String DEFAULT_SWORD_NAME = "Тупой меч";
     public static final String DEFAULT_PICKAXE_NAME = "Хрупкая кирка";

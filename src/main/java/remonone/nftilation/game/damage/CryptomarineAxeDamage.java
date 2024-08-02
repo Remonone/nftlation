@@ -12,7 +12,6 @@ import org.bukkit.inventory.ItemStack;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
-import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.roles.Cryptomarine;
 import remonone.nftilation.utils.PlayerUtils;
 
@@ -20,10 +19,16 @@ import java.util.Random;
 
 import static org.bukkit.Bukkit.getServer;
 
-public class CryptomarineAxeDamage implements IDamageInvoker {
+public class CryptomarineAxeDamage extends BaseDamageInvoker {
 
     private static final Random RANDOM = new Random();
-    
+
+    @Override
+    public int getPriority() {
+        return 1;
+    }
+
+    @SuppressWarnings("deprecation")
     @Override
     public void OnEntityDamageDealing(EntityDamageByEntityEvent e, PlayerUtils.AttackerInfo info) {
         if(!(e.getDamager() instanceof Player)) return;
@@ -35,8 +40,8 @@ public class CryptomarineAxeDamage implements IDamageInvoker {
         if(!(Store.getInstance().getDataInstance().getPlayerRole(attacker.getUniqueId()) instanceof Cryptomarine)) return;
         ItemStack itemStack = attacker.getInventory().getItemInMainHand();
         if(itemStack == null || itemStack.getAmount() < 1 || itemStack.getType().equals(Material.AIR)) return;
-        String axe = NBT.get(itemStack, nbt -> (String) nbt.getString("cryptomarine"));
-        if(StringUtils.isEmpty(axe) || !axe.equals("axe")) return;
+        String axe = NBT.get(itemStack, nbt -> (String) nbt.getString(RoleConstant.CRYPTOMARINE_NBT_CONTAINER));
+        if(StringUtils.isEmpty(axe) || !axe.equals(RoleConstant.CRYPTOMARINE_NBT_AXE)) return;
         if(RANDOM.nextFloat() > RoleConstant.CRYPTOMARINE_LIGHTNING_CHANCE) return;
         World world = attacker.getWorld();
         Location location = e.getEntity().getLocation();

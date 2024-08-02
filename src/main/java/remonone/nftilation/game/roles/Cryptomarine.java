@@ -152,7 +152,7 @@ public class Cryptomarine extends Role {
                 itemStack = new ItemStack(Material.DIAMOND_AXE);
                 itemStack.addEnchantment(Enchantment.DAMAGE_ALL, 1);
                 itemStack.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
-                NBT.modify(itemStack, nbt -> {nbt.setString("cryptomarine", "axe");});
+                NBT.modify(itemStack, nbt -> {nbt.setString(RoleConstant.CRYPTOMARINE_NBT_CONTAINER, RoleConstant.CRYPTOMARINE_NBT_AXE);});
                 break;
         }
         ItemMeta meta = itemStack.getItemMeta();

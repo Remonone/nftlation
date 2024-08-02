@@ -4,7 +4,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -13,12 +12,16 @@ import remonone.nftilation.Store;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
-import remonone.nftilation.game.models.IDamageHandler;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Cryptomarine;
 import remonone.nftilation.utils.PlayerUtils;
 
-public class CryptomarineDeathHandler implements IDamageHandler {
+public class CryptomarineDeathHandler extends BaseDamageHandler {
+    @Override
+    public int getPriority() {
+        return 1;
+    }
+
     @Override
     public void OnEntityDamageHandle(EntityDamageByEntityEvent e) {
         Player player = (Player) e.getEntity();
@@ -36,10 +39,5 @@ public class CryptomarineDeathHandler implements IDamageHandler {
         entity.setFuseTicks(0);
         EntityHandleComponent.setEntityOwner(entity, player);
         entity.setIsIncendiary(true);
-    }
-
-    @Override
-    public void OnDamageHandle(EntityDamageEvent e) {
-
     }
 }

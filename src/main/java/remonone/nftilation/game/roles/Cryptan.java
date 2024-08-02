@@ -20,8 +20,8 @@ import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.damage.CryptanLowDamage;
 import remonone.nftilation.game.models.IDamageHandler;
-import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.InventoryUtils;
 import remonone.nftilation.utils.PlayerUtils;
@@ -124,7 +124,7 @@ public class Cryptan extends Role {
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
-        NBT.modify(itemStack, nbt -> {nbt.setString("cryptan", "hook");});
+        NBT.modify(itemStack, nbt -> {nbt.setString(RoleConstant.CRYPTAN_NBT_CONTAINER, RoleConstant.CRYPTAN_NBT_HOOK);});
         List<ItemStack> items = new ArrayList<>();
         items.add(itemStack);
         return items;
@@ -136,6 +136,8 @@ public class Cryptan extends Role {
         Player player = event.getPlayer();
         ItemStack stack = player.getInventory().getItemInMainHand();
         if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Cryptan)) return;
+        if(stack == null || stack.getAmount() < 1 || stack.getType() == Material.AIR) return;
+        if(NBT.get(stack, nbt -> (String)nbt.getString(RoleConstant.CRYPTAN_NBT_CONTAINER)).equals(RoleConstant.CRYPTAN_NBT_HOOK)) return;
         if(InventoryUtils.isCooldownRemain(stack)) {
             InventoryUtils.notifyAboutCooldown(player, stack);
             event.setCancelled(true);
@@ -186,32 +188,10 @@ public class Cryptan extends Role {
         int setCooldown = upgradeLevel == 3 ? RoleConstant.CRYPTAN_COOLDOWN_MAX_RANK : RoleConstant.CRYPTAN_COOLDOWN_LOW_RANK;
         InventoryUtils.setCooldownForItem(stack, setCooldown);
     }
-    
-    @EventHandler
-    public void onPlayerDamage(EntityDamageEvent event) {
-        if(!(event.getEntity() instanceof Player)) return;
-        Player player = (Player) event.getEntity();
-        if(player.getHealth() - event.getFinalDamage() > 6D) return;
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Cryptan)) return;
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
-        World world = player.getWorld();
-        world.playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, .5f, 1f);
-        if(!PlayerUtils.validateParams(model.getParameters())) return;
-        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        int power = Math.min(upgradeLevel, 2);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 10 * 20, power, false, false));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 10 * 20, power, false, false));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 10 * 20, power, false, false));
-    }
 
     @Override
     public List<IDamageHandler> getDamageHandlers() {
-        return Collections.emptyList();
+        return Collections.singletonList(new CryptanLowDamage());
     }
 
-    @Override
-    public List<IDamageInvoker> getDamageInvokers() {
-        return Collections.emptyList();
-    }
 }

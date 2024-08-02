@@ -1,7 +1,6 @@
 package remonone.nftilation.game.damage;
 
 import net.minecraft.server.v1_12_R1.EntityBlaze;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftBlaze;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.Fireball;
@@ -11,11 +10,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import remonone.nftilation.Store;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.mob.RuslanBlaze;
-import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.Arrays;
@@ -24,7 +21,7 @@ import java.util.Random;
 
 import static org.bukkit.Bukkit.getServer;
 
-public class RuslanBlazeDamageInvoker implements IDamageInvoker {
+public class RuslanBlazeDamageInvoker extends BaseDamageInvoker {
 
     private final static List<PotionEffectType> negativeEffects = Arrays.asList(PotionEffectType.CONFUSION, PotionEffectType.BLINDNESS, PotionEffectType.POISON, PotionEffectType.SLOW, PotionEffectType.SLOW_DIGGING, PotionEffectType.WITHER, PotionEffectType.HARM, PotionEffectType.WEAKNESS, PotionEffectType.HUNGER, PotionEffectType.LEVITATION);
 
@@ -33,7 +30,12 @@ public class RuslanBlazeDamageInvoker implements IDamageInvoker {
     public static PotionEffectType getRandomNegativeEffect() {
         return negativeEffects.get(random.nextInt(negativeEffects.size()));
     }
-    
+
+    @Override
+    public int getPriority() {
+        return 100;
+    }
+
     @SuppressWarnings("deprecation")
     @Override
     public void OnEntityDamageDealing(EntityDamageByEntityEvent e, PlayerUtils.AttackerInfo info) {
@@ -50,16 +52,8 @@ public class RuslanBlazeDamageInvoker implements IDamageInvoker {
         }
         RuslanBlaze ruslanBlaze = (RuslanBlaze) entityBlaze;
         Player host = (Player) ruslanBlaze.getOwner().getBukkitEntity();
-        String team = ruslanBlaze.getTeam();
         if(host == null) {
             return;
-        }
-        if(livingEntity instanceof Player) {
-            String teamName = Store.getInstance().getDataInstance().getPlayerTeam(livingEntity.getUniqueId());
-            if(StringUtils.isEmpty(teamName) || teamName.equals(team)) {
-                e.setCancelled(true);
-                return;
-            }
         }
         e.setCancelled(true);
         EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(host, livingEntity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, RoleConstant.RUSLAN_BLAZE_DAMAGE);
