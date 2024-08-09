@@ -7,7 +7,9 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.events.OnPhaseUpdateEvent;
+import remonone.nftilation.game.rules.RuleManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +51,22 @@ public class PhaseCounter {
         };
         task.runTaskLater(Nftilation.getInstance(), delay);
         taskId = task.getTaskId();
+        StartCounter(delaySeconds);
+    }
+
+    public void PauseCounter() {
+        getServer().getScheduler().cancelTask(taskId);
+        RuleManager.getInstance().setRule(PropertyConstant.RULE_GAME_IS_RUNNING, false);
+    }
+
+    public void ResumeCounter() {
+        RuleManager.getInstance().setRule(PropertyConstant.RULE_GAME_IS_RUNNING, true);
+        if(phaseCounter >= phases.size()) return;
+        long delay = phases.get(phaseCounter);
+        StartCounter((int)delay);
+    }
+
+    private void StartCounter(int delaySeconds) {
         BukkitRunnable barTask = new BukkitRunnable() {
             @Override
             public void run() {
@@ -61,7 +79,7 @@ public class PhaseCounter {
         barTask.runTaskTimer(Nftilation.getInstance(), 0, 20);
         this.barTask = barTask.getTaskId();
     }
-    
+
     public String getBossBarTitle(int phase, int remainingSeconds) {
         int mins = remainingSeconds / 60;
         int secs = remainingSeconds % 60;
@@ -85,17 +103,7 @@ public class PhaseCounter {
         task.runTaskLater(Nftilation.getInstance(), delay);
         taskId = task.getTaskId();
         int delaySeconds = (int) (delay / DataConstants.TICKS_IN_MINUTE) * 60;
-        BukkitRunnable barTask = new BukkitRunnable() {
-            @Override
-            public void run() {
-                secondsCounter++;
-                int totalSeconds = delaySeconds - secondsCounter;
-                bar.setTitle(getBossBarTitle(phaseCounter + 1, totalSeconds));
-                bar.setProgress((double) totalSeconds / (double) delaySeconds);
-            }
-        };
-        barTask.runTaskTimer(Nftilation.getInstance(), 0, 20);
-        this.barTask = barTask.getTaskId();
+        StartCounter(delaySeconds);
     }
     
     public void SkipPhase() {

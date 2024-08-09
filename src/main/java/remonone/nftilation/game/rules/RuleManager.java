@@ -11,10 +11,16 @@ import java.util.Map;
 @Setter
 public class RuleManager {
 
-    @Getter
-    private final static RuleManager instance = new RuleManager();
+    private static RuleManager instance;
     
     private final Map<String, Object> inGameRules = new HashMap<>();
+
+    public static RuleManager getInstance() {
+        if(instance == null) {
+            instance = new RuleManager();
+        }
+        return instance;
+    }
     
     public RuleManager() {
         inGameRules.put(PropertyConstant.RULE_CORE_INVULNERABLE, true);
@@ -26,6 +32,8 @@ public class RuleManager {
         inGameRules.put(PropertyConstant.RULE_AVAILABLE_TIER, 1);
         inGameRules.put(PropertyConstant.RULE_CORE_DAMAGE_INTAKE, 2);
         inGameRules.put(PropertyConstant.RULE_IMMINENT_DEATH, false);
+        inGameRules.put(PropertyConstant.RULE_PLAYERS_ABLE_TO_MOVE, true);
+        inGameRules.put(PropertyConstant.RULE_GAME_IS_RUNNING, true);
     }
     
     public Object getRuleOrDefault(String rule, Object defaultValue) {

@@ -14,37 +14,47 @@ import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.events.OnCounterPauseEvent;
 import remonone.nftilation.events.OnPhaseUpdateEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.rules.RuleManager;
+import remonone.nftilation.utils.tasks.TaskCache;
+import remonone.nftilation.utils.tasks.TaskContainer;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.bukkit.Bukkit.getServer;
+
 public class PhaseUpdateHandler implements Listener {
     
     int taskId = -1;
+
+    public TaskCache cache = new TaskCache();
     
     @EventHandler
     public void onPhaseUpdate(final OnPhaseUpdateEvent event) {
         int stage = event.getPhaseStage();
-        
+        cache.clear();
         switch (stage) {
             case 1: {
-                new BukkitRunnable() {
+                BukkitRunnable runnable = new BukkitRunnable() {
                     public void run() {
                         ActionContainer.InitAction(ActionType.CHECKER, new HashMap<>());
                     }
-                }.runTaskLater(Nftilation.getInstance(), 10 * DataConstants.TICKS_IN_MINUTE);
+                };
+                int checkerDelay = 10 * DataConstants.TICKS_IN_MINUTE;
+                runnable.runTaskLater(Nftilation.getInstance(), checkerDelay);
+                cache.add(new TaskContainer(runnable, System.currentTimeMillis(), checkerDelay, 0));
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.FIRST_PHASE_TITLE, MessageConstant.FIRST_PHASE_SUBTITLE, 10, 80, 10);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.LINE_SEPARATOR);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIRST_PHASE_DESCRIPTION_1);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIRST_PHASE_DESCRIPTION_2);
+                    sendMessagesToPlayer(player,
+                            MessageConstant.FIRST_PHASE_DESCRIPTION_1,
+                            MessageConstant.FIRST_PHASE_DESCRIPTION_2);
                 }
                 break;
             }
@@ -53,10 +63,10 @@ public class PhaseUpdateHandler implements Listener {
                 SummonDiamonds();
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.SECOND_PHASE_TITLE, MessageConstant.SECOND_PHASE_SUBTITLE, 10, 80, 10);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.LINE_SEPARATOR);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.SECOND_PHASE_DESCRIPTION_1);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.SECOND_PHASE_DESCRIPTION_2);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.SECOND_PHASE_DESCRIPTION_3);
+                    sendMessagesToPlayer(player,
+                            MessageConstant.SECOND_PHASE_DESCRIPTION_1,
+                            MessageConstant.SECOND_PHASE_DESCRIPTION_2,
+                            MessageConstant.SECOND_PHASE_DESCRIPTION_3);
                 }
                 break;
             }
@@ -64,9 +74,9 @@ public class PhaseUpdateHandler implements Listener {
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_INVULNERABLE, false);
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.THIRD_PHASE_TITLE, MessageConstant.THIRD_PHASE_SUBTITLE, 10, 80, 10);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.LINE_SEPARATOR);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.THIRD_PHASE_DESCRIPTION_1);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.THIRD_PHASE_DESCRIPTION_2);
+                    sendMessagesToPlayer(player,
+                            MessageConstant.THIRD_PHASE_DESCRIPTION_1,
+                            MessageConstant.THIRD_PHASE_DESCRIPTION_2);
                 }
                 new BukkitRunnable() {
                     @Override
@@ -80,9 +90,9 @@ public class PhaseUpdateHandler implements Listener {
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_AVAILABLE_TIER, 3);
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.FOURTH_PHASE_TITLE, MessageConstant.FOURTH_PHASE_SUBTITLE, 10, 80, 10);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.LINE_SEPARATOR);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FOURTH_PHASE_DESCRIPTION_1);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FOURTH_PHASE_DESCRIPTION_2);
+                    sendMessagesToPlayer(player,
+                            MessageConstant.FOURTH_PHASE_DESCRIPTION_1,
+                            MessageConstant.FOURTH_PHASE_DESCRIPTION_2);
                 }
                 new BukkitRunnable() {
                     @Override
@@ -96,16 +106,20 @@ public class PhaseUpdateHandler implements Listener {
                         ActionContainer.InitAction(ActionType.CRYPT_DROP, new HashMap<>());
                     }
                 };
-                runnable.runTaskLater(Nftilation.getInstance(), 10 * DataConstants.TICKS_IN_MINUTE);
+                int cryptDropDelay = 10 * DataConstants.TICKS_IN_MINUTE;
+                runnable.runTaskLater(Nftilation.getInstance(), cryptDropDelay);
+                cache.add(new TaskContainer(runnable, System.currentTimeMillis(), cryptDropDelay, 0));
                 break;
             }
             case 5: {
-                RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_SELF_DESTRUCTIVE, true);
-                RuleManager.getInstance().setRule(PropertyConstant.RULE_INVENTORY_AUTO_CLEAR, false);
-                RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_DAMAGE_INTAKE, 4);
+                RuleManager instance = RuleManager.getInstance();
+                instance.setRule(PropertyConstant.RULE_CORE_SELF_DESTRUCTIVE, true);
+                instance.setRule(PropertyConstant.RULE_INVENTORY_AUTO_CLEAR, false);
+                instance.setRule(PropertyConstant.RULE_CORE_DAMAGE_INTAKE, 4);
                 BukkitRunnable runnable = new BukkitRunnable() {
                     @Override
                     public void run() {
+                        if(!(Boolean)instance.getRuleOrDefault(PropertyConstant.RULE_GAME_IS_RUNNING, true)) return;
                         Iterator<ITeam> teamIterator = GameInstance.getInstance().getTeamIterator();
                         while(teamIterator.hasNext()) {
                             ITeam team = teamIterator.next();
@@ -117,11 +131,11 @@ public class PhaseUpdateHandler implements Listener {
                 };
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.FIFTH_PHASE_TITLE, MessageConstant.FIFTH_PHASE_SUBTITLE, 10, 80, 10);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.LINE_SEPARATOR);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIFTH_PHASE_DESCRIPTION_1);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIFTH_PHASE_DESCRIPTION_2);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIFTH_PHASE_DESCRIPTION_3);
-                    player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.FIFTH_PHASE_DESCRIPTION_4);
+                    sendMessagesToPlayer(player,
+                            MessageConstant.FIFTH_PHASE_DESCRIPTION_1,
+                            MessageConstant.FIFTH_PHASE_DESCRIPTION_2,
+                            MessageConstant.FIFTH_PHASE_DESCRIPTION_3,
+                            MessageConstant.FIFTH_PHASE_DESCRIPTION_4);
                 }
                 runnable.runTaskTimer(Nftilation.getInstance(), 0, (long) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, 9 * 20));
                 taskId = runnable.getTaskId();
@@ -160,5 +174,41 @@ public class PhaseUpdateHandler implements Listener {
     private void SummonDiamonds() {
         List<Location> spawnPositions = ConfigManager.getInstance().getDiamondSpawnList();
         spawnPositions.forEach(position -> position.getBlock().setType(Material.DIAMOND_ORE));
+    }
+
+    @EventHandler
+    public void onCounterPause(final OnCounterPauseEvent e) {
+        List<TaskContainer> tasks = cache.getContainers();
+        if(e.isStopped()) {
+            tasks.forEach(task -> {
+                int ticksAfterStart = getRemainingSeconds(task);
+                if(ticksAfterStart < 0) {
+                    cache.removeTask(task);
+                    return;
+                }
+                getServer().getScheduler().cancelTask(task.getRunnable().getTaskId());
+                task.setTicksAfterStart(ticksAfterStart);
+            });
+        } else {
+            tasks.forEach(task -> {
+                task.getRunnable().runTaskLater(Nftilation.getInstance(), task.getTicksBeforeStart() - task.getTicksAfterStart());
+            });
+        }
+    }
+
+    private int getRemainingSeconds(TaskContainer task) {
+        long currentTime = System.currentTimeMillis();
+        long taskTime = task.getTaskStartTime();
+        long diff = currentTime - taskTime;
+        int diffInTicks = (int)(diff / DataConstants.ONE_SECOND) * DataConstants.TICKS_IN_SECOND;
+        if(diffInTicks > task.getTicksBeforeStart()) return -1;
+        return diffInTicks;
+    }
+
+    public void sendMessagesToPlayer(Player player, String... messages) {
+        player.sendMessage(MessageConstant.LINE_STARTED + MessageConstant.LINE_SEPARATOR);
+        for(String message : messages) {
+            player.sendMessage(MessageConstant.LINE_STARTED + message);
+        }
     }
 }

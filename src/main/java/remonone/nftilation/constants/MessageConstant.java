@@ -61,4 +61,7 @@ public class MessageConstant {
     public static final String SIXTH_PHASE_TITLE = ChatColor.DARK_RED + "Annihilation";
     public static final String SIXTH_PHASE_SUBTITLE = "Конец близок.";
     public static final String TEAM_DAMAGED_MESSAGE = "Вашему ядру нанесли урон! Проучите мерзавца посягнувшего на ваше святилище!";
+    public static final String GAME_NOT_START_YET = "Game not started yet!";
+    public static final String GAME_PAUSED = "Game is paused!";
+    public static final String GAME_RESUMED = "Game is resumed!";
 }
