@@ -56,9 +56,5 @@ public class RoleConstant {
     public static final String DEFAULT_AXE_NAME = "Треснувший топор";
     public static final String DEFAULT_SHOVEL_NAME = "Ветхая лопата";
 
-    public static final String META_ITEM_TYPE = ".type";
-    public static final String META_ITEM_NAME = ".name";
-    public static final String META_ITEM_ENCHANTS = ".enchants";
-    public static final String META_ITEM_NBT = ".nbt";
-    public static final String META_HOOK_AVAILABILITY = "hook.availability";
+    
 }

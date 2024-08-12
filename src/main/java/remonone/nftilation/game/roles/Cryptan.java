@@ -16,6 +16,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
@@ -49,7 +50,7 @@ public class Cryptan extends Role {
     @Override
     protected List<ItemStack> getAbilityItems(Map<String, Object> params) {
         int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        int hookAvailability = (int) getMetaInfo(RoleConstant.META_HOOK_AVAILABILITY, meta, upgradeLevel);
+        int hookAvailability = (int) getMetaInfo(MetaConstants.META_HOOK_AVAILABILITY, meta, upgradeLevel);
         if(upgradeLevel < hookAvailability) return Collections.emptyList();
         ItemStack itemStack = new ItemStack(Material.FISHING_ROD);
         ItemMeta meta = itemStack.getItemMeta();
@@ -117,7 +118,7 @@ public class Cryptan extends Role {
         if(!PlayerUtils.validateParams(model.getParameters())) return;
         int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         int setCooldown = upgradeLevel == 3 ? RoleConstant.CRYPTAN_COOLDOWN_MAX_RANK : RoleConstant.CRYPTAN_COOLDOWN_LOW_RANK;
-        InventoryUtils.setCooldownForItem(stack, setCooldown);
+        InventoryUtils.setCooldownForItem(model, stack, setCooldown);
     }
 
     @Override

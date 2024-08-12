@@ -151,7 +151,7 @@ public class Monkey extends Role {
         World world = player.getWorld();
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, length * DataConstants.TICKS_IN_SECOND, 0, false, false));
         world.playSound(player.getLocation(), Sound.BLOCK_LAVA_EXTINGUISH, .5f, .8f);
-        InventoryUtils.setCooldownForItem(item, 60);
+        InventoryUtils.setCooldownForItem(model, item, 60);
     }
 
     @Override

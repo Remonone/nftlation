@@ -104,7 +104,7 @@ public class RuslanEth extends Role {
         String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         EntityHandleComponent.setEntityOwner(snowball, player);
         snowball.setMetadata("invokerTeam", new FixedMetadataValue(Nftilation.getInstance(), team));
-        InventoryUtils.setCooldownForItem(interactee, RoleConstant.RUSLAN_SPAWN_CLONES_COOLDOWN);
+        InventoryUtils.setCooldownForItem(PlayerUtils.getModelFromPlayer(player), interactee, RoleConstant.RUSLAN_SPAWN_CLONES_COOLDOWN);
     }
     
     @EventHandler

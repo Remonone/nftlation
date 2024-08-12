@@ -1,6 +1,7 @@
 package remonone.nftilation.game.runes;
 
 import org.bukkit.event.EventHandler;
+import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.models.PlayerModel;
@@ -32,7 +33,7 @@ public class GreedRune extends Rune {
         if(runeId.equals("_")) { return; }
         if(!runeId.equals(getRuneID())) { return; }
         int level = (Integer) params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        Object raw = NestedObjectFetcher.getNestedObject("effect", this.getMeta(), level);
+        Object raw = NestedObjectFetcher.getNestedObject(MetaConstants.META_RUNE_EFFECT, this.getMeta(), level);
         if(raw == null) { return; }
         int additionalPercent = (Integer)raw;
         float tokens = e.getTokensAmount();

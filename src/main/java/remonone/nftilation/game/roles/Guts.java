@@ -173,7 +173,7 @@ public class Guts extends Role {
             }
         }.runTaskLater(Nftilation.getInstance(), 25);
         int cooldown =  upgradeLevel * 3;
-        InventoryUtils.setCooldownForItem(stack, cooldown);
+        InventoryUtils.setCooldownForItem(model, stack, cooldown);
     }
 
     private void shotArrow(ItemStack stack, Player user) {
@@ -188,6 +188,6 @@ public class Guts extends Role {
         if(!PlayerUtils.validateParams(model.getParameters())) return;
         int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         long cooldown = 2 + upgradeLevel * 3L;
-        InventoryUtils.setCooldownForItem(stack, cooldown);
+        InventoryUtils.setCooldownForItem(model, stack, cooldown);
     }
 }

@@ -14,9 +14,13 @@ import remonone.nftilation.components.ItemStatModifierComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
+import remonone.nftilation.events.OnCooldownApplyEvent;
 import remonone.nftilation.game.DataInstance;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.runes.Rune;
+
+import static org.bukkit.Bukkit.getServer;
 
 public class InventoryUtils {
     
@@ -72,8 +76,13 @@ public class InventoryUtils {
         player.getInventory().addItem(roleSelector);
     }
     
-    public static void setCooldownForItem(ItemStack item,  long cooldown) {
-        NBT.modify(item, nbt -> {nbt.setLong("cooldown", System.currentTimeMillis() + cooldown * DataConstants.ONE_SECOND);});
+    public static void setCooldownForItem(PlayerModel model, ItemStack item, long cooldown) {
+        float cooldownValue = cooldown;
+        OnCooldownApplyEvent event = new OnCooldownApplyEvent(model, cooldownValue);
+        getServer().getPluginManager().callEvent(event);
+        cooldownValue = event.getCooldown() * DataConstants.ONE_SECOND;
+        long finalCooldown = (long) cooldownValue;
+        NBT.modify(item, nbt -> {nbt.setLong("cooldown", System.currentTimeMillis() + finalCooldown * DataConstants.ONE_SECOND);});
     }
     
     public static boolean isCooldownRemain(ItemStack item) {

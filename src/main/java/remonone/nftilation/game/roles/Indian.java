@@ -113,7 +113,7 @@ public class Indian extends Role {
         player.getInventory().addItem(stack);
         World world = player.getWorld();
         world.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, .5f, 1f);
-        InventoryUtils.setCooldownForItem(item, RoleConstant.INDIAN_BLOCK_COOLDOWN);
+        InventoryUtils.setCooldownForItem(PlayerUtils.getModelFromPlayer(player), item, RoleConstant.INDIAN_BLOCK_COOLDOWN);
     }
 
     @EventHandler
