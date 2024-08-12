@@ -94,7 +94,7 @@ public class RuslanBlaze extends EntityBlaze implements EntityOwnable {
 
         public PathfinderGoalBlazeFireball(EntityBlaze var1) {
             this.a = var1;
-            this.a(3);
+            this.a(5);
         }
 
         public boolean a() {

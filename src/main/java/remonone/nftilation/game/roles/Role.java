@@ -3,50 +3,61 @@ package remonone.nftilation.game.roles;
 import de.tr7zw.nbtapi.NBT;
 import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.ItemStatModifierComponent;
 import remonone.nftilation.constants.PropertyConstant;
-import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.meta.MetaConfig;
+import remonone.nftilation.game.meta.RoleInfo;
 import remonone.nftilation.game.models.*;
-import remonone.nftilation.utils.ColorUtils;
-import remonone.nftilation.utils.Logger;
-import remonone.nftilation.utils.PlayerUtils;
-import remonone.nftilation.utils.ResetUtils;
+import remonone.nftilation.utils.*;
 
 import java.util.*;
 
 import static org.bukkit.Bukkit.getServer;
 
-public abstract class Role implements Cloneable, Listener, IDamageContainer {
+@Getter
+public abstract class Role implements Cloneable, Listener, IDamageContainer, IInventoryHelder {
+
+    private final Material material;
+    private final String name;
+    private final List<String> description;
+    private final int index;
+    protected final Map<String, Object> meta;
     
     @Getter
     private final static List<Role> roles = new ArrayList<>();
     
-    public abstract Material getMaterial();
-    
-    public abstract String getRoleName();
-    
-    public abstract List<String> getRoleDescription();
-    
     public abstract String getRoleID();
-    
-    public abstract int getRoleIndex();
-    
+
     protected abstract void setPlayer(Player player, Map<String, Object> params);
     protected void killPlayer(Player player) {}
+    
+    protected Role(String id) {
+        RoleInfo info = MetaConfig.getInstance().getRoles().stream().filter(roleInfo -> roleInfo.getRoleId().equals(id)).findFirst().orElse(null);
+        if(info == null) {
+            Logger.error("Cannot find info for role: " + this.getClass().getSimpleName());
+            this.material = Material.AIR;
+            this.name = "";
+            this.description = new ArrayList<>();
+            this.index = 0;
+            this.meta = new HashMap<>();
+            return;
+        }
+        this.material = Material.getMaterial(info.getMaterialName());
+        this.name = info.getRoleName();
+        this.description = info.getDescription();
+        this.index = info.getRoleIndex();
+        this.meta = info.getMetaInfo();
+    }
     
     public static void UpdatePlayerAbilities(PlayerModel model) {
         ResetUtils.globalResetPlayerStats(model.getReference());
@@ -69,83 +80,9 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer {
         PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
         UpdatePlayerAbilities(model);
     }
-
-    protected ItemStack getSword(Map<String, Object> params) {
-        Material mat = Material.STONE_SWORD;
-        ItemStack stack = new ItemStack(mat);
-        ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName(RoleConstant.DEFAULT_SWORD_NAME);
-        meta.setUnbreakable(true);
-        stack.setItemMeta(meta);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        return stack;
-    }
-    protected ItemStack getPickaxe(Map<String, Object> params) {
-        Material mat = Material.STONE_PICKAXE;
-        ItemStack stack = new ItemStack(mat);
-        ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName(RoleConstant.DEFAULT_PICKAXE_NAME);
-        meta.setUnbreakable(true);
-        stack.setItemMeta(meta);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        return stack;
-    }
-    protected ItemStack getAxe(Map<String, Object> params) {
-        Material mat = Material.STONE_AXE;
-        ItemStack stack = new ItemStack(mat);
-        ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName(RoleConstant.DEFAULT_AXE_NAME);
-        meta.setUnbreakable(true);
-        stack.setItemMeta(meta);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        return stack;
-    }
-    protected ItemStack getShovel(Map<String, Object> params) {
-        Material mat = Material.STONE_SPADE;
-        ItemStack stack = new ItemStack(mat);
-        ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName(RoleConstant.DEFAULT_SHOVEL_NAME);
-        meta.setUnbreakable(true);
-        stack.setItemMeta(meta);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        return stack;
-    }
-
+    
     protected List<ItemStack> getAbilityItems(Map<String, Object> params) {
         return Collections.emptyList();
-    }
-    
-    protected ItemStack getHelmet(Map<String, Object> params) {
-        ItemStack helmet = new ItemStack(Material.LEATHER_HELMET);
-        String teamName = params.get(PropertyConstant.PLAYER_TEAM_NAME).toString();
-        setMetaToDefaultArmor(teamName, helmet);
-        return helmet;
-    }
-    protected ItemStack getChestplate(Map<String, Object> params) {
-        ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
-        String teamName = params.get(PropertyConstant.PLAYER_TEAM_NAME).toString();
-        setMetaToDefaultArmor(teamName, chestplate);
-        return chestplate;
-    }
-    protected ItemStack getLeggings(Map<String, Object> params) {
-        ItemStack leggings = new ItemStack(Material.LEATHER_LEGGINGS);
-        String teamName = params.get(PropertyConstant.PLAYER_TEAM_NAME).toString();
-        setMetaToDefaultArmor(teamName, leggings);
-        return leggings;
-    }
-    protected ItemStack getBoots(Map<String, Object> params) {
-        ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);
-        String teamName = params.get(PropertyConstant.PLAYER_TEAM_NAME).toString();
-        setMetaToDefaultArmor(teamName, boots);
-        return boots;
-    }
-    
-    private void setMetaToDefaultArmor(String teamName, ItemStack stack) {
-        LeatherArmorMeta meta = (LeatherArmorMeta) stack.getItemMeta();
-        ITeam team = GameInstance.getInstance().getTeam(teamName);
-        meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(team.getTeamColor())));
-        meta.setUnbreakable(true);
-        stack.setItemMeta(meta);
     }
     
     public static void registerRole(Class<? extends Role> role) {
@@ -175,10 +112,10 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer {
         Role role = getRoleByID(params.getOrDefault(PropertyConstant.PLAYER_ROLE_ID, "_").toString());
         
         ItemStack[] itemStacks = Arrays.asList(
-                role.getSword(params), 
-                role.getPickaxe(params),
-                role.getAxe(params),
-                role.getShovel(params)).toArray(new ItemStack[0]);
+                RoleItemDispenser.getItem(RoleItemDispenser.ItemType.SWORD, params, role.meta),
+                RoleItemDispenser.getItem(RoleItemDispenser.ItemType.PICKAXE, params, role.meta),
+                RoleItemDispenser.getItem(RoleItemDispenser.ItemType.AXE, params, role.meta),
+                RoleItemDispenser.getItem(RoleItemDispenser.ItemType.SHOVEL, params, role.meta)).toArray(new ItemStack[0]);
         SetOwner(player, itemStacks);
         for(ItemStack stack : itemStacks) {
             ItemStatModifierComponent.markItemAsUndroppable(stack);
@@ -244,23 +181,12 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer {
             return;
         }
         Role role = getRoleByID(params.get(PropertyConstant.PLAYER_ROLE_ID).toString());
-        ItemStack helmet = role.getHelmet(params);
-        ItemStack chestplate = role.getChestplate(params);
-        ItemStack leggings = role.getLeggings(params);
-        ItemStack boots = role.getBoots(params);
+        ItemStack helmet = RoleItemDispenser.getItem(RoleItemDispenser.ItemType.HELMET, params, role.meta);
+        ItemStack chestplate = RoleItemDispenser.getItem(RoleItemDispenser.ItemType.CHESTPLATE, params, role.meta);
+        ItemStack leggings = RoleItemDispenser.getItem(RoleItemDispenser.ItemType.LEGGINGS, params, role.meta);
+        ItemStack boots = RoleItemDispenser.getItem(RoleItemDispenser.ItemType.BOOTS, params, role.meta);
         SetOwner(player, helmet, chestplate, leggings, boots);
-        ItemStatModifierComponent.markItemAsDefault(helmet);
-        ItemStatModifierComponent.markItemAsDefault(chestplate);
-        ItemStatModifierComponent.markItemAsDefault(leggings);
-        ItemStatModifierComponent.markItemAsDefault(boots);
-        ItemStatModifierComponent.markItemAsUnstorable(helmet);
-        ItemStatModifierComponent.markItemAsUnstorable(chestplate);
-        ItemStatModifierComponent.markItemAsUnstorable(leggings);
-        ItemStatModifierComponent.markItemAsUnstorable(boots);
-        ItemStatModifierComponent.markItemAsUndroppable(helmet);
-        ItemStatModifierComponent.markItemAsUndroppable(chestplate);
-        ItemStatModifierComponent.markItemAsUndroppable(leggings);
-        ItemStatModifierComponent.markItemAsUndroppable(boots);
+        MarkEquipment(helmet, chestplate, leggings, boots);
         ItemStack equippedHelmet = equipment.getHelmet();
         if(equippedHelmet != null && !ItemStatModifierComponent.checkItemIfDefault(equippedHelmet)) player.getInventory().addItem(equippedHelmet.clone());
         equipment.setHelmet(helmet);
@@ -274,7 +200,15 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer {
         if(equippedBoots != null && !ItemStatModifierComponent.checkItemIfDefault(equippedBoots)) player.getInventory().addItem(equippedBoots.clone());
         equipment.setBoots(boots);
     }
-    
+
+    private static void MarkEquipment(ItemStack... items) {
+        for(ItemStack itemStack : items) {
+            ItemStatModifierComponent.markItemAsDefault(itemStack);
+            ItemStatModifierComponent.markItemAsUnstorable(itemStack);
+            ItemStatModifierComponent.markItemAsUndroppable(itemStack);
+        }
+    }
+
     public static Role getRoleByID(String roleID) {
         return roles.stream().filter(role -> role.getRoleID().equals(roleID)).findFirst().orElse(null);
     }
@@ -296,5 +230,9 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+    
+    protected Object getMetaInfo(String path, Map<String, Object> meta, int level) {
+        return NestedObjectFetcher.getNestedObject(path, meta, level);
     }
 }

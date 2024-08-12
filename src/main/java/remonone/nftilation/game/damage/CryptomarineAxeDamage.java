@@ -1,4 +1,4 @@
-﻿package remonone.nftilation.game.damage;
+package remonone.nftilation.game.damage;
 
 import de.tr7zw.nbtapi.NBT;
 import org.apache.commons.lang.StringUtils;

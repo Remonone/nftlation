@@ -17,7 +17,7 @@ public class PlayerCollection implements ConfigurationSerializable, Cloneable {
 
     private Map<String, Object> parameters;
     private Location location;
-    private int tokens;
+    private float tokens;
     private double currentHealth;
 
     @Override
@@ -30,6 +30,7 @@ public class PlayerCollection implements ConfigurationSerializable, Cloneable {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     public static PlayerCollection deserialize(Map<String, Object> parameters) {
         int tokens = 0;
         Map<String, Object> params = new HashMap<>();

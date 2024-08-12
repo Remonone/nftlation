@@ -1,6 +1,5 @@
 package remonone.nftilation.game.rules;
 
-import lombok.Getter;
 import lombok.Setter;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;

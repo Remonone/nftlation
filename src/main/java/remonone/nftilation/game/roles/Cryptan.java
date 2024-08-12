@@ -3,7 +3,6 @@ package remonone.nftilation.game.roles;
 import de.tr7zw.nbtapi.NBT;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -31,29 +30,14 @@ import java.util.*;
 import static org.bukkit.Bukkit.getServer;
 
 public class Cryptan extends Role {
-    @Override
-    public Material getMaterial() {
-        return Material.GOLD_INGOT;
-    }
-
-    @Override
-    public String getRoleName() {
-        return "Cryptan";
-    }
-
-    @Override
-    public List<String> getRoleDescription() {
-        return Arrays.asList(RoleConstant.CRYPTAN_DESCRIPTION_1, RoleConstant.CRYPTAN_DESCRIPTION_2, RoleConstant.CRYPTAN_DESCRIPTION_3);
+    
+    public Cryptan() {
+        super("CY");
     }
 
     @Override
     public String getRoleID() {
         return "CY";
-    }
-
-    @Override
-    public int getRoleIndex() {
-        return 20;
     }
     
 
@@ -61,63 +45,12 @@ public class Cryptan extends Role {
     public void setPlayer(Player player, Map<String, Object> params) {
         player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(RoleConstant.CRYPTAN_ATTACK_SPEED);
     }
-
-    @Override
-    protected ItemStack getSword(Map<String, Object> params) {
-        int upgradeLevel = (Integer) params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        ItemStack itemStack = new ItemStack(Material.WOOD_SWORD);
-        switch(upgradeLevel) {
-            case 1:
-                itemStack = new ItemStack(Material.IRON_SWORD);
-                itemStack.addEnchantment(Enchantment.DAMAGE_ALL, 1);
-                break;
-            case 2:
-                itemStack = new ItemStack(Material.IRON_SWORD);
-                itemStack.addEnchantment(Enchantment.DAMAGE_ALL, 2);
-                break;
-            case 3:
-                itemStack = new ItemStack(Material.DIAMOND_SWORD);
-                itemStack.addEnchantment(Enchantment.DAMAGE_ALL, 4);
-                break;
-        }
-        ItemMeta meta = itemStack.getItemMeta();
-        meta.setDisplayName(RoleConstant.CRYPTAN_SWORD);
-        meta.setUnbreakable(true);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        itemStack.setItemMeta(meta);
-        return itemStack;
-    }
-    
-    @Override
-    protected ItemStack getChestplate(Map<String, Object> params) {
-        ItemStack itemStack = new ItemStack(Material.WOOD_SWORD);
-        int upgradeLevel = (Integer) params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        switch(upgradeLevel) {
-            case 1:
-                itemStack = new ItemStack(Material.IRON_CHESTPLATE);
-                itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
-                break;
-            case 2:
-                itemStack = new ItemStack(Material.IRON_CHESTPLATE);
-                itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
-                break;
-            case 3:
-                itemStack = new ItemStack(Material.DIAMOND_CHESTPLATE);
-                itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
-                break;
-        }
-        ItemMeta meta = itemStack.getItemMeta();
-        meta.setDisplayName(RoleConstant.CRYPTAN_CHESTPLATE_NAME);
-        meta.setUnbreakable(true);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        itemStack.setItemMeta(meta);
-        return itemStack;
-    }
     
     @Override
     protected List<ItemStack> getAbilityItems(Map<String, Object> params) {
         int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        if(upgradeLevel < 2) return Collections.emptyList();
+        int hookAvailability = (int) getMetaInfo(RoleConstant.META_HOOK_AVAILABILITY, meta, upgradeLevel);
+        if(upgradeLevel < hookAvailability) return Collections.emptyList();
         ItemStack itemStack = new ItemStack(Material.FISHING_ROD);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setDisplayName(RoleConstant.CRYPTAN_ABILITY);
@@ -136,8 +69,6 @@ public class Cryptan extends Role {
         Player player = event.getPlayer();
         ItemStack stack = player.getInventory().getItemInMainHand();
         if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Cryptan)) return;
-        if(stack == null || stack.getAmount() < 1 || stack.getType() == Material.AIR) return;
-        if(NBT.get(stack, nbt -> (String)nbt.getString(RoleConstant.CRYPTAN_NBT_CONTAINER)).equals(RoleConstant.CRYPTAN_NBT_HOOK)) return;
         if(InventoryUtils.isCooldownRemain(stack)) {
             InventoryUtils.notifyAboutCooldown(player, stack);
             event.setCancelled(true);

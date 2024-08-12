@@ -31,4 +31,8 @@ public class ShopItemRegistry {
         }
         return itemRegistry.get(id);
     }
+    
+    public static void clearRegister() {
+        itemRegistry.clear();
+    }
 }

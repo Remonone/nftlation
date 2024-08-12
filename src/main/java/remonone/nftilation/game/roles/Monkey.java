@@ -3,7 +3,6 @@ package remonone.nftilation.game.roles;
 import de.tr7zw.nbtapi.NBT;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -16,7 +15,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.DataConstants;
-import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
@@ -28,72 +26,36 @@ import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.InventoryUtils;
 import remonone.nftilation.utils.PlayerUtils;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class Monkey extends Role {
-    @Override
-    public Material getMaterial() {
-        return Material.BROWN_MUSHROOM;
+    
+    public Monkey() {
+        super("MN");
     }
-
-    @Override
-    public String getRoleName() {
-        return "Monkey";
-    }
-
-    @Override
-    public List<String> getRoleDescription() {
-        return Arrays.asList(RoleConstant.MONKEY_DESCRIPTION_1, RoleConstant.MONKEY_DESCRIPTION_2, RoleConstant.MONKEY_DESCRIPTION_3);
-    }
-
+    
     @Override
     public String getRoleID() {
         return "MN";
     }
 
-    @Override
-    public int getRoleIndex() {
-        return 33;
-    }
-    
-    @Override
-    protected ItemStack getSword(Map<String, Object> params) {
-        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        ItemStack stack = new ItemStack(Material.STICK);
-        stack.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-        NBT.modify(stack, nbt -> {
-            nbt.setString(RoleConstant.MONKEY_NBT_CONTAINER, RoleConstant.MONKEY_NBT_WAND);
-        });
-        ItemMeta meta = stack.getItemMeta();
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        String name = upgradeLevel == 3 ? "Monkey King Wand" : "BONK";
-        meta.setDisplayName(name);
-        stack.setItemMeta(meta);
-        return stack;
-    }
-    
-    @Override
-    protected ItemStack getHelmet(Map<String, Object> params) {
-        return new ItemStack(Material.AIR);
-    }
-
-    @Override
-    protected ItemStack getChestplate(Map<String, Object> params) {
-        return new ItemStack(Material.AIR);
-    }
-
-    @Override
-    protected ItemStack getLeggings(Map<String, Object> params) {
-        return new ItemStack(Material.AIR);
-    }
-
-    @Override
-    protected ItemStack getBoots(Map<String, Object> params) {
-        return new ItemStack(Material.AIR);
-    }
+//    @Override
+//    protected ItemStack getSword(Map<String, Object> params) {
+//        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
+//        ItemStack stack = new ItemStack(Material.STICK);
+//        stack.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+//        NBT.modify(stack, nbt -> {
+//            nbt.setString(RoleConstant.MONKEY_NBT_CONTAINER, RoleConstant.MONKEY_NBT_WAND);
+//        });
+//        ItemMeta meta = stack.getItemMeta();
+//        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+//        String name = upgradeLevel == 3 ? "Monkey King Wand" : "BONK";
+//        meta.setDisplayName(name);
+//        stack.setItemMeta(meta);
+//        return stack;
+//    }
 
     @Override
     protected List<ItemStack> getAbilityItems(Map<String, Object> params){
@@ -130,7 +92,8 @@ public class Monkey extends Role {
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) {
             return;
         }
-        Map<String, Object> params = Store.getInstance().getDataInstance().getPlayerParams(accessor.getUniqueId());
+        PlayerModel model = PlayerUtils.getModelFromPlayer(accessor);
+        Map<String, Object> params = model.getParameters();
         e.setCancelled(true);
         accessor.setAllowFlight(false);
         accessor.setFlying(false);
@@ -153,7 +116,8 @@ public class Monkey extends Role {
     }
 
     private void CheckOnGround(Player accessor, Location from, Location to) {
-        Map<String, Object> params = Store.getInstance().getDataInstance().getPlayerParams(accessor.getUniqueId());
+        PlayerModel model = PlayerUtils.getModelFromPlayer(accessor);
+        Map<String, Object> params = model.getParameters();
         if((from.getBlockY()>to.getBlockY())
                 && !(accessor.getLocation().add(0, -2, 0)
                 .getBlock()
@@ -171,12 +135,10 @@ public class Monkey extends Role {
             return;
         }
         if (!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Monkey)) return;
-        String isInvisiblity = NBT.get(item, nbt -> (String) nbt.getString("monkey"));
-        if (StringUtils.isEmpty(isInvisiblity) || !isInvisiblity.equals("invisibility")) return;
-        long cooldown = NBT.get(item, nbt -> (Long) nbt.getLong("cooldown"));
-        if(cooldown > System.currentTimeMillis()) {
-            player.playSound(player.getLocation(), Sound.ENTITY_CAT_HURT, 1f, 1f);
-            player.sendMessage(ChatColor.RED + MessageConstant.ITEM_COOLDOWN + (int)((cooldown - System.currentTimeMillis()) / 1000));
+        String isInvisiblity = NBT.get(item, nbt -> (String) nbt.getString(RoleConstant.MONKEY_NBT_CONTAINER));
+        if (StringUtils.isEmpty(isInvisiblity) || !isInvisiblity.equals(RoleConstant.MONKEY_NBT_INVISIBILITY)) return;
+        if(InventoryUtils.isCooldownRemain(item)) {
+            InventoryUtils.notifyAboutCooldown(player, item);
             return;
         }
         GameInstance instance = GameInstance.getInstance();

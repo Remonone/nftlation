@@ -6,7 +6,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -23,42 +22,24 @@ import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
-import remonone.nftilation.game.models.IDamageHandler;
-import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.InventoryUtils;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.VectorUtils;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class Guts extends Role {
-    @Override
-    public Material getMaterial() {
-        return Material.DIAMOND_SWORD;
+    
+    public Guts() {
+        super("GT");
     }
-
-    @Override
-    public String getRoleName() {
-        return "Guts";
-    }
-
-    @Override
-    public List<String> getRoleDescription() {
-        return Collections.singletonList("Ты знаешь что делать. ;)");
-    }
-
+    
     @Override
     public String getRoleID() {
         return "GT";
-    }
-
-    @Override
-    public int getRoleIndex() {
-        return 40;
     }
 
     @Override
@@ -75,37 +56,17 @@ public class Guts extends Role {
         player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, Integer.MAX_VALUE, 1));
     }
     
-    @Override
-    protected ItemStack getHelmet(Map<String, Object> params) {
-        return new ItemStack(Material.AIR);
-    }
-    
-    @Override
-    protected ItemStack getChestplate(Map<String, Object> params) {
-        return new ItemStack(Material.AIR);
-    }
-    
-    @Override
-    protected ItemStack getLeggings(Map<String, Object> params) {
-        return new ItemStack(Material.AIR);
-    }
-
-    @Override
-    protected ItemStack getBoots(Map<String, Object> params) {
-        return new ItemStack(Material.AIR);
-    }
-    
-    @Override
-    protected ItemStack getSword(Map<String, Object> params) {
-        ItemStack weapon = new ItemStack(Material.DIAMOND_SWORD);
-        weapon.addEnchantment(Enchantment.DAMAGE_ALL, 2);
-        ItemMeta meta = weapon.getItemMeta();
-        meta.setDisplayName(ChatColor.BOLD + "" + ChatColor.DARK_RED + "Меч Гатса");
-        meta.setUnbreakable(true);
-        weapon.setItemMeta(meta);
-        NBT.modify(weapon, (nbt) -> {nbt.setString("gutsWeaponary", "weapon");});
-        return weapon;
-    }
+//    @Override
+//    protected ItemStack getSword(Map<String, Object> params) {
+//        ItemStack weapon = new ItemStack(Material.DIAMOND_SWORD);
+//        weapon.addEnchantment(Enchantment.DAMAGE_ALL, 2);
+//        ItemMeta meta = weapon.getItemMeta();
+//        meta.setDisplayName(ChatColor.BOLD + "" + ChatColor.DARK_RED + "Меч Гатса");
+//        meta.setUnbreakable(true);
+//        weapon.setItemMeta(meta);
+//        NBT.modify(weapon, (nbt) -> {nbt.setString("gutsWeaponary", "weapon");});
+//        return weapon;
+//    }
     
     @Override
     protected List<ItemStack> getAbilityItems(Map<String, Object> params) {
@@ -228,15 +189,5 @@ public class Guts extends Role {
         int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         long cooldown = 2 + upgradeLevel * 3L;
         InventoryUtils.setCooldownForItem(stack, cooldown);
-    }
-
-    @Override
-    public List<IDamageHandler> getDamageHandlers() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<IDamageInvoker> getDamageInvokers() {
-        return Collections.emptyList();
     }
 }

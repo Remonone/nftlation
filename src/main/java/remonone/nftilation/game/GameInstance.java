@@ -13,6 +13,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
+import remonone.nftilation.application.models.TeamData;
 import remonone.nftilation.application.services.SkinCache;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.config.ConfigManager;
@@ -20,9 +21,9 @@ import remonone.nftilation.config.TeamSpawnPoint;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
+import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.damage.TeamAttackInvoker;
 import remonone.nftilation.game.ingame.core.Core;
-import remonone.nftilation.game.ingame.core.ICoreData;
 import remonone.nftilation.game.ingame.services.RepairCoreService;
 import remonone.nftilation.game.ingame.services.SecondTierService;
 import remonone.nftilation.game.ingame.services.ServiceContainer;
@@ -49,6 +50,7 @@ public class GameInstance {
     @Getter
     private final static GameInstance instance = new GameInstance();
     private Map<String, IModifiableTeam> teamData;
+    private final Set<ITeam> teamRaw = new HashSet<>();
     @Getter
     private PhaseCounter counter;
     
@@ -64,6 +66,7 @@ public class GameInstance {
         counter.Init();
         for(ITeam team : teamData.values()) {
             initPlayerRoles(team.getPlayers());
+            initPlayerRunes(team.getPlayers());
             team.getPlayers().forEach(Role::refillInventoryWithItems);
             for(PlayerModel model : team.getPlayers()) {
                 ScoreboardHandler.buildScoreboard(model.getReference());
@@ -117,16 +120,27 @@ public class GameInstance {
         }
     }
 
+    private void initPlayerRunes(List<PlayerModel> models) {
+        for(PlayerModel model : models) {
+            
+        }
+    }
+
     private void constructTeamData(Map<String, List<DataInstance.PlayerInfo>> teams) {
         teamData = new HashMap<>();
         Stack<TeamSpawnPoint> teamList = new Stack<>();
         teamList.addAll(ConfigManager.getInstance().getTeamSpawnList());
         for(Map.Entry<String, List<DataInstance.PlayerInfo>> entry : teams.entrySet()) {
             String teamName = entry.getKey();
+            TeamData teamInfo = Store.getInstance().getDataInstance().getTeamData().stream().filter(data -> data.getTeamName().equals(teamName)).findFirst().orElse(null);
+            if (teamInfo == null) {
+                Logger.error("Cannot init team " + teamName + "! Skipping...");
+                continue;
+            }
             TeamSpawnPoint point = teamList.pop();
             List<PlayerModel> teamPlayers = new ArrayList<>();
-            for(DataInstance.PlayerInfo info : entry.getValue()) {
-                if(info.getRole() == null) {
+            for (DataInstance.PlayerInfo info : entry.getValue()) {
+                if (info.getRole() == null) {
                     info.setRole(getRandomRole(entry.getValue()));
                 }
                 Map<String, Object> parameters = getParametersObject(info, teamName);
@@ -137,68 +151,17 @@ public class GameInstance {
             }
             Core teamCore = SetCore(teamName, point);
             SpawnShopKeeper(point);
-            IModifiableTeam team = new IModifiableTeam() {
-
-                private final UUID uuid = new UUID(50, 10);
-                private boolean isTeamAlive = true;
-                private boolean isTeamActive = true;
-                
-                @Override
-                public UUID getTeamID() {
-                    return uuid;
-                }
-
-                @Override
-                public List<PlayerModel> getPlayers() {
-                    return teamPlayers;
-                }
-
-                @Override
-                public ICoreData getCoreData() {
-                    return teamCore;
-                }
-
-                @Override
-                public TeamSpawnPoint getTeamSpawnPoint() {
-                    return point;
-                }
-
-                @Override
-                public boolean isCoreAlive() {
-                    return isTeamAlive;
-                }
-
-                @Override
-                public boolean isTeamActive() {
-                    return isTeamActive;
-                }
-
-                @Override
-                public String getTeamName() {
-                    return teamName;
-                }
-
-                @Override
-                public char getTeamColor() {
-                    return 0;
-                }
-                
-                @Override
-                public void setTeamActive(boolean value) {
-                    isTeamAlive = value;
-                }
-
-                @Override
-                public void setCoreAlive(boolean value) {
-                    isTeamActive = value;
-                }
-
-                @Override
-                public Core getCoreInstance() {
-                    return teamCore;
-                }
-            };
+            IModifiableTeam team = TeamImpl.builder()
+                    .teamName(teamName)
+                    .players(teamPlayers)
+                    .spawnPoint(point)
+                    .core(teamCore)
+                    .teamColor(ChatColor.getByChar(teamInfo.getTeamColor()))
+                    .isTeamActive(true)
+                    .isCoreAlive(true)
+                    .build();
             teamData.put(teamName, team);
+            teamRaw.add(team);
         }
     }
 
@@ -233,6 +196,7 @@ public class GameInstance {
         parameters.put(PropertyConstant.PLAYER_ROLE_ID, info.getRole().getRoleID());
         parameters.put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, true);
         parameters.put(PropertyConstant.PLAYER_TEAM_NAME, teamName);
+        parameters.put(PropertyConstant.PLAYER_RUNE_ID, info.getRune().getRuneID());
         return parameters;
     }
 
@@ -241,18 +205,24 @@ public class GameInstance {
                 .filter(info -> ObjectUtils.notEqual(info.getRole(), null))
                 .map(roleContainer -> roleContainer.getRole().getRoleID())
                 .collect(Collectors.toList());
-        List<Role> availableRoles = Role.getRoles().stream().filter(role -> !reservedRoles.contains(role.getRoleID()) && !role.getRoleName().equals("Guts")).collect(Collectors.toList());
+        List<Role> availableRoles = Role.getRoles().stream().filter(role -> !reservedRoles.contains(role.getRoleID()) && !role.getName().equals("Guts")).collect(Collectors.toList());
         return availableRoles.get(RANDOM.nextInt(availableRoles.size()));
     }
 
     public Iterator<ITeam> getTeamIterator() {
-        List<ITeam> teams = new ArrayList<>(teamData.values());
-        return teams.iterator();
+        return teamRaw.iterator();
     }
     
     public void awardPlayer(String teamName, Player player, int tokens) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        model.setTokens(model.getTokens() + tokens);
+        awardPlayer(model, tokens);
+    }
+    
+    public void awardPlayer(PlayerModel model, int tokens) {
+        OnTokenTransactionEvent e = new OnTokenTransactionEvent(OnTokenTransactionEvent.TransactionType.GAIN, tokens, model);
+        getServer().getPluginManager().callEvent(e);
+        if(e.isCancelled()) return;
+        model.setTokens(model.getTokens() + e.getTokensAmount());
         ScoreboardHandler.updateScoreboard(model);
     }
     
@@ -482,6 +452,7 @@ public class GameInstance {
     }
     
     public PlayerModel getPlayerModelFromTeam(String teamName, Player player) {
+        if(teamData == null) return null;
         ITeam team = teamData.get(teamName);
         if(team == null) return null;
         return team.getPlayers().stream().filter(playerModel -> playerModel.getReference().getUniqueId().equals(player.getUniqueId())).findFirst().orElse(null);

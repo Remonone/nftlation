@@ -15,7 +15,7 @@ import static remonone.nftilation.utils.CommandUtils.verifyEligibleSender;
 public class GetTeamInfoCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        CommandUtils.State state = verifyEligibleSender(sender, args, 0);
+        CommandUtils.State state = verifyEligibleSender(sender, args, 0, false);
         if(state != CommandUtils.State.NONE) return state.getValue();
         
         Collection<TeamSpawnPoint> teamSpawnPoints = ConfigManager.getInstance().getTeamSpawnList();

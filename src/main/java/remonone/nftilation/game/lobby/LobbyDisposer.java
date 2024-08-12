@@ -26,7 +26,7 @@ public class LobbyDisposer implements Listener {
             if(Store.getInstance().getGameStage().getStage() == Stage.LOBBY) {
                 gameTransfer.MoveToLobby(player);
                 player.getInventory().clear();
-                InventoryUtils.giveRoleSelector(player);
+                InventoryUtils.fillPlayerLobbyInventory(player);
             }
         } else {
             gameTransfer.MoveToAdminRoom(player, data);
@@ -40,16 +40,21 @@ public class LobbyDisposer implements Listener {
         if(stack == null) return;
         ItemMeta meta = stack.getItemMeta();
         if(meta == null) return;
-        if(!StringUtils.equals(meta.getDisplayName(), NameConstants.ROLE_SELECTOR)) return;
+        
+        if(!(StringUtils.equals(meta.getDisplayName(), NameConstants.ROLE_SELECTOR) || StringUtils.equals(meta.getDisplayName(), NameConstants.RUNE_SELECTOR))) return;
         event.setCancelled(true);
         Player player = event.getPlayer();
         PlayerData data = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData();
         if(data.getRole().equals(PlayerRole.ADMIN) || data.getRole().equals(PlayerRole.DEV)) return;
         String teamName = data.getTeam().getTeamName();
         if(teamName == null) return;
-        Inventory inventory = InventoryBuilder.getRoleSelectionInventory(player, teamName);
+        Inventory inventory;
+        if(StringUtils.equals(meta.getDisplayName(), NameConstants.ROLE_SELECTOR)) {
+            inventory = InventoryBuilder.getRoleSelectionInventory(player, teamName);
+        } else {
+            inventory = InventoryBuilder.getRuneSelectionInventory(player);
+        }
         player.openInventory(inventory);
     }
-
     
 }

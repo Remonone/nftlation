@@ -3,7 +3,6 @@ package remonone.nftilation.handlers;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -19,6 +18,7 @@ import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
+import remonone.nftilation.events.OnPlayerKillPlayerEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.IDamageHandler;
 import remonone.nftilation.game.models.IDamageInvoker;
@@ -51,14 +51,15 @@ public class OnEntityDieHandler implements Listener {
         while(!queue.isEmpty()) {
             queue.poll().OnDamageHandle(event);
         }
+        if(event.isCancelled() || event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) return;
         if(player.getHealth() - event.getFinalDamage() <= 0) {
             event.setCancelled(true);
             OnDeath(player);
             Player attacker = EntityDamageByPlayerLog.getEventLogForLivingEntity(player.getUniqueId());
             if(attacker == null) return;
             EntityDamageByPlayerLog.removeLogEvent(player.getUniqueId());
-            attacker.playSound(attacker.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f, 1.0f);
-            countKill(player, attacker);
+            OnPlayerKillPlayerEvent e = new OnPlayerKillPlayerEvent(PlayerUtils.getModelFromPlayer(attacker), model);
+            getServer().getPluginManager().callEvent(e);
         }
     }
     
@@ -104,6 +105,7 @@ public class OnEntityDieHandler implements Listener {
         if(!(event.getEntity() instanceof Player)) return;
         if(Store.getInstance().getGameStage().getStage() == Stage.LOBBY) {
             event.setCancelled(true);
+            return;
         }
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
         Player target = (Player) event.getEntity();
@@ -118,25 +120,24 @@ public class OnEntityDieHandler implements Listener {
         }
         PriorityQueue<IDamageHandler> targetQueue = new PriorityQueue<>(targetModel.getDamageHandlers());
         while(!targetQueue.isEmpty()) {
-            targetQueue.poll().OnDamageHandle(event);
+            targetQueue.poll().OnEntityDamageHandle(event);
         }
         PriorityQueue<IDamageInvoker> queue = new PriorityQueue<>(targetModel.getDamageInvokers());
         while(!queue.isEmpty()) {
             queue.poll().OnEntityDamageDealing(event, attackerData);
         }
-
+        if(event.isCancelled()) return;
+        if(target.getHealth() - event.getFinalDamage() <= 0) {
+            event.setCancelled(true);
+            OnDeath(target);
+            EntityDamageByPlayerLog.removeLogEvent(target.getUniqueId());
+            OnPlayerKillPlayerEvent e = new OnPlayerKillPlayerEvent(attackerModel, targetModel);
+            getServer().getPluginManager().callEvent(e);
+        }
+        
         if(target.getHealth() - event.getFinalDamage() > 0) {
             EntityDamageByPlayerLog.insertLogEvent(target, attackerData.attacker);
         }
-    }
-    
-    
-    private void countKill(Player target, Player attacker) {
-        String attackerTeam = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getUniqueId());
-        GameInstance.getInstance().awardPlayer(attackerTeam, attacker, DataConstants.TOKEN_PER_KILL);
-        String targetTeam =Store.getInstance().getDataInstance().getPlayerTeam(target.getUniqueId());
-        GameInstance.getInstance().increasePlayerKillCounter(attackerTeam, attacker);
-        GameInstance.getInstance().increasePlayerDeathCounter(targetTeam, target);
     }
 
     public static void OnDeath(Player player) {

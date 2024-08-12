@@ -17,12 +17,18 @@ import remonone.nftilation.game.ingame.actions.world.CryptDrop;
 import remonone.nftilation.game.ingame.actions.world.Hamster;
 import remonone.nftilation.game.ingame.actions.world.RoboSybil;
 import remonone.nftilation.game.lobby.LobbyDisposer;
+import remonone.nftilation.game.meta.MetaConfig;
+import remonone.nftilation.game.meta.RoleInfo;
+import remonone.nftilation.game.meta.RuneInfo;
 import remonone.nftilation.game.roles.*;
+import remonone.nftilation.game.runes.GreedRune;
+import remonone.nftilation.game.runes.Rune;
 import remonone.nftilation.game.shop.ShopBuilder;
 import remonone.nftilation.game.shop.content.CategoryElement;
 import remonone.nftilation.game.shop.content.ItemElement;
 import remonone.nftilation.game.shop.content.ServiceElement;
 import remonone.nftilation.game.shop.content.ShopItemPosition;
+import remonone.nftilation.game.shop.registry.ShopItemRegistry;
 import remonone.nftilation.handlers.*;
 import remonone.nftilation.utils.CustomEntities;
 import remonone.nftilation.utils.EntityList;
@@ -40,11 +46,18 @@ public final class Nftilation extends JavaPlugin {
         SerializeProperties();
         ShopBuilder.getInstance().Load();
         ConfigManager.getInstance().Load();
+        MetaConfig.getInstance().Load();
         InitHandlers();
         InitCommands();
         RegisterRoles();
+        RegisterRunes();
         FetchRoleSkins();
         InitActions();
+    }
+
+    private void RegisterRunes() {
+        Logger.log("Registering runes...");
+        Rune.registerRune(GreedRune.class);
     }
 
     private void FetchRoleSkins() {
@@ -74,6 +87,9 @@ public final class Nftilation extends JavaPlugin {
         ConfigurationSerialization.registerClass(ItemElement.class);
         ConfigurationSerialization.registerClass(ServiceElement.class);
         ConfigurationSerialization.registerClass(ShopItemPosition.class);
+        ConfigurationSerialization.registerClass(RoleInfo.class);
+        ConfigurationSerialization.registerClass(RuneInfo.class);
+        ConfigurationSerialization.registerClass(RoleItemDispenser.EnchantInfo.class);
     }
 
     private void RegisterRoles() {
@@ -98,7 +114,7 @@ public final class Nftilation extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerMoveEvent(), this);
         getServer().getPluginManager().registerEvents(new PhaseUpdateHandler(), this);
         getServer().getPluginManager().registerEvents(new OnBlockDestroyHandler(), this);
-        getServer().getPluginManager().registerEvents(new OnRoleSelectHandler(), this);
+        getServer().getPluginManager().registerEvents(new OnLobbyItemInteractHandler(), this);
         getServer().getPluginManager().registerEvents(new OnItemManipulateHandler(), this);
         getServer().getPluginManager().registerEvents(new ShopKeeperInteract(), this);
         getServer().getPluginManager().registerEvents(new OnEntityDieHandler(), this);
@@ -131,6 +147,7 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("addAirDropPos").setExecutor(new AddAirDropCommand());
         this.getCommand("setTeamCoreHealth").setExecutor(new SetTeamCoreHealth());
         this.getCommand("giveTokensToPlayer").setExecutor(new GiveTokenToPlayer());
+        this.getCommand("reloadProperties").setExecutor(new ReloadConfigCommand());
     }
     
     public static Nftilation getInstance() {
@@ -150,4 +167,16 @@ public final class Nftilation extends JavaPlugin {
         CustomEntities.unregisterEntities();
     }
     
+    
+    public void ReloadProperties() {
+        Role.getRoles().clear();
+        Rune.getRunes().clear();
+        ShopItemRegistry.clearRegister();
+        ShopBuilder.getInstance().Load();
+        ConfigManager.getInstance().Load();
+        MetaConfig.getInstance().Load();
+        
+        RegisterRoles();
+        RegisterRunes();
+    }
 }

@@ -1,9 +1,9 @@
-﻿package remonone.nftilation.game.damage;
+package remonone.nftilation.game.damage;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -23,7 +23,7 @@ public class CryptomarineDeathHandler extends BaseDamageHandler {
     }
 
     @Override
-    public void OnEntityDamageHandle(EntityDamageByEntityEvent e) {
+    public void OnDamageHandle(EntityDamageEvent e) {
         Player player = (Player) e.getEntity();
         if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Cryptomarine)) return;
         if(player.getHealth() - e.getFinalDamage() > 0) return;

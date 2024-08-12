@@ -98,7 +98,7 @@ public class OnBlockDestroyHandler implements Listener {
             if(GameInstance.getInstance().damageCore(team.getTeamName(), true)) {
                 List<PlayerModel> players = GameInstance.getInstance().getTeam(playerTeam).getPlayers();
                 for(PlayerModel model : players) {
-                    GameInstance.getInstance().awardPlayer(playerTeam, model.getReference(), DataConstants.TOKEN_PER_DESTRUCTION);
+                    GameInstance.getInstance().awardPlayer(model, DataConstants.TOKEN_PER_DESTRUCTION);
                 }
                 block.setType(Material.AIR);
             }

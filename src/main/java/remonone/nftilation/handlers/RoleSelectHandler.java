@@ -6,7 +6,9 @@ import org.bukkit.event.Listener;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.events.OnRoleSelectEvent;
+import remonone.nftilation.events.OnRuneSelectEvent;
 import remonone.nftilation.game.roles.Role;
+import remonone.nftilation.game.runes.Rune;
 import remonone.nftilation.utils.InventoryUtils;
 
 
@@ -22,8 +24,23 @@ public class RoleSelectHandler implements Listener {
             return;
         }
         InventoryUtils.clearInventory(event.getPlayer());
-        InventoryUtils.giveRoleSelector(event.getPlayer());
+        InventoryUtils.fillPlayerLobbyInventory(event.getPlayer());
         event.getPlayer().closeInventory();
-        player.sendMessage(MessageConstant.ROLE_SELECT + role.getRoleName());
+        player.sendMessage(MessageConstant.SUCCESSFUL_SELECTION + role.getName());
+    }
+    
+    @EventHandler
+    public void onRuneSelect(final OnRuneSelectEvent event) {
+        Player player = event.getPlayer();
+        Rune rune = event.getRune();
+        boolean isUpdated = Store.getInstance().getDataInstance().updatePlayerRune(rune, player.getUniqueId());
+        if(!isUpdated) {
+            player.sendMessage(MessageConstant.RUNE_ERROR);
+            return;
+        }
+        InventoryUtils.clearInventory(player);
+        InventoryUtils.fillPlayerLobbyInventory(player);
+        event.getPlayer().closeInventory();
+        player.sendMessage(MessageConstant.SUCCESSFUL_SELECTION + rune.getName());
     }
 }

@@ -13,7 +13,7 @@ import remonone.nftilation.utils.CommandUtils;
 public class PauseGameCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        CommandUtils.State state = CommandUtils.verifyEligibleSender(commandSender, strings, 0);
+        CommandUtils.State state = CommandUtils.verifyEligibleSender(commandSender, strings, 0, false);
         if(!state.equals(CommandUtils.State.NONE)) return state.getValue();
         RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_PLAYERS_ABLE_TO_MOVE, false);
         if(GameInstance.getInstance().getCounter() == null) {

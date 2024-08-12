@@ -29,7 +29,6 @@ import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.damage.RuslanBlazeDamageInvoker;
 import remonone.nftilation.game.mob.RuslanBlaze;
-import remonone.nftilation.game.models.IDamageHandler;
 import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.BlockUtils;
@@ -42,33 +41,15 @@ import java.util.*;
 import static org.bukkit.Bukkit.getServer;
 
 public class RuslanEth extends Role {
-    
-    
     private final Map<UUID, List<LivingEntity>> entitiesList = new HashMap<>();
     
-    @Override
-    public Material getMaterial() {
-        return Material.BLAZE_ROD;
+    public RuslanEth() {
+        super("RE");
     }
-
-    @Override
-    public String getRoleName() {
-        return "Ruslan.eth";
-    }
-
-    @Override
-    public List<String> getRoleDescription() {
-        return Arrays.asList(RoleConstant.RUSLAN_DESCRIPTION_1, RoleConstant.RUSLAN_DESCRIPTION_2, RoleConstant.RUSLAN_DESCRIPTION_3);
-    }
-
+    
     @Override
     public String getRoleID() {
         return "RE";
-    }
-
-    @Override
-    public int getRoleIndex() {
-        return 29;
     }
     
     @Override
@@ -101,7 +82,8 @@ public class RuslanEth extends Role {
         if(player.getInventory().contains(Material.SNOW_BALL)) {
             player.getInventory().remove(Material.SNOW_BALL);
         }
-        Map<String, Object> params = Store.getInstance().getDataInstance().getPlayerParams(player.getUniqueId());
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        Map<String, Object> params = model.getParameters();
         int taskId = (int) params.getOrDefault("taskId", -1);
         if(taskId != -1) return;
         getServer().getScheduler().cancelTask(taskId);
@@ -173,7 +155,8 @@ public class RuslanEth extends Role {
             stack.add(getExplodeItem());
         }
         ItemStack[] stacks = stack.toArray(new ItemStack[0]);
-        Store.getInstance().getDataInstance().getPlayerParams(owner.getUniqueId()).put("actions", stacks);
+        Map<String, Object> params = model.getParameters();
+        params.put("actions", stacks);
         for(ItemStack stack1 : stacks) {
             owner.getInventory().addItem(stack1);
         }
@@ -283,6 +266,7 @@ public class RuslanEth extends Role {
         }
     }
     
+    @SuppressWarnings("StatementWithEmptyBody")
     private void RemoveRuslanActionItems(Player player) {
         Spliterator<ItemStack> itemStackSpliterator = player.getInventory().spliterator();
         while(itemStackSpliterator.tryAdvance(itemStack -> {
@@ -296,11 +280,6 @@ public class RuslanEth extends Role {
                 player.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
             }
         }));
-    }
-
-    @Override
-    public List<IDamageHandler> getDamageHandlers() {
-        return Collections.emptyList();
     }
 
     @Override

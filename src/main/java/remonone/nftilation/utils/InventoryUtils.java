@@ -16,6 +16,7 @@ import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.roles.Role;
+import remonone.nftilation.game.runes.Rune;
 
 public class InventoryUtils {
     
@@ -23,10 +24,15 @@ public class InventoryUtils {
         player.getInventory().clear();
     }
     
+    public static void fillPlayerLobbyInventory(Player player) {
+        giveRoleSelector(player);
+        giveRuneSelector(player);
+    }
+    
     public static void giveRoleSelector(Player player) {
         DataInstance instance = Store.getInstance().getDataInstance();
         Role role = instance.getPlayerRole(player.getUniqueId());
-        Material material = role != null ? role.getMaterial() : Material.RED_GLAZED_TERRACOTTA;
+        Material material = role != null ? role.getMaterial() : Material.CYAN_GLAZED_TERRACOTTA;
         
         ItemStack roleSelector = new ItemStack(material);
         ItemMeta itemMeta = roleSelector.getItemMeta();
@@ -38,6 +44,27 @@ public class InventoryUtils {
         itemMeta.setUnbreakable(true);
         itemMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        roleSelector.setItemMeta(itemMeta);
+        ItemStatModifierComponent.markItemAsUndroppable(roleSelector);
+        ItemStatModifierComponent.markItemAsUnstorable(roleSelector);
+        ItemStatModifierComponent.markItemAsUncraftable(roleSelector);
+        player.getInventory().addItem(roleSelector);
+    }
+
+    public static void giveRuneSelector(Player player) {
+        DataInstance instance = Store.getInstance().getDataInstance();
+        Rune rune = instance.getPlayerRune(player.getUniqueId());
+        Material material = rune != null ? rune.getMaterial() : Material.BLACK_GLAZED_TERRACOTTA;
+
+        ItemStack roleSelector = new ItemStack(material);
+        ItemMeta itemMeta = roleSelector.getItemMeta();
+
+        itemMeta.setDisplayName(NameConstants.RUNE_SELECTOR);
+        if(rune != null) {
+            itemMeta.addEnchant(Enchantment.MENDING, 1, false);
+        }
+        itemMeta.setUnbreakable(true);
+        itemMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ENCHANTS);
         roleSelector.setItemMeta(itemMeta);
         ItemStatModifierComponent.markItemAsUndroppable(roleSelector);
         ItemStatModifierComponent.markItemAsUnstorable(roleSelector);

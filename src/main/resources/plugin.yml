@@ -68,3 +68,6 @@ commands:
   giveTokensToPlayer:
     description: Give tokens to player
     usage: /giveTokensToPlayer
+  reloadProperties:
+    description: Reload in-game properties
+    usage: /reloadProperties

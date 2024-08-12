@@ -26,6 +26,10 @@ public class PlayerUtils {
             player.sendMessage(ChatColor.RED + MessageConstant.PERMISSION_LOCKED);
             return true;
         }
+        return false;
+    }
+    
+    public static boolean trySendMessageOnWrongStage(Player player) {
         if(Store.getInstance().getGameStage().getStage() != Stage.IDLE) {
             player.sendMessage(ChatColor.RED + MessageConstant.STATE_NOT_IDLE);
             return true;

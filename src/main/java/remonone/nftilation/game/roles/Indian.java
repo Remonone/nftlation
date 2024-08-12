@@ -6,7 +6,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -35,72 +34,21 @@ import java.util.Map;
 import static org.bukkit.Bukkit.getServer;
 
 public class Indian extends Role {
-    @Override
-    public Material getMaterial() {
-        return Material.BOOK;
-    }
-
-    @Override
-    public String getRoleName() {
-        return "Indian";
-    }
-
-    @Override
-    public List<String> getRoleDescription() {
-        return Arrays.asList(RoleConstant.INDIAN_DESCRIPTION_1, 
-                RoleConstant.INDIAN_DESCRIPTION_2, 
-                RoleConstant.INDIAN_DESCRIPTION_3,
-                RoleConstant.INDIAN_DESCRIPTION_4,
-                RoleConstant.INDIAN_DESCRIPTION_5);
-    }
-
+    
     @Override
     public String getRoleID() {
         return "IN";
     }
 
-    @Override
-    public int getRoleIndex() {
-        return 31;
+    public Indian() {
+        super("IN");
     }
-
+    
     @Override
     public void setPlayer(Player player, Map<String, Object> params) {
         int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         float speedAddition = .05F * (upgradeLevel + 1);
         player.setWalkSpeed(DataConstants.PLAYER_SPEED + speedAddition);
-    }
-    
-    @Override
-    public ItemStack getPickaxe(Map<String, Object> params) {
-        ItemStack stack = new ItemStack(Material.WOOD_PICKAXE);
-        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        switch (upgradeLevel) {
-            case 1:
-                stack = new ItemStack(Material.IRON_PICKAXE);
-                stack.addEnchantment(Enchantment.DIG_SPEED, 1);
-                stack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1);
-                break;
-            case 2:
-                stack = new ItemStack(Material.IRON_PICKAXE);
-                stack.addEnchantment(Enchantment.DIG_SPEED, 1);
-                stack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 2);
-                stack.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-                break;
-            case 3:
-                stack = new ItemStack(Material.DIAMOND_PICKAXE);
-                stack.addEnchantment(Enchantment.DIG_SPEED, 4);
-                stack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 3);
-                stack.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-                stack.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
-                break;
-        }
-        ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName(RoleConstant.INDIAN_PICKAXE_NAME);
-        meta.setUnbreakable(true);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        stack.setItemMeta(meta);
-        return stack;
     }
     
     @Override
@@ -139,7 +87,7 @@ public class Indian extends Role {
         meta.setDisplayName(RoleConstant.INDIAN_RECALL_ABILITY);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
-        NBT.modify(itemStack, nbt -> {nbt.setString("indian", "recall");});
+        NBT.modify(itemStack, nbt -> {nbt.setString(RoleConstant.INDIAN_NBT_CONTAINER, RoleConstant.INDIAN_NBT_RECALL);});
         return Arrays.asList(blocks, itemStack);
     }
     
@@ -178,10 +126,11 @@ public class Indian extends Role {
             return;
         }
         if(e.getFrom().toVector().distance(e.getTo().toVector()) < .1f) return;
-        Map<String, Object> params = data.getPlayerParams(accessor.getUniqueId());
-        if(!params.containsKey("recall")) return;
-        int taskId = (int)params.get("recall");
-        params.remove("recall");
+        PlayerModel model = PlayerUtils.getModelFromPlayer(accessor);
+        Map<String, Object> params = model.getParameters();
+        if(!params.containsKey(RoleConstant.INDIAN_PARAM_RECALL)) return;
+        int taskId = (int)params.get(RoleConstant.INDIAN_PARAM_RECALL);
+        params.remove(RoleConstant.INDIAN_PARAM_RECALL);
         getServer().getScheduler().cancelTask(taskId);
         accessor.sendMessage(ChatColor.GOLD + RoleConstant.INDIAN_RECALL_CANCEL);
     }
@@ -194,14 +143,13 @@ public class Indian extends Role {
             return;
         }
         if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Indian)) return;
-        String isRecall = NBT.get(item, nbt -> (String) nbt.getString("indian"));
-        if(StringUtils.isEmpty(isRecall) || !isRecall.equals("recall")) return;
+        String isRecall = NBT.get(item, nbt -> (String) nbt.getString(RoleConstant.INDIAN_NBT_CONTAINER));
+        if(StringUtils.isEmpty(isRecall) || !isRecall.equals(RoleConstant.INDIAN_NBT_RECALL)) return;
         event.setCancelled(true);
-        GameInstance instance = GameInstance.getInstance();
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-        PlayerModel model = instance.getPlayerModelFromTeam(team, player);
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
         Map<String, Object> params = model.getParameters();
-        if(params.containsKey("recall")) {
+        String team = (String)params.get(PropertyConstant.PLAYER_TEAM_NAME);
+        if(params.containsKey(RoleConstant.INDIAN_PARAM_RECALL)) {
             player.sendMessage(ChatColor.GOLD + RoleConstant.INDIAN_RECALL_ACTIVE);
             return;
         }
@@ -212,13 +160,13 @@ public class Indian extends Role {
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override
             public void run() {
-                params.remove("recall");
+                params.remove(RoleConstant.INDIAN_PARAM_RECALL);
                 GameInstance.getInstance().teleportPlayerToBase(team, player);
             }
         };
         int delay = upgradeLevel > 2 ? RoleConstant.INDIAN_RECALL_MAX_LEVEL : RoleConstant.INDIAN_RECALL_MIN_LEVEL;
         runnable.runTaskLater(Nftilation.getInstance(), delay * 20);
         int taskId = runnable.getTaskId();
-        params.put("recall", taskId);
+        params.put(RoleConstant.INDIAN_PARAM_RECALL, taskId);
     }
 }

@@ -16,7 +16,8 @@ public class MessageConstant {
     public static final String UNKNOWN_KICK = "Непредвиденная ошибка во время авторизации! Свяжитесь с администрацией для решения проблемы!";
     public static final String ROLE_RESERVED = "Эта роль уже занята!";
     public static final String ROLE_ERROR = "Ошибка при выборе роли. Попробуйте еще раз...";
-    public static final String ROLE_SELECT = "Вы выбрали ";
+    public static final String RUNE_ERROR = "Ошибка при выборе руны. Попробуйте еще раз...";
+    public static final String SUCCESSFUL_SELECTION = "Вы выбрали ";
     public static final String TEAM_NOT_EQUALS = "Failed to start Lobby stage! Team count is not equal to server preset!";
     public static final String CORE_INVULNERABLE = "Ядро на данный момент неуязвимо! Вы не можете ему навредить сейчас!";
     public static final String CORE_DESTROYED_TITLE = "Ваше ядро было уничтожено!";

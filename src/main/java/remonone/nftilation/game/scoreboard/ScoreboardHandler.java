@@ -44,7 +44,7 @@ public class ScoreboardHandler {
         }
         objective.getScore("Level: " + playerParams.get(PropertyConstant.PLAYER_LEVEL_PARAM)).setScore(++counter);
         objective.getScore("Tokens: " + model.getTokens()).setScore(++counter);
-        objective.getScore("Role: " + Role.getRoleByID((String)playerParams.get(PropertyConstant.PLAYER_ROLE_ID)).getRoleName()).setScore(++counter);
+        objective.getScore("Role: " + Role.getRoleByID((String)playerParams.get(PropertyConstant.PLAYER_ROLE_ID)).getName()).setScore(++counter);
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(model.getReference().getUniqueId());
         ITeam team = GameInstance.getInstance().getTeam(teamName);
         objective.getScore("Core Health: " + team.getCoreData().getHealth()).setScore(++counter);
@@ -57,13 +57,13 @@ public class ScoreboardHandler {
         Iterator<ITeam> it = instance.getTeamIterator();
         while(it.hasNext()) {
             ITeam t = it.next();
-            String scoreName = teamName + "[";
+            String scoreName = t.getTeamName() + "[";
             if(t.isCoreAlive()) {
                 scoreName += ChatColor.GREEN + "" + ChatColor.BOLD + "✓";
-            } else if(t.isTeamActive()) {
+            } else if(!t.isTeamActive()) {
                 scoreName += ChatColor.DARK_RED + "" + ChatColor.BOLD +  "x";
             } else {
-                scoreName += ChatColor.DARK_RED + "" + ChatColor.BOLD + getTeamMembersAlive(teamName);
+                scoreName += ChatColor.DARK_RED + "" + ChatColor.BOLD + getTeamMembersAlive(t.getTeamName());
             }
             scoreName += ChatColor.RESET + "]";
             objective.getScore(scoreName).setScore(++counter);

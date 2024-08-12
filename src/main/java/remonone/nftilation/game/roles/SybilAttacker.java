@@ -31,29 +31,13 @@ import java.util.*;
 
 public class SybilAttacker extends Role {
     
-    @Override
-    public Material getMaterial() {
-        return Material.SPECTRAL_ARROW;
+    public SybilAttacker() {
+        super("SA");
     }
-
-    @Override
-    public String getRoleName() {
-        return "Sybil Attacker";
-    }
-
-    @Override
-    public List<String> getRoleDescription() {
-        return Arrays.asList(RoleConstant.SYBIL_DESCRIPTION_1, RoleConstant.SYBIL_DESCRIPTION_2, RoleConstant.SYBIL_DESCRIPTION_3);
-    }
-
+    
     @Override
     public String getRoleID() {
         return "SA";
-    }
-
-    @Override
-    public int getRoleIndex() {
-        return 22;
     }
 
     @Override

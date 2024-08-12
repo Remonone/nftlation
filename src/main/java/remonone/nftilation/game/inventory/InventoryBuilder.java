@@ -12,8 +12,10 @@ import remonone.nftilation.components.ItemStatModifierComponent;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.DataInstance;
+import remonone.nftilation.game.models.IInventoryHelder;
 import remonone.nftilation.game.roles.Guts;
 import remonone.nftilation.game.roles.Role;
+import remonone.nftilation.game.runes.Rune;
 import remonone.nftilation.game.shop.content.*;
 import remonone.nftilation.game.shop.registry.ShopItemRegistry;
 import remonone.nftilation.utils.Logger;
@@ -44,21 +46,41 @@ public class InventoryBuilder {
             Material mat = roles.contains(role) ?
                     Material.RED_GLAZED_TERRACOTTA
                     : role.getMaterial();
+            if(mat == Material.AIR) continue;
             itemStack = new ItemStack(mat);
             FillMeta(itemStack, role);
             NBT.modify(itemStack, nbt -> {
                 nbt.setString(PropertyConstant.NBT_ROLE, role.getRoleID());
                 nbt.setBoolean(PropertyConstant.NBT_ROLE_RESERVED, roles.contains(role));
             });
-            inventory.setItem(role.getRoleIndex(), itemStack);
+            inventory.setItem(role.getIndex(), itemStack);
         }
         return inventory;
     }
 
-    private static void FillMeta(ItemStack itemStack, Role role) {
+    public static Inventory getRuneSelectionInventory(Player player) {
+        Inventory inventory = Bukkit.createInventory(player, 54, NameConstants.RUNE_SELECTION_TAB);
+        for(Rune rune : Rune.getRunes()) {
+            ItemStack itemStack;
+            Material mat = rune.getMaterial();
+            Logger.debug(mat.toString());
+            if(mat == Material.AIR) continue;
+            itemStack = new ItemStack(mat);
+            FillMeta(itemStack, rune);
+            NBT.modify(itemStack, nbt -> {
+                nbt.setString(PropertyConstant.NBT_RUNE, rune.getRuneID());
+            });
+            inventory.setItem(rune.getIndex(), itemStack);
+        }
+        return inventory;
+    }
+    
+    private static void FillMeta(ItemStack itemStack, IInventoryHelder helder) {
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(role.getRoleName());
-        itemMeta.setLore(role.getRoleDescription());
+        String roleName = Optional.ofNullable(helder.getName()).orElse("none");
+        List<String> descriptions = Optional.ofNullable(helder.getDescription()).orElse(Collections.emptyList());
+        itemMeta.setDisplayName(roleName);
+        itemMeta.setLore(descriptions);
         itemStack.setItemMeta(itemMeta);
     }
     

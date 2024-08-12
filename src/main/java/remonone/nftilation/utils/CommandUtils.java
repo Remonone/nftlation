@@ -21,7 +21,7 @@ public class CommandUtils {
         return State.NONE;
     }
 
-    public static State verifyEligibleSender(CommandSender commandSender, String[] args, int mandatoryLength) {
+    public static State verifyEligibleSender(CommandSender commandSender, String[] args, int mandatoryLength, boolean isIdlePermitted) {
         if(args.length != mandatoryLength) {
             return State.IMPROPER_ARGS;
         }
@@ -31,6 +31,9 @@ public class CommandUtils {
         }
         Player player = (Player) commandSender;
         if(PlayerUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
+            return State.FAILED_EXECUTION;
+        }
+        if(isIdlePermitted && PlayerUtils.trySendMessageOnWrongStage(player)) {
             return State.FAILED_EXECUTION;
         }
         

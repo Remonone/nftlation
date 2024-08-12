@@ -13,6 +13,7 @@ import org.bukkit.potion.PotionEffectType;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.mob.RuslanBlaze;
+import remonone.nftilation.utils.EntityDamageByPlayerLog;
 import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.Arrays;
@@ -62,6 +63,7 @@ public class RuslanBlazeDamageInvoker extends BaseDamageInvoker {
             livingEntity.setHealth(livingEntity.getHealth() - event.getFinalDamage());
             livingEntity.setLastDamageCause(event);
             livingEntity.addPotionEffect(new PotionEffect(getRandomNegativeEffect(), 5 * DataConstants.TICKS_IN_SECOND, 1, false, true));
+            EntityDamageByPlayerLog.insertLogEvent(livingEntity, host);
         }
     }
 }

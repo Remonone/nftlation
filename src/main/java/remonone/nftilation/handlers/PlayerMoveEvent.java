@@ -20,7 +20,7 @@ public class PlayerMoveEvent implements Listener {
     @EventHandler
     public void onPlayerMove(final org.bukkit.event.player.PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        if(isNotAuthenticated(player) || (PlayerUtils.getModelFromPlayer(player) != null &&  isMoveRuleSet())) {
+        if(isNotAuthenticated(player) || (PlayerUtils.getModelFromPlayer(player) != null && isMoveForbidden())) {
             event.setCancelled(true);
         }
     }
@@ -30,14 +30,15 @@ public class PlayerMoveEvent implements Listener {
         if(!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
         if(isNotAuthenticated(player) ||
-                !Store.getInstance().getGameStage().getStage().equals(Stage.IN_GAME) ||
-                (PlayerUtils.getModelFromPlayer(player) != null && isMoveRuleSet())) {
+                (Store.getInstance().getGameStage().getStage().equals(Stage.IN_GAME) &&
+                PlayerUtils.getModelFromPlayer(player) != null && isMoveForbidden())) {
+            
             event.setCancelled(true);
         }
     }
 
-    private boolean isMoveRuleSet() {
-        return (Boolean)rules.getRuleOrDefault(PropertyConstant.RULE_PLAYERS_ABLE_TO_MOVE, true);
+    private boolean isMoveForbidden() {
+        return !(Boolean)rules.getRuleOrDefault(PropertyConstant.RULE_PLAYERS_ABLE_TO_MOVE, true);
     }
 
     private boolean isNotAuthenticated(final Player player) {

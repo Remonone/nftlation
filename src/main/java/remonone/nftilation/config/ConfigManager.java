@@ -54,6 +54,7 @@ public class ConfigManager {
             configuration.load(file);
         } catch(Exception e) {
             Logger.error("Error during loading a configurations: " + e.getMessage());
+            return;
         }
         
         LoadData();

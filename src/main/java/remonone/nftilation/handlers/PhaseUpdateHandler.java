@@ -72,6 +72,7 @@ public class PhaseUpdateHandler implements Listener {
             }
             case 3: {
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_INVULNERABLE, false);
+                RuleManager.getInstance().setRule(PropertyConstant.RULE_RESPAWN_TIMER, (long) 10 * DataConstants.TICKS_IN_SECOND);
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.THIRD_PHASE_TITLE, MessageConstant.THIRD_PHASE_SUBTITLE, 10, 80, 10);
                     sendMessagesToPlayer(player,
@@ -88,6 +89,7 @@ public class PhaseUpdateHandler implements Listener {
             }
             case 4: {
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_AVAILABLE_TIER, 3);
+                RuleManager.getInstance().setRule(PropertyConstant.RULE_RESPAWN_TIMER, (long) 15 * DataConstants.TICKS_IN_SECOND);
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.FOURTH_PHASE_TITLE, MessageConstant.FOURTH_PHASE_SUBTITLE, 10, 80, 10);
                     sendMessagesToPlayer(player,
@@ -116,6 +118,7 @@ public class PhaseUpdateHandler implements Listener {
                 instance.setRule(PropertyConstant.RULE_CORE_SELF_DESTRUCTIVE, true);
                 instance.setRule(PropertyConstant.RULE_INVENTORY_AUTO_CLEAR, false);
                 instance.setRule(PropertyConstant.RULE_CORE_DAMAGE_INTAKE, 4);
+                instance.setRule(PropertyConstant.RULE_RESPAWN_TIMER, 20 * DataConstants.TICKS_IN_SECOND);
                 BukkitRunnable runnable = new BukkitRunnable() {
                     @Override
                     public void run() {

@@ -13,15 +13,14 @@ import remonone.nftilation.enums.LoginState;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.roles.Role;
+import remonone.nftilation.game.runes.Rune;
 import remonone.nftilation.utils.Logger;
 
 import java.util.*;
 
 public class DataInstance {
         
-    public DataInstance() {
-        
-    }
+    public DataInstance() {}
     
     private boolean initialized = false;
     @Getter
@@ -66,11 +65,11 @@ public class DataInstance {
                 info.data = playerData;
                 playerInfo = info;
             } else {
-                playerInfo = new PlayerInfo(playerData, null, player.getUniqueId(), new HashMap<>());
+                playerInfo = new PlayerInfo(playerData, null, null, player.getUniqueId());
                 teams.get(playerData.getTeam().getTeamName()).add(playerInfo);
             }
         } else {
-            playerInfo = new PlayerInfo(playerData, null, player.getUniqueId(), new HashMap<>());
+            playerInfo = new PlayerInfo(playerData, null, null, player.getUniqueId());
         }
         players.add(playerInfo);
         
@@ -80,7 +79,7 @@ public class DataInstance {
     
     public String getPlayerTeam(UUID playerId) {
         PlayerInfo info = FindPlayerByName(playerId);
-        if(info == null) return "";
+        if(info == null || info.getData() == null || info.getData().getTeam() == null) return "";
         return info.getData().getTeam().getTeamName();
     }
     
@@ -116,13 +115,6 @@ public class DataInstance {
         return null;
     }
     
-    
-    public Map<String, Object> getPlayerParams(UUID playerId) {
-        PlayerInfo info = FindPlayerByName(playerId);
-        if(info == null) return null;
-        return info.params;
-    }
-    
     public boolean isTeamPresented(String team) {
         return teams.containsKey(team);
     }
@@ -133,6 +125,14 @@ public class DataInstance {
             return null;
         }
         return info.getRole();
+    }
+
+    public Rune getPlayerRune(UUID playerId) {
+        PlayerInfo info = FindPlayerByName(playerId);
+        if(info == null) {
+            return null;
+        }
+        return info.getRune();
     }
 
     private PlayerInfo getPlayerInfo(PlayerData playerData) {
@@ -167,6 +167,19 @@ public class DataInstance {
         return true;
     }
     
+    public boolean updatePlayerRune(Rune rune, UUID playerId) {
+        PlayerInfo info = FindPlayerByName(playerId);
+        if(info == null) {
+            Logger.warn("Player " + playerId + " has not been authenticated to the game");
+            return false;
+        }
+        if(rune == null) {
+            Logger.warn("Rune is undefined!");
+            return false;
+        }
+        info.setRune(rune);
+        return true;
+    }
 
     @AllArgsConstructor
     @Getter
@@ -176,9 +189,9 @@ public class DataInstance {
         @Setter
         private Role role;
         @Setter
+        private Rune rune;
+        @Setter
         private UUID playerId;
-        @Getter
-        private Map<String, Object> params;
     }
     
     
