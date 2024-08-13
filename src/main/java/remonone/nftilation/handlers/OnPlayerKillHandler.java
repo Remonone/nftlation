@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.events.OnPlayerKillPlayerEvent;
+import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 
 public class OnPlayerKillHandler implements Listener {
@@ -19,7 +20,7 @@ public class OnPlayerKillHandler implements Listener {
         String attackerTeam = (String)e.getKiller().getParameters().get(PropertyConstant.PLAYER_TEAM_NAME);
         if(!e.getVictim().getParameters().containsKey(PropertyConstant.PLAYER_TEAM_NAME)) return;
         String victimTeam = (String)e.getVictim().getParameters().get(PropertyConstant.PLAYER_TEAM_NAME);
-        GameInstance.getInstance().awardPlayer(e.getKiller(), DataConstants.TOKEN_PER_KILL);
+        GameInstance.getInstance().adjustPlayerTokens(e.getKiller(), DataConstants.TOKEN_PER_KILL, OnTokenTransactionEvent.TransactionType.GAIN);
         GameInstance.getInstance().increasePlayerKillCounter(attackerTeam, attacker);
         GameInstance.getInstance().increasePlayerDeathCounter(victimTeam, victim);
     }

@@ -65,4 +65,8 @@ public class MessageConstant {
     public static final String GAME_NOT_START_YET = "Game not started yet!";
     public static final String GAME_PAUSED = "Game is paused!";
     public static final String GAME_RESUMED = "Game is resumed!";
+    public static final String TOKEN_TRANSFER_INCORRECT_RECIPIENT = "Неверный ник получателя!";
+    public static final String TOKEN_TRANSFER_INSUFFICIENT_AMOUNT = "Неверное количество токенов для перевода!";
+    public static final String TOKEN_TRANSFER_IMPOSSIBLE_TO_TRANSFER = "Невозможно перевести токены этому игроку!";
+    public static final String TOKEN_TRANSFER_TOO_FAR = "Игрок слишком далеко! Нельзя сделать перевод!";
 }

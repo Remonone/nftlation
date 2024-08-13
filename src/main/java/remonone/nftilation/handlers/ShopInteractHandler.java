@@ -14,6 +14,7 @@ import remonone.nftilation.Store;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.enums.Stage;
+import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.services.IPurchasableService;
 import remonone.nftilation.game.ingame.services.ServiceContainer;
@@ -73,7 +74,7 @@ public class ShopInteractHandler implements Listener {
 
     private void HandleItemPurchase(Player player, ItemStack item, int price) {
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-        if (!GameInstance.getInstance().withdrawFunds(teamName, player, price)) {
+        if (!GameInstance.getInstance().adjustPlayerTokens(teamName, player, -price, OnTokenTransactionEvent.TransactionType.SPEND)) {
             player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
             return;
         }

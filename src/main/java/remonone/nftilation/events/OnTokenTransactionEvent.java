@@ -19,7 +19,7 @@ public class OnTokenTransactionEvent extends Event implements Cancellable {
     
     private static final HandlerList handlers = new HandlerList();
 
-    public OnTokenTransactionEvent(TransactionType transactionType, int tokensAmount, PlayerModel player) {
+    public OnTokenTransactionEvent(TransactionType transactionType, float tokensAmount, PlayerModel player) {
         this.transactionType = transactionType;
         this.tokensAmount = tokensAmount;
         this.player = player;

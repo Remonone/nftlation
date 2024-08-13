@@ -148,6 +148,7 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("setTeamCoreHealth").setExecutor(new SetTeamCoreHealth());
         this.getCommand("giveTokensToPlayer").setExecutor(new GiveTokenToPlayer());
         this.getCommand("reloadProperties").setExecutor(new ReloadConfigCommand());
+        this.getCommand("transfer").setExecutor(new TokenTransferCommand());
     }
     
     public static Nftilation getInstance() {

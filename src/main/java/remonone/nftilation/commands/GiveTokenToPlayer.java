@@ -6,9 +6,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 import remonone.nftilation.Store;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
+import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.utils.CommandUtils;
@@ -39,7 +41,7 @@ public class GiveTokenToPlayer implements CommandExecutor, TabCompleter {
             return true;
         }
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(playerInfo.getPlayerId());
-        GameInstance.getInstance().awardPlayer(teamName, Bukkit.getPlayer(playerInfo.getPlayerId()), amount);
+        GameInstance.getInstance().adjustPlayerTokens(teamName, Bukkit.getPlayer(playerInfo.getPlayerId()), amount, OnTokenTransactionEvent.TransactionType.TRANSFER);
         return true;
     }
 
@@ -50,6 +52,9 @@ public class GiveTokenToPlayer implements CommandExecutor, TabCompleter {
         Player player = (Player) commandSender;
         DataInstance dataInstance = Store.getInstance().getDataInstance();
         if(dataInstance.FindPlayerByName(player.getUniqueId()).getData().getRole().equals(PlayerRole.PLAYER)) return Collections.emptyList();
-        return dataInstance.getPlayers().stream().filter(playerInfo -> playerInfo.getData().getRole().equals(PlayerRole.PLAYER)).map(playerInfo -> playerInfo.getData().getLogin()).collect(Collectors.toList());
+        if(strings.length > 1) return Collections.emptyList();
+        List<String> playerNicknames = dataInstance.getPlayers().stream().filter(playerInfo -> playerInfo.getData().getRole().equals(PlayerRole.PLAYER)).map(playerInfo -> playerInfo.getData().getLogin()).collect(Collectors.toList());
+        StringUtil.copyPartialMatches(strings[0], playerNicknames, playerNicknames);
+        return playerNicknames;
     }
 }

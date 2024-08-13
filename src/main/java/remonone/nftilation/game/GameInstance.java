@@ -212,30 +212,32 @@ public class GameInstance {
     public Iterator<ITeam> getTeamIterator() {
         return teamRaw.iterator();
     }
-    
-    public void awardPlayer(String teamName, Player player, int tokens) {
+
+
+    public boolean adjustPlayerTokens(String teamName, Player player, float tokens, OnTokenTransactionEvent.TransactionType type) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        awardPlayer(model, tokens);
+        return adjustPlayerTokens(model, tokens, type);
     }
-    
-    public void awardPlayer(PlayerModel model, int tokens) {
-        OnTokenTransactionEvent e = new OnTokenTransactionEvent(OnTokenTransactionEvent.TransactionType.GAIN, tokens, model);
+
+    /**
+     * @param model Player model
+     * @param tokens Tokens to give(positive/negative)
+     * @param type Transaction type: GAIN, SPEND, TRANSFER
+     * @return state if operation was successful
+     */
+    public boolean adjustPlayerTokens(PlayerModel model, float tokens, OnTokenTransactionEvent.TransactionType type) {
+        if(tokens == 0) return false;
+        if(model.getTokens() + tokens < 0) return false;
+        OnTokenTransactionEvent e = new OnTokenTransactionEvent(type, tokens, model);
         getServer().getPluginManager().callEvent(e);
-        if(e.isCancelled()) return;
+        if(e.isCancelled()) return false;
         model.setTokens(model.getTokens() + e.getTokensAmount());
         ScoreboardHandler.updateScoreboard(model);
+        return true;
     }
     
     public boolean haveEnoughMoney(String teamName, Player player, int amount) {
         return getPlayerModelFromTeam(teamName, player).getTokens() >= amount;
-    }
-    
-    public boolean withdrawFunds(String teamName, Player player, int amount) {
-        PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        if(!haveEnoughMoney(teamName, player, amount)) return false;
-        model.setTokens(model.getTokens() - amount);
-        ScoreboardHandler.updateScoreboard(model);
-        return true;
     }
     
     public void increasePlayerKillCounter(String teamName, Player player) {
@@ -300,7 +302,7 @@ public class GameInstance {
             player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
             return;
         }
-        withdrawFunds(teamName, player, price);
+        adjustPlayerTokens(teamName, player, -price, OnTokenTransactionEvent.TransactionType.SPEND);
         player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, .5f, 1f);
         params.put(PropertyConstant.PLAYER_LEVEL_PARAM, level);
 
@@ -381,7 +383,7 @@ public class GameInstance {
             player.sendMessage(ChatColor.RED + MessageConstant.CANNOT_HEAL_CORE);
             return;
         }
-        withdrawFunds(teamName, player, price);
+        adjustPlayerTokens(teamName, player, -price, OnTokenTransactionEvent.TransactionType.SPEND);
         team.getPlayers().forEach(ScoreboardHandler::updateScoreboard);
         World world = player.getWorld();
         world.playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, 1f, 1f);

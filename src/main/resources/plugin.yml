@@ -71,3 +71,6 @@ commands:
   reloadProperties:
     description: Reload in-game properties
     usage: /reloadProperties
+  transfer:
+    description: Use this command to transfer your tokens to teammates. You can transfer tokens within 5 blocks from potential recipient.
+    usage: /transfer [recipientName] [amount]

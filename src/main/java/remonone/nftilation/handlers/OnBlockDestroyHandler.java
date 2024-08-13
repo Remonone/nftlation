@@ -21,6 +21,7 @@ import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
+import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
@@ -67,7 +68,7 @@ public class OnBlockDestroyHandler implements Listener {
             int tokens = BlockConstants.getTokensFromBlock(mat);
             String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
             if(drops.length != 0) {
-                GameInstance.getInstance().awardPlayer(team, player, tokens);
+                GameInstance.getInstance().adjustPlayerTokens(team, player, tokens, OnTokenTransactionEvent.TransactionType.GAIN);
             }
             if(timer == -1) return;
             if(!isResourcesRespawnable) {
@@ -98,7 +99,7 @@ public class OnBlockDestroyHandler implements Listener {
             if(GameInstance.getInstance().damageCore(team.getTeamName(), true)) {
                 List<PlayerModel> players = GameInstance.getInstance().getTeam(playerTeam).getPlayers();
                 for(PlayerModel model : players) {
-                    GameInstance.getInstance().awardPlayer(model, DataConstants.TOKEN_PER_DESTRUCTION);
+                    GameInstance.getInstance().adjustPlayerTokens(model, DataConstants.TOKEN_PER_DESTRUCTION, OnTokenTransactionEvent.TransactionType.GAIN);
                 }
                 block.setType(Material.AIR);
             }

@@ -19,6 +19,7 @@ import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.OnPlayerKillPlayerEvent;
+import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.IDamageHandler;
 import remonone.nftilation.game.models.IDamageInvoker;
@@ -76,7 +77,7 @@ public class OnEntityDieHandler implements Listener {
             if(attacker == null) return;
             String attackerTeam = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getUniqueId());
             EntityDamageByPlayerLog.removeLogEvent(entity.getUniqueId());
-            GameInstance.getInstance().awardPlayer(attackerTeam, attacker, EntityHandleComponent.getEntityBounty(entity));
+            GameInstance.getInstance().adjustPlayerTokens(attackerTeam, attacker, EntityHandleComponent.getEntityBounty(entity), OnTokenTransactionEvent.TransactionType.GAIN);
         }
     }
     
@@ -93,7 +94,7 @@ public class OnEntityDieHandler implements Listener {
         }
         if(target.getHealth() - event.getFinalDamage() <= 0) {
             String team = Store.getInstance().getDataInstance().getPlayerTeam(info.attacker.getUniqueId());
-            GameInstance.getInstance().awardPlayer(team, info.attacker, EntityHandleComponent.getEntityBounty(target));
+            GameInstance.getInstance().adjustPlayerTokens(team, info.attacker, EntityHandleComponent.getEntityBounty(target), OnTokenTransactionEvent.TransactionType.GAIN);
             EntityDamageByPlayerLog.removeLogEvent(info.attacker.getUniqueId());
         } else {
             EntityDamageByPlayerLog.insertLogEvent(target, info.attacker);
