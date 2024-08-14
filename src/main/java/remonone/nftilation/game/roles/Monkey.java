@@ -15,6 +15,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
@@ -40,22 +41,6 @@ public class Monkey extends Role {
     public String getRoleID() {
         return "MN";
     }
-
-//    @Override
-//    protected ItemStack getSword(Map<String, Object> params) {
-//        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-//        ItemStack stack = new ItemStack(Material.STICK);
-//        stack.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-//        NBT.modify(stack, nbt -> {
-//            nbt.setString(RoleConstant.MONKEY_NBT_CONTAINER, RoleConstant.MONKEY_NBT_WAND);
-//        });
-//        ItemMeta meta = stack.getItemMeta();
-//        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-//        String name = upgradeLevel == 3 ? "Monkey King Wand" : "BONK";
-//        meta.setDisplayName(name);
-//        stack.setItemMeta(meta);
-//        return stack;
-//    }
 
     @Override
     protected List<ItemStack> getAbilityItems(Map<String, Object> params){
@@ -94,13 +79,24 @@ public class Monkey extends Role {
         }
         PlayerModel model = PlayerUtils.getModelFromPlayer(accessor);
         Map<String, Object> params = model.getParameters();
+        int level = (int)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        int jumpAmount = (Integer)getMetaInfo(MetaConstants.META_MONKEY_JUMP_COUNT, level);
+        if(params.containsKey(RoleConstant.MONKEY_JUMP_COUNT)) {
+            int jumpCount = (Integer)params.get(RoleConstant.MONKEY_JUMP_COUNT);
+            if(jumpCount >= jumpAmount) {
+                accessor.setAllowFlight(false);
+            }
+        }
+        int count = (int)params.getOrDefault(RoleConstant.MONKEY_JUMP_COUNT, 0);
+        params.put(RoleConstant.MONKEY_JUMP_COUNT, count + 1);
         e.setCancelled(true);
-        accessor.setAllowFlight(false);
         accessor.setFlying(false);
-        double acceleration = 2;
-        double velocityUp = .5;
+        double acceleration = (double)getMetaInfo(MetaConstants.META_MONKEY_JUMP_TOSSING, level);
+        double velocityUp = (double)getMetaInfo(MetaConstants.META_MONKEY_JUMP_ACCELERATION, level);
+        double cooldown = (double)getMetaInfo(MetaConstants.META_MONKEY_JUMP_COOLDOWN, level);
+        accessor.sendMessage(acceleration + " " + velocityUp);
         accessor.setVelocity(accessor.getVelocity().multiply(acceleration).setY(velocityUp).add(accessor.getLocation().getDirection().normalize()));
-        params.put("cooldown", System.currentTimeMillis() + RoleConstant.DOUBLE_JUMP_COOLDOWN * DataConstants.ONE_SECOND);
+        params.put("cooldown", System.currentTimeMillis() + (long)(cooldown * DataConstants.ONE_SECOND));
     }
 
     @EventHandler
@@ -124,6 +120,7 @@ public class Monkey extends Role {
                 .getType()
                 .equals(Material.AIR)) && (params.containsKey("cooldown") && (((long)params.get("cooldown")) < System.currentTimeMillis()))) {
             accessor.setAllowFlight(true);
+            params.remove(RoleConstant.MONKEY_JUMP_COUNT);
         }
     }
 
@@ -147,11 +144,12 @@ public class Monkey extends Role {
         PlayerModel model = instance.getPlayerModelFromTeam(team, player);
         if(!PlayerUtils.validateParams(model.getParameters())) return;
         int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        int length = 1 + level * 5;
+        int length = (Integer) getMetaInfo(MetaConstants.META_MONKEY_INVISIBILITY_DURATION, level);
         World world = player.getWorld();
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, length * DataConstants.TICKS_IN_SECOND, 0, false, false));
         world.playSound(player.getLocation(), Sound.BLOCK_LAVA_EXTINGUISH, .5f, .8f);
-        InventoryUtils.setCooldownForItem(model, item, 60);
+        float cooldown = (Float) getMetaInfo(MetaConstants.META_MONKEY_INVISIBILITY_COOLDOWN, level);
+        InventoryUtils.setCooldownForItem(model, item, cooldown);
     }
 
     @Override

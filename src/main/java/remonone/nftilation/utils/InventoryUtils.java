@@ -76,12 +76,10 @@ public class InventoryUtils {
         player.getInventory().addItem(roleSelector);
     }
     
-    public static void setCooldownForItem(PlayerModel model, ItemStack item, long cooldown) {
-        float cooldownValue = cooldown;
-        OnCooldownApplyEvent event = new OnCooldownApplyEvent(model, cooldownValue);
+    public static void setCooldownForItem(PlayerModel model, ItemStack item, float cooldown) {
+        OnCooldownApplyEvent event = new OnCooldownApplyEvent(model, cooldown);
         getServer().getPluginManager().callEvent(event);
-        cooldownValue = event.getCooldown() * DataConstants.ONE_SECOND;
-        long finalCooldown = (long) cooldownValue;
+        long finalCooldown = (long) event.getCooldown() * DataConstants.ONE_SECOND;
         NBT.modify(item, nbt -> {nbt.setLong("cooldown", System.currentTimeMillis() + finalCooldown * DataConstants.ONE_SECOND);});
     }
     

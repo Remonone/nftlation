@@ -1,4 +1,4 @@
-﻿package remonone.nftilation.game.runes;
+package remonone.nftilation.game.runes;
 
 import org.bukkit.event.EventHandler;
 import remonone.nftilation.constants.MetaConstants;
@@ -32,7 +32,7 @@ public class HasteRune extends Rune {
         int level = (Integer) params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         Object raw = NestedObjectFetcher.getNestedObject(MetaConstants.META_RUNE_EFFECT, this.getMeta(), level);
         if(raw == null) return;
-        int cooldownReduction = (Integer) raw;
+        float cooldownReduction = (float) raw;
         float cooldown = e.getCooldown();
         e.setCooldown(cooldown * (100 - cooldownReduction) / 100);
     }

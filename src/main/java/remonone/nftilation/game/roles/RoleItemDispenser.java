@@ -13,8 +13,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
-import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.utils.ColorUtils;
@@ -67,7 +67,7 @@ public class RoleItemDispenser {
     
     private static ItemStack getRoleItem(String type, Map<String, Object> playerParams, Map<String, Object> roleMeta) {
         int upgradeLevel = (int)playerParams.getOrDefault(PropertyConstant.PLAYER_LEVEL_PARAM, 1);
-        String itemMaterial = (String)getMetaInfo(type + RoleConstant.META_ITEM_TYPE, roleMeta, upgradeLevel);
+        String itemMaterial = (String)getMetaInfo(type + MetaConstants.META_ITEM_TYPE, roleMeta, upgradeLevel);
         ItemStack itemStack = new ItemStack(Material.getMaterial(itemMaterial));
         if(itemStack.getType().equals(Material.AIR)) return itemStack;
         List<EnchantInfo> enchantList = getEnchantments(type, upgradeLevel, roleMeta);
@@ -76,13 +76,13 @@ public class RoleItemDispenser {
                 itemStack.addUnsafeEnchantment(Enchantment.getByName(enchantInfo.enchantment), enchantInfo.level);
             }
         }
-        String itemName = (String)getMetaInfo(type + RoleConstant.META_ITEM_NAME, roleMeta, upgradeLevel);
+        String itemName = (String)getMetaInfo(type + MetaConstants.META_ITEM_NAME, roleMeta, upgradeLevel);
         ItemMeta meta =  itemStack.getItemMeta();
         meta.setDisplayName(itemName);
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
-        Object rawNBT = getMetaInfo(type + RoleConstant.META_ITEM_NBT, roleMeta, upgradeLevel);
+        Object rawNBT = getMetaInfo(type + MetaConstants.META_ITEM_NBT, roleMeta, upgradeLevel);
         if(rawNBT != null) {
             Map<String, String> nbtData = (Map<String, String>) rawNBT;
             NBT.modify(itemStack, nbt -> {
@@ -97,7 +97,7 @@ public class RoleItemDispenser {
     }
 
     private static List<EnchantInfo> getEnchantments(String type, int upgradeLevel, Map<String, Object> roleMeta) {
-        return (List<EnchantInfo>) getMetaInfo(type + RoleConstant.META_ITEM_ENCHANTS, roleMeta, upgradeLevel);
+        return (List<EnchantInfo>) getMetaInfo(type + MetaConstants.META_ITEM_ENCHANTS, roleMeta, upgradeLevel);
     }
 
 

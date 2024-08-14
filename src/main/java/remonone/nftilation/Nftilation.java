@@ -22,6 +22,7 @@ import remonone.nftilation.game.meta.RoleInfo;
 import remonone.nftilation.game.meta.RuneInfo;
 import remonone.nftilation.game.roles.*;
 import remonone.nftilation.game.runes.GreedRune;
+import remonone.nftilation.game.runes.HasteRune;
 import remonone.nftilation.game.runes.Rune;
 import remonone.nftilation.game.shop.ShopBuilder;
 import remonone.nftilation.game.shop.content.CategoryElement;
@@ -34,10 +35,8 @@ import remonone.nftilation.utils.CustomEntities;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
 
-
 public final class Nftilation extends JavaPlugin {
-
-        
+    
     @Override
     public void onEnable() {
         // Plugin startup logic
@@ -58,6 +57,7 @@ public final class Nftilation extends JavaPlugin {
     private void RegisterRunes() {
         Logger.log("Registering runes...");
         Rune.registerRune(GreedRune.class);
+        Rune.registerRune(HasteRune.class);
     }
 
     private void FetchRoleSkins() {
@@ -121,6 +121,7 @@ public final class Nftilation extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ShopInteractHandler(), this);
         getServer().getPluginManager().registerEvents(new ExplosionDestructionDisable(), this);
         getServer().getPluginManager().registerEvents(new OnChunkUnloadHandler(), this);
+        getServer().getPluginManager().registerEvents(new OnPlayerKillHandler(), this);
     }
     
     private void InitCommands() {

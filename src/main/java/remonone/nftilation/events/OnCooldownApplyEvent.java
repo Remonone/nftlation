@@ -1,4 +1,4 @@
-﻿package remonone.nftilation.events;
+package remonone.nftilation.events;
 
 import lombok.Getter;
 import lombok.Setter;

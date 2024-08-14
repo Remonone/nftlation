@@ -65,6 +65,7 @@ public class InventoryBuilder {
             Material mat = rune.getMaterial();
             Logger.debug(mat.toString());
             if(mat == Material.AIR) continue;
+            player.sendMessage(rune.getName() + rune.getIndex());
             itemStack = new ItemStack(mat);
             FillMeta(itemStack, rune);
             NBT.modify(itemStack, nbt -> {
@@ -77,9 +78,9 @@ public class InventoryBuilder {
     
     private static void FillMeta(ItemStack itemStack, IInventoryHelder helder) {
         ItemMeta itemMeta = itemStack.getItemMeta();
-        String roleName = Optional.ofNullable(helder.getName()).orElse("none");
+        String name = Optional.ofNullable(helder.getName()).orElse("none");
         List<String> descriptions = Optional.ofNullable(helder.getDescription()).orElse(Collections.emptyList());
-        itemMeta.setDisplayName(roleName);
+        itemMeta.setDisplayName(name);
         itemMeta.setLore(descriptions);
         itemStack.setItemMeta(itemMeta);
     }

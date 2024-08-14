@@ -12,4 +12,11 @@ public class MetaConstants {
     public static final String META_HOOK_AVAILABILITY = "hook.availability";
     
     public static final String META_RUNE_EFFECT = "effect";
+    
+    public static final String META_MONKEY_INVISIBILITY_COOLDOWN = "invisibility.cooldown";
+    public static final String META_MONKEY_INVISIBILITY_DURATION = "invisibility.duration";
+    public static final String META_MONKEY_JUMP_COUNT = "jump.amount";
+    public static final String META_MONKEY_JUMP_ACCELERATION = "jump.acceleration";
+    public static final String META_MONKEY_JUMP_TOSSING = "jump.tossing";
+    public static final String META_MONKEY_JUMP_COOLDOWN = "jump.cooldown";
 }

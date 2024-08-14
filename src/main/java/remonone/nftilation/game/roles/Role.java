@@ -232,7 +232,7 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
         }
     }
     
-    protected Object getMetaInfo(String path, Map<String, Object> meta, int level) {
-        return NestedObjectFetcher.getNestedObject(path, meta, level);
+    protected Object getMetaInfo(String path, int level) {
+        return NestedObjectFetcher.getNestedObject(path, this.getMeta(), level);
     }
 }
