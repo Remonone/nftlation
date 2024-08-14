@@ -64,6 +64,6 @@ public abstract class Rune implements Listener, IInventoryHelder {
         return runes.stream().filter(role -> role.getRuneID().equals(runeID)).findFirst().orElse(null);
     }
     
-    protected void setPlayer(PlayerModel model) {}
+    public void setPlayer(PlayerModel model) {}
     
 }

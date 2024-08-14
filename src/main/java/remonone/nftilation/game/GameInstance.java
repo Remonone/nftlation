@@ -1,37 +1,22 @@
 package remonone.nftilation.game;
 
 import lombok.*;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftIronGolem;
 import org.bukkit.entity.*;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.application.models.TeamData;
-import remonone.nftilation.application.services.SkinCache;
-import remonone.nftilation.components.EntityHandleComponent;
-import remonone.nftilation.config.ConfigManager;
-import remonone.nftilation.config.TeamSpawnPoint;
+import remonone.nftilation.components.IComponent;
+import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.events.OnTokenTransactionEvent;
-import remonone.nftilation.game.damage.TeamAttackInvoker;
-import remonone.nftilation.game.ingame.core.Core;
-import remonone.nftilation.game.ingame.services.RepairCoreService;
-import remonone.nftilation.game.ingame.services.SecondTierService;
-import remonone.nftilation.game.ingame.services.ServiceContainer;
-import remonone.nftilation.game.ingame.services.ThirdTierService;
-import remonone.nftilation.game.mob.AngryGolem;
 import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.phase.PhaseCounter;
-import remonone.nftilation.game.roles.Guts;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.scoreboard.ScoreboardHandler;
@@ -39,55 +24,86 @@ import remonone.nftilation.handlers.OnEntityDieHandler;
 import remonone.nftilation.utils.*;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.bukkit.Bukkit.*;
 
 public class GameInstance {
-    
-    private static final Random RANDOM = new Random(System.currentTimeMillis());
-    
+
     @Getter
     private final static GameInstance instance = new GameInstance();
     private Map<String, IModifiableTeam> teamData;
     private final Set<ITeam> teamRaw = new HashSet<>();
     @Getter
     private PhaseCounter counter;
+
+    private Map<String, IComponent> components;
     
     private boolean isFinished;
     
     public void startGame() {
         Map<String, List<DataInstance.PlayerInfo>> teams = Store.getInstance().getDataInstance().getTeams();
-        constructTeamData(teams);
-        disposePlayers();
-        initServices();
-        spawnGolems();
+        teamData = GameConfiguration.constructTeamData(teams, destroyTeam);
+        GameConfiguration.disposePlayers(teamRaw);
+        GameConfiguration.initServices();
+        GameConfiguration.spawnGolems();
         counter = new PhaseCounter();
         counter.Init();
         for(ITeam team : teamData.values()) {
-            initPlayerRoles(team.getPlayers());
-            initPlayerRunes(team.getPlayers());
+            GameConfiguration.initPlayerRoles(team);
+            GameConfiguration.initPlayerRunes(team);
             team.getPlayers().forEach(Role::refillInventoryWithItems);
             for(PlayerModel model : team.getPlayers()) {
                 ScoreboardHandler.buildScoreboard(model.getReference());
             }
         }
+        initComponents();
     }
 
-    private void spawnGolems() {
-        List<Location> locations = ConfigManager.getInstance().getIronGolemPositions();
-        for(Location location : locations) {
-            location.getChunk().load();
-            AngryGolem golem = new AngryGolem(location);
-            ((CraftWorld)location.getWorld()).getHandle().addEntity(golem, CreatureSpawnEvent.SpawnReason.CUSTOM);
-            EntityHandleComponent.setEntityUnloadLocked(golem.getBukkitEntity());
-            EntityHandleComponent.setEntityHostile(golem.getBukkitEntity());
-            EntityHandleComponent.setEntityBounty(golem.getBukkitEntity(), 120);
-            EntityList.addEntity((LivingEntity) golem.getBukkitEntity());
-            golem.setCustomName("Angry Golem");
-            ((CraftIronGolem)golem.getBukkitEntity()).setRemoveWhenFarAway(false);
+    private void initComponents() {
+        components = new HashMap<>();
+        IComponent playerInteract = instantiateComponent(PlayerInteractComponent.class);
+        components.put(playerInteract.getName(), playerInteract);
+    }
+
+    private IComponent instantiateComponent(Class<? extends IComponent> componentClass) {
+        try {
+            IComponent comp = componentClass.newInstance();
+            comp.initComponent();
+            return comp;
+        } catch(Exception ex) {
+            Logger.error("Cannot instantiate component " + componentClass.getName());
+            throw new RuntimeException("Cannot instantiate component " + componentClass.getName(), ex);
         }
     }
+
+    public IComponent getComponentByName(String name) {
+        return components.get(name);
+    }
+
+    private final Function<String, Void> destroyTeam = (String teamName) -> {
+        IModifiableTeam team = teamData.get(teamName);
+        team.setCoreAlive(false);
+
+        World world = Store.getInstance().getDataInstance().getMainWorld();
+        Location location = team.getTeamSpawnPoint().getCoreCenter().toLocation(world);
+        location.getBlock().setType(Material.AIR);
+        notifyDestruction(team);
+
+        if(!PlayerUtils.isTeamHaveAlivePlayers(teamName)) {
+            team.setTeamActive(false);
+            checkOnActiveTeams();
+        }
+        if((Boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_IMMINENT_DEATH, false) && !isFinished) {
+            team.getPlayers().forEach(playerModel -> OnEntityDieHandler.OnDeath(playerModel.getReference()));
+        }
+        for(ITeam currentTeam : teamData.values()) {
+            currentTeam.getPlayers().forEach(ScoreboardHandler::updateScoreboard);
+        }
+        checkOnActiveTeams();
+        return null;
+    };
 
     public boolean checkIfPlayersInSameTeam(Player player1, Player player2) {
         String data1 = Store.getInstance().getDataInstance().getPlayerTeam(player1.getUniqueId());
@@ -95,136 +111,19 @@ public class GameInstance {
         return !StringUtils.isEmpty(data1) && !StringUtils.isEmpty(data2) && data1.equals(data2);
     }
 
-    private void initServices() {
-        ServiceContainer.registerService(new RepairCoreService());
-        ServiceContainer.registerService(new SecondTierService());
-        ServiceContainer.registerService(new ThirdTierService());
-    }
-
-
-    private void initPlayerRoles(List<PlayerModel> models) {
-        for(PlayerModel model : models) {
-            Map<String, Object> params = model.getParameters();
-            if(!PlayerUtils.validateParams(params)) {
-                continue;
-            }
-            String roleId = params.get(PropertyConstant.PLAYER_ROLE_ID).toString();
-            try {
-                String texture = SkinCache.getInstance().getTexture(roleId);
-                String signature = SkinCache.getInstance().getSignature(roleId);
-                PlayerNMSUtil.changePlayerSkin(model.getReference(), texture, signature);
-                Role.UpdatePlayerAbilities(model);
-            } catch(Exception ex) {
-                Logger.error("Unable load role: " + roleId + ". Player: " + model.getReference().getDisplayName());
-            }
-        }
-    }
-
-    private void initPlayerRunes(List<PlayerModel> models) {
-        for(PlayerModel model : models) {
-            
-        }
-    }
-
-    private void constructTeamData(Map<String, List<DataInstance.PlayerInfo>> teams) {
-        teamData = new HashMap<>();
-        Stack<TeamSpawnPoint> teamList = new Stack<>();
-        teamList.addAll(ConfigManager.getInstance().getTeamSpawnList());
-        for(Map.Entry<String, List<DataInstance.PlayerInfo>> entry : teams.entrySet()) {
-            String teamName = entry.getKey();
-            TeamData teamInfo = Store.getInstance().getDataInstance().getTeamData().stream().filter(data -> data.getTeamName().equals(teamName)).findFirst().orElse(null);
-            if (teamInfo == null) {
-                Logger.error("Cannot init team " + teamName + "! Skipping...");
-                continue;
-            }
-            TeamSpawnPoint point = teamList.pop();
-            List<PlayerModel> teamPlayers = new ArrayList<>();
-            for (DataInstance.PlayerInfo info : entry.getValue()) {
-                if (info.getRole() == null) {
-                    info.setRole(getRandomRole(entry.getValue()));
-                }
-                Map<String, Object> parameters = getParametersObject(info, teamName);
-                PlayerModel model = new PlayerModel(getPlayer(info.getPlayerId()), 0, parameters);
-                model.getDamageInvokers().addAll(constructDamageInvokers(model));
-                model.getDamageHandlers().addAll(constructDamageHandlers(model));
-                teamPlayers.add(model);
-            }
-            Core teamCore = SetCore(teamName, point);
-            SpawnShopKeeper(point);
-            IModifiableTeam team = TeamImpl.builder()
-                    .teamName(teamName)
-                    .players(teamPlayers)
-                    .spawnPoint(point)
-                    .core(teamCore)
-                    .teamColor(ChatColor.getByChar(teamInfo.getTeamColor()))
-                    .isTeamActive(true)
-                    .isCoreAlive(true)
-                    .build();
-            teamData.put(teamName, team);
-            teamRaw.add(team);
-        }
-    }
-
-    private Collection<? extends IDamageHandler> constructDamageHandlers(PlayerModel model) {
-        List<IDamageHandler> invokers = new ArrayList<>();
-        Role role = Role.getRoleByID(model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID).toString());
-        if(role == null) {
-            Logger.error("Unexpected issue have encountered during construction damage invokers for: " + model.getReference().getDisplayName());
-            return Collections.emptyList();
-        }
-        invokers.addAll(role.getDamageHandlers());
-        return invokers;
-    }
-
-    private Collection<? extends IDamageInvoker> constructDamageInvokers(PlayerModel model) {
-        List<IDamageInvoker> invokers = new ArrayList<>();
-        invokers.add(new TeamAttackInvoker());
-        Role role = Role.getRoleByID(model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID).toString());
-        if(role == null) {
-            Logger.error("Unexpected issue have encountered during construction damage invokers for: " + model.getReference().getDisplayName());
-            return Collections.emptyList();
-        }
-        invokers.addAll(role.getDamageInvokers());
-        return invokers;
-    }
-
-    private static Map<String, Object> getParametersObject(DataInstance.PlayerInfo info, String teamName) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(PropertyConstant.PLAYER_LEVEL_PARAM, 1);
-        parameters.put(PropertyConstant.PLAYER_DEATH_COUNT, 0);
-        parameters.put(PropertyConstant.PLAYER_KILL_COUNT, 0);
-        parameters.put(PropertyConstant.PLAYER_ROLE_ID, info.getRole().getRoleID());
-        parameters.put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, true);
-        parameters.put(PropertyConstant.PLAYER_TEAM_NAME, teamName);
-        parameters.put(PropertyConstant.PLAYER_RUNE_ID, info.getRune().getRuneID());
-        return parameters;
-    }
-
-    private Role getRandomRole(List<DataInstance.PlayerInfo> players) {
-        List<String> reservedRoles = players.stream()
-                .filter(info -> ObjectUtils.notEqual(info.getRole(), null))
-                .map(roleContainer -> roleContainer.getRole().getRoleID())
-                .collect(Collectors.toList());
-        List<Role> availableRoles = Role.getRoles().stream().filter(role -> !reservedRoles.contains(role.getRoleID()) && !role.getName().equals("Guts")).collect(Collectors.toList());
-        return availableRoles.get(RANDOM.nextInt(availableRoles.size()));
-    }
-
     public Iterator<ITeam> getTeamIterator() {
         return teamRaw.iterator();
     }
-
 
     public boolean adjustPlayerTokens(String teamName, Player player, float tokens, OnTokenTransactionEvent.TransactionType type) {
         PlayerModel model = getPlayerModelFromTeam(teamName, player);
         return adjustPlayerTokens(model, tokens, type);
     }
+    
+    public boolean haveEnoughMoney(String teamName, Player player, int amount) {
+        return getPlayerModelFromTeam(teamName, player).getTokens() >= amount;
+    }
 
-    /**
-     * @param model Player model
-     * @param tokens Tokens to give(positive/negative)
-     * @param type Transaction type: GAIN, SPEND, TRANSFER
-     * @return state if operation was successful
-     */
     public boolean adjustPlayerTokens(PlayerModel model, float tokens, OnTokenTransactionEvent.TransactionType type) {
         if(tokens == 0) return false;
         if(model.getTokens() + tokens < 0) return false;
@@ -236,109 +135,16 @@ public class GameInstance {
         return true;
     }
     
-    public boolean haveEnoughMoney(String teamName, Player player, int amount) {
-        return getPlayerModelFromTeam(teamName, player).getTokens() >= amount;
-    }
-    
-    public void increasePlayerKillCounter(String teamName, Player player) {
-        PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        Map<String, Object> params = model.getParameters();
-        int killCount = (Integer) params.getOrDefault(PropertyConstant.PLAYER_KILL_COUNT, 0);
-        params.put(PropertyConstant.PLAYER_KILL_COUNT, ++killCount);
-        ScoreboardHandler.updateScoreboard(model);
-    }
-
-    public void increasePlayerDeathCounter(String teamName, Player player) {
-        PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        Map<String, Object> params = model.getParameters();
-        int killCount = (Integer) params.getOrDefault(PropertyConstant.PLAYER_DEATH_COUNT, 0);
-        params.put(PropertyConstant.PLAYER_DEATH_COUNT, ++killCount);
-        ScoreboardHandler.updateScoreboard(model);
-    }
-    
     public ITeam getTeam(String teamName) {
         return teamData.getOrDefault(teamName, null);
-    }
-
-    private void SpawnShopKeeper(TeamSpawnPoint point) {
-        World world = Store.getInstance().getDataInstance().getMainWorld();
-        Location location = point.getShopKeeperPosition();
-        location.getChunk().load();
-        Villager villager = world.spawn(location, Villager.class);
-        villager.setAI(false);
-        villager.setCustomName("Shop keeper");
-        villager.setCustomNameVisible(false);
-        villager.setInvulnerable(true);
-        villager.setRemoveWhenFarAway(false);
-        EntityHandleComponent.setEntityUnloadLocked(villager);
-        EntityList.addEntity(villager);
-    }
-
-    private Core SetCore(String teamName, TeamSpawnPoint point) {
-        Core core = new Core(() -> destroyTeam(teamName));
-        World world = Store.getInstance().getDataInstance().getMainWorld();
-        Location location = point.getCoreCenter().toLocation(world);
-        location.getBlock().setType(Material.BEACON);
-        return core;
-    }
-    
-    public void upgradePlayer(Player player, int level, int price) {
-        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-        PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        Map<String, Object> params = model.getParameters();
-        if(!params.containsKey(PropertyConstant.PLAYER_LEVEL_PARAM)) {
-            Logger.error("Cannot fetch upgrade level for player: " + player.getDisplayName());
-            return;
-        }
-        if(level - (int)params.get(PropertyConstant.PLAYER_LEVEL_PARAM) != 1) {
-            player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_UPGRADE_LEVEL);
-            return;
-        }
-        if((int)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_AVAILABLE_TIER, 1) < level) {
-            player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_STAGE_FOR_UPGRADE);
-            return;
-        }
-        if(!haveEnoughMoney(teamName, player, price)) {
-            player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
-            return;
-        }
-        adjustPlayerTokens(teamName, player, -price, OnTokenTransactionEvent.TransactionType.SPEND);
-        player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, .5f, 1f);
-        params.put(PropertyConstant.PLAYER_LEVEL_PARAM, level);
-
-        Role role = Role.getRoleByID(model.getParameters().getOrDefault(PropertyConstant.PLAYER_ROLE_ID, "_").toString());
-        if(role == null) {
-            Logger.error("Cannot upgrade level for player: " + player.getDisplayName());
-            return;
-        }
-        if(role instanceof Guts) {
-            if(level == 2) {
-                Logger.broadcast(ChatColor.RED + "Мишка потерял концентрацию и его внимание расплывчато!");
-            }
-            if(level == 3) {
-                Logger.broadcast(ChatColor.DARK_RED + "Мишка сильно ослаб и находится в предсмертном состоянии!");
-            }
-        }
-        Role.SetInventoryItems(model);
-        Role.UpdatePlayerAbilities(player);
-        ScoreboardHandler.updateScoreboard(model);
-    }
-
-    private void disposePlayers() {
-        for(ITeam team : teamData.values()) {
-            team.getPlayers().forEach(playerModel -> setPlayerToPosition(team.getTeamSpawnPoint().getPosition(), playerModel.getReference()));
-        }
     }
     
     public void teleportPlayerToBase(String teamName, Player player) {
         ITeam team = teamData.get(teamName);
         if(team == null) return;
-        setPlayerToPosition(team.getTeamSpawnPoint().getPosition(), player);
+        player.teleport(team.getTeamSpawnPoint().getPosition());
     }
-    
-    private void setPlayerToPosition(Location loc, Player player) {
-        player.teleport(loc);
-    }
+
 
     public ITeam getTeamByCorePosition(Vector position) {
         for(ITeam team : teamData.values()) {
@@ -348,8 +154,7 @@ public class GameInstance {
         }
         return null;
     }
-    
-    
+
     public boolean damageCore(String teamName, boolean isPlayerDamager) {
         IModifiableTeam team = teamData.get(teamName);
         if(team == null) return false;
@@ -387,28 +192,6 @@ public class GameInstance {
         team.getPlayers().forEach(ScoreboardHandler::updateScoreboard);
         World world = player.getWorld();
         world.playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, 1f, 1f);
-    }
-
-    private void destroyTeam(String teamName) {
-        IModifiableTeam team = teamData.get(teamName);
-        team.setCoreAlive(false);
-        
-        World world = Store.getInstance().getDataInstance().getMainWorld();
-        Location location = team.getTeamSpawnPoint().getCoreCenter().toLocation(world);
-        location.getBlock().setType(Material.AIR);
-        notifyDestruction(team);
-        
-        if(!PlayerUtils.isTeamHaveAlivePlayers(teamName)) {
-            team.setTeamActive(false);
-            checkOnActiveTeams();
-        }
-        if((Boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_IMMINENT_DEATH, false) && !isFinished) {
-            team.getPlayers().forEach(playerModel -> OnEntityDieHandler.OnDeath(playerModel.getReference()));
-        }
-        for(ITeam currentTeam : teamData.values()) {
-            currentTeam.getPlayers().forEach(ScoreboardHandler::updateScoreboard);
-        }
-        checkOnActiveTeams();
     }
 
     private void checkOnActiveTeams() {
@@ -480,7 +263,7 @@ public class GameInstance {
         ITeam team = teamData.get(teamName);
         if(team == null) return;
         if(team.isCoreAlive()) {
-            setPlayerToPosition(team.getTeamSpawnPoint().getPosition(), player);
+            player.teleport(team.getTeamSpawnPoint().getPosition());
             PlayerModel model = getPlayerModelFromTeam(teamName, player);
             if(model == null) return;
             model.getParameters().put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, true);

@@ -5,13 +5,13 @@ import lombok.Setter;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.rules.RuleManager;
 
+@Setter
 public class Core implements ICoreData{
     
     @Getter
-    @Setter
     private int health;
-    
-    private final Runnable onDieFunction;
+
+    private Runnable onDieFunction;
     
     public Core(Runnable onDie) {
         health = 100;
