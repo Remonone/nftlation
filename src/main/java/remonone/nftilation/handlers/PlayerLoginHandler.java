@@ -114,7 +114,7 @@ public class PlayerLoginHandler implements Listener {
             PlayerNMSUtil.changePlayerSkin(player, SkinCache.getInstance().getTexture(role.getRoleID()), SkinCache.getInstance().getSignature(role.getRoleID()));
             ScoreboardHandler.updateScoreboard(model);
             GameInstance.getInstance().getCounter().bar.addPlayer(player);
-            Role.UpdatePlayerAbilities(player);
+            Role.updatePlayerAbilities(player);
         }
             
     }

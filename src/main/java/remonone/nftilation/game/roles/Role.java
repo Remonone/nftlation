@@ -4,15 +4,20 @@ import de.tr7zw.nbtapi.NBT;
 import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.ItemStatModifierComponent;
+import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.meta.MetaConfig;
@@ -38,7 +43,46 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
     
     public abstract String getRoleID();
 
-    protected abstract void setPlayer(Player player, Map<String, Object> params);
+    @SuppressWarnings("unchecked")
+    protected void setPlayer(Player player, Map<String, Object> params) {
+        if(!params.containsKey(PropertyConstant.PLAYER_LEVEL_PARAM)) {
+            Logger.error("Cannot set player: " + player.getDisplayName() + " with role: " + name);
+            return;
+        }
+        player.setHealthScaled(true);
+        int level = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        Object attributeRaw = getMetaInfo(MetaConstants.META_STATS_ATTRIBUTES, level);
+        if(attributeRaw != null) {
+            List<AttributeModifier> modifiers = (List<AttributeModifier>) attributeRaw;
+            try {
+                modifiers.forEach(modifier -> {
+                    Attribute attribute = Attribute.valueOf(modifier.getAttributeName());
+                    Object levelBasedValue = NestedObjectFetcher.getLevelBasedObject(level, modifier.getAttributeValue());
+                    player.getAttribute(attribute).setBaseValue((double) levelBasedValue);
+                    if(attribute.equals(Attribute.GENERIC_MAX_HEALTH)) {
+                        player.setHealthScale((double) levelBasedValue);
+                    }
+                });
+            } catch (Exception e) {
+                Logger.error("Configuration value is corrupted: " + e.getMessage());
+            }
+        }
+        Object potionRaw = getMetaInfo(MetaConstants.META_STATS_EFFECTS, level);
+        if(potionRaw != null) {
+            List<EffectPotion> effects = (List<EffectPotion>) potionRaw;
+            effects.forEach(potion -> {
+                PotionEffectType type = PotionEffectType.getByName(potion.getEffect());
+                if(type == null) {
+                    Logger.warn("Cannot give effect " + potion.getEffect() + " for role " + name + ". Skipping...");
+                    return;
+                }
+                Object levelBasedValue = NestedObjectFetcher.getLevelBasedObject(level, potion.getStrength());
+                player.addPotionEffect(new PotionEffect(type, DataConstants.CONSTANT_POTION_DURATION, (int)levelBasedValue, false, false));
+            });
+        }
+        
+    }
+    
     protected void killPlayer(Player player) {}
     
     protected Role(String id) {
@@ -59,7 +103,7 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
         this.meta = info.getMetaInfo();
     }
     
-    public static void UpdatePlayerAbilities(PlayerModel model) {
+    public static void updatePlayerAbilities(PlayerModel model) {
         ResetUtils.globalResetPlayerStats(model.getReference());
         Map<String, Object> params = model.getParameters();
         if(!PlayerUtils.validateParams(params)) {
@@ -75,10 +119,10 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
         }.runTaskLater(Nftilation.getInstance(), 1);
     }
 
-    public static void UpdatePlayerAbilities(Player player) {
+    public static void updatePlayerAbilities(Player player) {
         String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
-        UpdatePlayerAbilities(model);
+        updatePlayerAbilities(model);
     }
     
     protected List<ItemStack> getAbilityItems(Map<String, Object> params) {
@@ -98,10 +142,10 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
     
     public static void refillInventoryWithItems(PlayerModel player) {
         player.getReference().getInventory().clear();
-        SetInventoryItems(player);
+        setInventoryItems(player);
     }
 
-    public static void SetInventoryItems(PlayerModel model) {
+    public static void setInventoryItems(PlayerModel model) {
         Player player = model.getReference();
         Inventory inventory = player.getInventory();
         clearPlayerItems(player);
@@ -116,19 +160,19 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
                 RoleItemDispenser.getItem(RoleItemDispenser.ItemType.PICKAXE, params, role.meta),
                 RoleItemDispenser.getItem(RoleItemDispenser.ItemType.AXE, params, role.meta),
                 RoleItemDispenser.getItem(RoleItemDispenser.ItemType.SHOVEL, params, role.meta)).toArray(new ItemStack[0]);
-        SetOwner(player, itemStacks);
+        setOwner(player, itemStacks);
         for(ItemStack stack : itemStacks) {
             ItemStatModifierComponent.markItemAsUndroppable(stack);
             ItemStatModifierComponent.markItemAsUnstorable(stack);
         }
         inventory.addItem(itemStacks);
-        FillEquipment(player, params);
+        fillEquipment(player, params);
         role.giveAbilityItems(player, params);
     }
     
     private void giveAbilityItems(Player player, Map<String, Object> params) {
         ItemStack[] abilityItems = getAbilityItems(params).toArray(new ItemStack[0]);
-        SetOwner(player, abilityItems);
+        setOwner(player, abilityItems);
         for(int i = 0; i < abilityItems.length; i++) {
             ItemStack stack = abilityItems[i];
             ItemStack existingItem = player.getInventory().getItem(8 - i);
@@ -147,7 +191,7 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
         role.killPlayer(player);
     }
 
-    private static void SetOwner(Player owner, ItemStack... itemStacks) {
+    private static void setOwner(Player owner, ItemStack... itemStacks) {
         for (ItemStack stack : itemStacks) {
             if(stack == null || stack.getAmount() < 1 || stack.getType() == Material.AIR) continue;
             NBT.modify(stack, nbt -> {
@@ -174,7 +218,7 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
         player.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
     }
 
-    private static void FillEquipment(Player player, Map<String, Object> params) {
+    private static void fillEquipment(Player player, Map<String, Object> params) {
         EntityEquipment equipment = player.getEquipment();
         if(!PlayerUtils.validateParams(params)) {
             Logger.error("Cannot fill equipment for player: " + player.getDisplayName());
@@ -185,8 +229,8 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
         ItemStack chestplate = RoleItemDispenser.getItem(RoleItemDispenser.ItemType.CHESTPLATE, params, role.meta);
         ItemStack leggings = RoleItemDispenser.getItem(RoleItemDispenser.ItemType.LEGGINGS, params, role.meta);
         ItemStack boots = RoleItemDispenser.getItem(RoleItemDispenser.ItemType.BOOTS, params, role.meta);
-        SetOwner(player, helmet, chestplate, leggings, boots);
-        MarkEquipment(helmet, chestplate, leggings, boots);
+        setOwner(player, helmet, chestplate, leggings, boots);
+        markEquipment(helmet, chestplate, leggings, boots);
         ItemStack equippedHelmet = equipment.getHelmet();
         if(equippedHelmet != null && !ItemStatModifierComponent.checkItemIfDefault(equippedHelmet)) player.getInventory().addItem(equippedHelmet.clone());
         equipment.setHelmet(helmet);
@@ -201,7 +245,7 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
         equipment.setBoots(boots);
     }
 
-    private static void MarkEquipment(ItemStack... items) {
+    private static void markEquipment(ItemStack... items) {
         for(ItemStack itemStack : items) {
             ItemStatModifierComponent.markItemAsDefault(itemStack);
             ItemStatModifierComponent.markItemAsUnstorable(itemStack);

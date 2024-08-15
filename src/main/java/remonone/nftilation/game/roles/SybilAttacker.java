@@ -12,13 +12,10 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.EntityHandleComponent;
-import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
@@ -38,14 +35,6 @@ public class SybilAttacker extends Role {
     @Override
     public String getRoleID() {
         return "SA";
-    }
-
-    @Override
-    public void setPlayer(Player player, Map<String, Object> params) {
-        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        if(upgradeLevel > 1) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, DataConstants.CONSTANT_POTION_DURATION, 1, false, false));
-        }
     }
     
     @Override

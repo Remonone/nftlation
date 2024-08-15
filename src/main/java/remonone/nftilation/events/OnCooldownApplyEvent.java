@@ -13,7 +13,7 @@ public class OnCooldownApplyEvent extends Event {
     
     private final PlayerModel model;
     @Setter
-    private float cooldown;
+    private double cooldown;
     
     public OnCooldownApplyEvent(PlayerModel model, float cooldown) {
         this.model = model;

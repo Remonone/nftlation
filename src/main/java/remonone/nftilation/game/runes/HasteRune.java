@@ -32,8 +32,8 @@ public class HasteRune extends Rune {
         int level = (Integer) params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         Object raw = NestedObjectFetcher.getNestedObject(MetaConstants.META_RUNE_EFFECT, this.getMeta(), level);
         if(raw == null) return;
-        float cooldownReduction = (float) raw;
-        float cooldown = e.getCooldown();
+        double cooldownReduction = (double) raw;
+        double cooldown = e.getCooldown();
         e.setCooldown(cooldown * (100 - cooldownReduction) / 100);
     }
 }

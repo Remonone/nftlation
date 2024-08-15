@@ -56,14 +56,8 @@ public class Monkey extends Role {
     
     @Override
     public void setPlayer(Player player, Map<String, Object> params) {
-        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        player.setHealthScaled(true);
-        float healthModifier = upgradeLevel > 2 ? 30 : 40;
-        float speedModifier = .05F * upgradeLevel;
-        player.setWalkSpeed(DataConstants.PLAYER_SPEED + speedModifier);
-        player.setHealthScale(DataConstants.PLAYER_HEALTH - (DataConstants.PLAYER_HEALTH / 100) * healthModifier);
+        super.setPlayer(player, params);
         player.setAllowFlight(true);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 1000000, 100, false, false));
     }
 
     @EventHandler

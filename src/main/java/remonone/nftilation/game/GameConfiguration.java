@@ -83,7 +83,7 @@ public class GameConfiguration {
                 String texture = SkinCache.getInstance().getTexture(roleId);
                 String signature = SkinCache.getInstance().getSignature(roleId);
                 PlayerNMSUtil.changePlayerSkin(model.getReference(), texture, signature);
-                Role.UpdatePlayerAbilities(model);
+                Role.updatePlayerAbilities(model);
             } catch(Exception ex) {
                 Logger.error("Unable load role: " + roleId + ". Player: " + model.getReference().getDisplayName());
             }

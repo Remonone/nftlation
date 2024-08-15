@@ -16,7 +16,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
@@ -42,13 +41,6 @@ public class Indian extends Role {
 
     public Indian() {
         super("IN");
-    }
-    
-    @Override
-    public void setPlayer(Player player, Map<String, Object> params) {
-        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        float speedAddition = .05F * (upgradeLevel + 1);
-        player.setWalkSpeed(DataConstants.PLAYER_SPEED + speedAddition);
     }
     
     @Override

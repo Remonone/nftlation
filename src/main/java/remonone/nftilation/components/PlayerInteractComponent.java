@@ -112,8 +112,8 @@ public class PlayerInteractComponent implements IComponent {
                 Logger.broadcast(ChatColor.DARK_RED + "Мишка сильно ослаб и находится в предсмертном состоянии!");
             }
         }
-        Role.SetInventoryItems(model);
-        Role.UpdatePlayerAbilities(player);
+        Role.setInventoryItems(model);
+        Role.updatePlayerAbilities(player);
         ScoreboardHandler.updateScoreboard(model);
     }
 

@@ -21,7 +21,7 @@ public class NestedObjectFetcher {
         return null;
     }
 
-    private static Object getLevelBasedObject(int i, Object value) {
+    public static Object getLevelBasedObject(int i, Object value) {
         if(value == null) return null;
         if(!(value instanceof Map)) return value;
         Map<String, Object> values = (Map<String, Object>) value;

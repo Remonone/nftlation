@@ -18,6 +18,7 @@ public class ResetUtils {
         player.getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS).setBaseValue(0);
         player.getAttribute(Attribute.GENERIC_ARMOR).setBaseValue(0);
         player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(20F);
+        player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(.1F);
         player.setHealth(DataConstants.PLAYER_HEALTH);
         player.setWalkSpeed(DataConstants.PLAYER_SPEED);
         for(PotionEffect effect : player.getActivePotionEffects()) {

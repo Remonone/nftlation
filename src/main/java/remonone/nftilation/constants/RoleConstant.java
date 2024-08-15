@@ -4,7 +4,6 @@ import org.bukkit.ChatColor;
 
 public class RoleConstant {
     public static final String CRYPTAN_ABILITY = ChatColor.BLUE + "Тяга";
-    public static final double CRYPTAN_ATTACK_SPEED = 5D;
     public static final double CRYPTAN_HOOK_STRENGTH = 2.5D;
     public static final double CRYPTAN_HOOK_SPEED = .125D;
     public static final double CRYPTAN_HOOK_AIRBORNE_MODIFIER = 1.1D;
@@ -21,8 +20,6 @@ public class RoleConstant {
     public static final String SYBIL_BOW_NAME = "DDoS лук";
     
     public static final String CTYPTOMARINE_SHIELD = "Щит императора";
-    public static final float CRYPTOMARINE_LIGHTNING_CHANCE = .3f;
-    public static final float CRYPTOMARINE_LIGHTNING_DAMAGE = 4f;
     public static final int CRYPTOMARINE_EXPLOSION_STRENGTH = 4;
     public static final String CRYPTOMARINE_NBT_CONTAINER = "cryptomarine_items";
     public static final String CRYPTOMARINE_NBT_AXE = "axe";
@@ -34,7 +31,7 @@ public class RoleConstant {
     public static final float RUSLAN_BLAZE_DAMAGE = 5f;
     public static final String RUSLAN_AREA_EFFECT_NAME = "Газы руслана";
 
-    public static final int INDIAN_BLOCK_COOLDOWN = 60;
+    public static final float INDIAN_BLOCK_COOLDOWN = 60;
     public static final int INDIAN_RECALL_MIN_LEVEL = 10;
     public static final int INDIAN_RECALL_MAX_LEVEL = 7;
     public static final String INDIAN_BLOCK_ABILITY = "Создать новый оригинальный L2 проект";

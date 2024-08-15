@@ -13,6 +13,14 @@ public class MetaConstants {
     
     public static final String META_RUNE_EFFECT = "effect";
     
+    public static final String META_STATS = "stats";
+    public static final String META_STATS_ATTRIBUTES = META_STATS + ".attributes";
+    public static final String META_STATS_EFFECTS = META_STATS + ".effects";
+
+    public static final String META_CRYPTOMARINE_STRIKE_LEVEL = "strike.requiredLevel";
+    public static final String META_CRYPTOMARINE_STRIKE_DAMAGE = "strike.damage";
+    public static final String META_CRYPTOMARINE_STRIKE_CHANCE = "strike.chance";
+    
     public static final String META_MONKEY_INVISIBILITY_COOLDOWN = "invisibility.cooldown";
     public static final String META_MONKEY_INVISIBILITY_DURATION = "invisibility.duration";
     public static final String META_MONKEY_JUMP_COUNT = "jump.amount";

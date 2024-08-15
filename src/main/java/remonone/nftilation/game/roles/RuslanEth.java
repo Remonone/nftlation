@@ -54,13 +54,10 @@ public class RuslanEth extends Role {
     
     @Override
     public void setPlayer(Player player, Map<String, Object> params) {
+        super.setPlayer(player, params);
         if(!entitiesList.containsKey(player.getUniqueId())) {
             entitiesList.put(player.getUniqueId(), new ArrayList<>());
         }
-        player.setHealthScaled(true);
-        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        float health = 12.0F + 2 * upgradeLevel;
-        player.setHealthScale(health);
     }
     
     @Override
@@ -78,7 +75,7 @@ public class RuslanEth extends Role {
     public void killPlayer(Player player) {
         entitiesList.get(player.getUniqueId()).forEach(Entity::remove);
         entitiesList.get(player.getUniqueId()).clear();
-        RemoveRuslanActionItems(player);
+        removeRuslanActionItems(player);
         if(player.getInventory().contains(Material.SNOW_BALL)) {
             player.getInventory().remove(Material.SNOW_BALL);
         }
@@ -237,7 +234,7 @@ public class RuslanEth extends Role {
                 Location playerLocation = player.getLocation();
                 List<LivingEntity> entities = entitiesList.get(player.getUniqueId());
                 entities.forEach(entity -> entity.teleport(playerLocation));
-                RemoveRuslanActionItems(player);
+                removeRuslanActionItems(player);
                 break;
             }
             case "explode": {
@@ -261,13 +258,13 @@ public class RuslanEth extends Role {
                     area.setDuration(25);
                 }
                 entitiesList.get(player.getUniqueId()).clear();
-                RemoveRuslanActionItems(player);
+                removeRuslanActionItems(player);
             }
         }
     }
     
     @SuppressWarnings("StatementWithEmptyBody")
-    private void RemoveRuslanActionItems(Player player) {
+    private void removeRuslanActionItems(Player player) {
         Spliterator<ItemStack> itemStackSpliterator = player.getInventory().spliterator();
         while(itemStackSpliterator.tryAdvance(itemStack -> {
             if(itemStack == null || itemStack.getType().equals(Material.AIR) || itemStack.getAmount() < 1) return;

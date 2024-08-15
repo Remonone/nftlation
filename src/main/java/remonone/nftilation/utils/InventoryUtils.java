@@ -80,7 +80,7 @@ public class InventoryUtils {
         OnCooldownApplyEvent event = new OnCooldownApplyEvent(model, cooldown);
         getServer().getPluginManager().callEvent(event);
         long finalCooldown = (long) event.getCooldown() * DataConstants.ONE_SECOND;
-        NBT.modify(item, nbt -> {nbt.setLong("cooldown", System.currentTimeMillis() + finalCooldown * DataConstants.ONE_SECOND);});
+        NBT.modify(item, nbt -> {nbt.setLong("cooldown", System.currentTimeMillis() + finalCooldown);});
     }
     
     public static boolean isCooldownRemain(ItemStack item) {

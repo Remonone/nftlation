@@ -20,6 +20,8 @@ import remonone.nftilation.game.lobby.LobbyDisposer;
 import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.meta.RoleInfo;
 import remonone.nftilation.game.meta.RuneInfo;
+import remonone.nftilation.game.models.AttributeModifier;
+import remonone.nftilation.game.models.EffectPotion;
 import remonone.nftilation.game.roles.*;
 import remonone.nftilation.game.runes.GreedRune;
 import remonone.nftilation.game.runes.HasteRune;
@@ -90,6 +92,8 @@ public final class Nftilation extends JavaPlugin {
         ConfigurationSerialization.registerClass(RoleInfo.class);
         ConfigurationSerialization.registerClass(RuneInfo.class);
         ConfigurationSerialization.registerClass(RoleItemDispenser.EnchantInfo.class);
+        ConfigurationSerialization.registerClass(AttributeModifier.class);
+        ConfigurationSerialization.registerClass(EffectPotion.class);
     }
 
     private void RegisterRoles() {

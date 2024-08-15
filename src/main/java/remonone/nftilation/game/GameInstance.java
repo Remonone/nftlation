@@ -38,13 +38,14 @@ public class GameInstance {
     @Getter
     private PhaseCounter counter;
 
-    private Map<String, IComponent> components;
+    private static Map<String, IComponent> components;
     
     private boolean isFinished;
     
     public void startGame() {
         Map<String, List<DataInstance.PlayerInfo>> teams = Store.getInstance().getDataInstance().getTeams();
         teamData = GameConfiguration.constructTeamData(teams, destroyTeam);
+        teamRaw.addAll(teamData.values());
         GameConfiguration.disposePlayers(teamRaw);
         GameConfiguration.initServices();
         GameConfiguration.spawnGolems();
@@ -78,7 +79,7 @@ public class GameInstance {
         }
     }
 
-    public IComponent getComponentByName(String name) {
+    public static IComponent getComponentByName(String name) {
         return components.get(name);
     }
 
@@ -267,7 +268,7 @@ public class GameInstance {
             PlayerModel model = getPlayerModelFromTeam(teamName, player);
             if(model == null) return;
             model.getParameters().put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, true);
-            Role.UpdatePlayerAbilities(model);
+            Role.updatePlayerAbilities(model);
         }
         
     }

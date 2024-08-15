@@ -14,7 +14,7 @@ public class ThirdTierService implements IPurchasableService {
 
     @Override
     public void OnPurchase(Player buyer, int price) {
-        PlayerInteractComponent playerInteract = (PlayerInteractComponent) GameInstance.getInstance().getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
+        PlayerInteractComponent playerInteract = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
         if(playerInteract == null) return;
         playerInteract.upgradePlayer(buyer, 3, price);
     }

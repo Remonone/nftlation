@@ -2,7 +2,6 @@ package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -39,12 +38,6 @@ public class Cryptan extends Role {
     @Override
     public String getRoleID() {
         return "CY";
-    }
-    
-
-    @Override
-    public void setPlayer(Player player, Map<String, Object> params) {
-        player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(RoleConstant.CRYPTAN_ATTACK_SPEED);
     }
     
     @Override
