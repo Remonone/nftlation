@@ -23,9 +23,7 @@ import remonone.nftilation.game.meta.RuneInfo;
 import remonone.nftilation.game.models.AttributeModifier;
 import remonone.nftilation.game.models.EffectPotion;
 import remonone.nftilation.game.roles.*;
-import remonone.nftilation.game.runes.GreedRune;
-import remonone.nftilation.game.runes.HasteRune;
-import remonone.nftilation.game.runes.Rune;
+import remonone.nftilation.game.runes.*;
 import remonone.nftilation.game.shop.ShopBuilder;
 import remonone.nftilation.game.shop.content.CategoryElement;
 import remonone.nftilation.game.shop.content.ItemElement;
@@ -60,6 +58,9 @@ public final class Nftilation extends JavaPlugin {
         Logger.log("Registering runes...");
         Rune.registerRune(GreedRune.class);
         Rune.registerRune(HasteRune.class);
+        Rune.registerRune(BloodLustRune.class);
+        Rune.registerRune(ReaperRune.class);
+        Rune.registerRune(TimeFrostRune.class);
     }
 
     private void FetchRoleSkins() {

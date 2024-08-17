@@ -123,7 +123,7 @@ public class OnEntityDieHandler implements Listener {
         while(!targetQueue.isEmpty()) {
             targetQueue.poll().OnEntityDamageHandle(event);
         }
-        PriorityQueue<IDamageInvoker> queue = new PriorityQueue<>(targetModel.getDamageInvokers());
+        PriorityQueue<IDamageInvoker> queue = new PriorityQueue<>(attackerModel.getDamageInvokers());
         while(!queue.isEmpty()) {
             queue.poll().OnEntityDamageDealing(event, attackerData);
         }

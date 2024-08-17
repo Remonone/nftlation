@@ -5,10 +5,9 @@ import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import remonone.nftilation.game.models.RequisiteContainer;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @SerializableAs("ServiceElement")
 public class ServiceElement implements IShopElement, IPurchasableAction, ConfigurationSerializable {
@@ -17,6 +16,7 @@ public class ServiceElement implements IShopElement, IPurchasableAction, Configu
     private final static String SERVICE_NAME = "name";
     private final static String SERVICE_DISPLAY = "serviceDisplay";
     private final static String SERVICE_PRICE = "servicePrice";
+    private final static String SERVICE_REQUISITES = "requisites";
     
     @Getter
     private final String id;
@@ -24,21 +24,15 @@ public class ServiceElement implements IShopElement, IPurchasableAction, Configu
     private final int price;
 
     private final ItemStack displayItem;
-
-    public ServiceElement(String id, Material mat, String name, String serviceName, int price) {
-        this.serviceName = serviceName;
-        this.price = price;
-        this.id = id;
-        this.displayItem = new ItemStack(mat);
-        ItemMeta meta = displayItem.getItemMeta();
-        meta.setDisplayName(name);
-        displayItem.setItemMeta(meta);
-    }
-    public ServiceElement(String id, ItemStack displayItem, String serviceName, int price) {
+    @Getter
+    private final RequisiteContainer requisites;
+    
+    public ServiceElement(String id, ItemStack displayItem, String serviceName, int price, RequisiteContainer container) {
         this.serviceName = serviceName;
         this.price = price;
         this.id = id;
         this.displayItem = displayItem;
+        this.requisites = container;
     }
 
     @Override
@@ -57,6 +51,11 @@ public class ServiceElement implements IShopElement, IPurchasableAction, Configu
     }
 
     @Override
+    public List<String> getDescription() {
+        return Collections.emptyList();
+    }
+
+    @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put(SERVICE_ID, this.id);
@@ -70,6 +69,7 @@ public class ServiceElement implements IShopElement, IPurchasableAction, Configu
         String serviceName = "";
         ItemStack itemStack = new ItemStack(Material.AIR);
         int price = 0;
+        RequisiteContainer container;
 
         if (map.containsKey(SERVICE_ID)) {
             id = (String) map.get(SERVICE_ID);
@@ -83,7 +83,12 @@ public class ServiceElement implements IShopElement, IPurchasableAction, Configu
         if (map.containsKey(SERVICE_PRICE)) {
             price = (int) map.get(SERVICE_PRICE);
         }
+        if(map.containsKey(SERVICE_REQUISITES)) {
+            container = (RequisiteContainer) map.get(SERVICE_REQUISITES);
+        } else {
+            container = new RequisiteContainer(new ArrayList<>());
+        }
 
-        return new ServiceElement(id, itemStack, serviceName, price);
+        return new ServiceElement(id, itemStack, serviceName, price, container);
     }
 }

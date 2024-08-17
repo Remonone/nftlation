@@ -7,6 +7,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import remonone.nftilation.game.models.RequisiteContainer;
 
 import java.util.*;
 
@@ -17,20 +18,23 @@ public class CategoryElement implements IShopElement, IExpandable, Configuration
 
     @Getter
     private final String id;
-    private final Map<Integer, String> elements;
+    private final List<String> elements;
     private final ItemStack displayItem;
+    @Getter
+    private final RequisiteContainer requisites;
 
-    public CategoryElement(String id, Material mat, String name, List<ShopItemPosition> elements) {
-        this.elements = buildElements(elements);
+    public CategoryElement(String id, Material mat, String name, List<String> elements, RequisiteContainer requisites) {
+        this.elements = elements;
         this.displayItem = new ItemStack(mat);
         ItemMeta meta = displayItem.getItemMeta();
         meta.setDisplayName(name);
         displayItem.setItemMeta(meta);
         this.id = id;
+        this.requisites = requisites;
     }
 
     @Override
-    public Map<Integer, String> getExpandableElements() {
+    public List<String> getExpandableElements() {
         return elements;
     }
 
@@ -39,26 +43,14 @@ public class CategoryElement implements IShopElement, IExpandable, Configuration
         return displayItem;
     }
 
-    private Map<Integer, String> buildElements(List<ShopItemPosition> elements) {
-        Map<Integer, String> elementsMap = new HashMap<>();
-        for(ShopItemPosition element : elements) {
-            elementsMap.put(element.getPosition(), element.getItemId());
-        }
-        return Collections.unmodifiableMap(elementsMap);
+    @Override
+    public List<String> getDescription() {
+        return Collections.emptyList();
     }
 
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", id);
-        List<ShopItemPosition> elements = new ArrayList<>();
-        for(Map.Entry<Integer, String> pair: this.elements.entrySet()) {
-            elements.add(new ShopItemPosition(pair.getKey(), pair.getValue()));
-        }
-        map.put("elements", elements);
-        map.put("display_material", displayItem.getType());
-        map.put("display_name", displayItem.getItemMeta().getDisplayName());
-        return map;
+        return Collections.emptyMap();
     }
     
     @SuppressWarnings("unchecked")
@@ -66,11 +58,17 @@ public class CategoryElement implements IShopElement, IExpandable, Configuration
         String id = (String) map.get("id");
         Material mat = Material.getMaterial((String)map.get("display_material"));
         String displayName = (String) map.get("display_name");
-        List<ShopItemPosition> elements = new ArrayList<>();
+        List<String> elements = new ArrayList<>();
+        RequisiteContainer container;
         if(map.containsKey("elements")) {
-            elements = (List<ShopItemPosition>) map.get("elements");
+            elements = (List<String>) map.get("elements");
         }
-        return new CategoryElement(id, mat, displayName, elements);
+        if(map.containsKey("requisites")) {
+            container = (RequisiteContainer) map.get("requisites");
+        } else {
+            container = new RequisiteContainer(new ArrayList<>());
+        }
+        return new CategoryElement(id, mat, displayName, elements, container);
     }
     
 }

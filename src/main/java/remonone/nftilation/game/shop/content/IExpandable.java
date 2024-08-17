@@ -1,7 +1,7 @@
 package remonone.nftilation.game.shop.content;
 
-import java.util.Map;
+import java.util.List;
 
 public interface IExpandable {
-    Map<Integer, String> getExpandableElements();
+    List<String> getExpandableElements();
 }

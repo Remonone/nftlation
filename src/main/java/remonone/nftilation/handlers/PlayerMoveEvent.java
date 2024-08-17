@@ -10,8 +10,11 @@ import remonone.nftilation.Store;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.utils.PlayerUtils;
+
+import java.util.Map;
 
 public class PlayerMoveEvent implements Listener {
 
@@ -20,7 +23,9 @@ public class PlayerMoveEvent implements Listener {
     @EventHandler
     public void onPlayerMove(final org.bukkit.event.player.PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        if(isNotAuthenticated(player) || (PlayerUtils.getModelFromPlayer(player) != null && isMoveForbidden())) {
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        if(isNotAuthenticated(player) ||
+                model != null && (isMoveForbidden() || isModelContainBlockers(model))) {
             event.setCancelled(true);
         }
     }
@@ -29,12 +34,26 @@ public class PlayerMoveEvent implements Listener {
     public void onPlayerDamage(final EntityDamageEvent event) {
         if(!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
         if(isNotAuthenticated(player) ||
                 (Store.getInstance().getGameStage().getStage().equals(Stage.IN_GAME) &&
-                PlayerUtils.getModelFromPlayer(player) != null && isMoveForbidden())) {
+                model != null && isMoveForbidden())) {
             
             event.setCancelled(true);
         }
+    }
+
+    private boolean isModelContainBlockers(PlayerModel model) {
+        Map<String, Object> params = model.getParameters();
+        if(params.containsKey(PropertyConstant.PLAYER_STUN_DURATION)) {
+            long stunDuration = (Long) params.get(PropertyConstant.PLAYER_STUN_DURATION);
+            if(stunDuration < System.currentTimeMillis()) {
+                params.remove(PropertyConstant.PLAYER_STUN_DURATION);
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     private boolean isMoveForbidden() {

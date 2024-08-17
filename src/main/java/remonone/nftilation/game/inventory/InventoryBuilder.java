@@ -87,7 +87,8 @@ public class InventoryBuilder {
     
     public static Inventory buildShopKeeperInventory(Player player, CategoryElement el) {
         Inventory inventory = Bukkit.createInventory(player, 27, NameConstants.SHOP_TAB);
-        for(Map.Entry<Integer, String> element : el.getExpandableElements().entrySet()) {
+        Map<Integer, String> availableItems = getAvailableItems(player, el.getExpandableElements());
+        for(Map.Entry<Integer, String> element : availableItems.entrySet()) {
             IShopElement shopElement = ShopItemRegistry.getItem(element.getValue());
             if(shopElement == null) {
                 Logger.error("Category " + el.getId() + "contains item which not exists! Id: " + element.getValue() + ". Skipping...");
@@ -108,11 +109,20 @@ public class InventoryBuilder {
                 ItemMeta itemMeta = stack.getItemMeta();
                 itemMeta.setLore(Collections.singletonList("Price: " + serviceElement.getPrice()));
                 stack.setItemMeta(itemMeta);
-                inventory.setItem(element.getKey(), stack);
             }
             ItemStatModifierComponent.markItemAsUndroppable(stack);
             inventory.setItem(element.getKey(), stack);
         }
         return inventory;
+    }
+
+    private static Map<Integer, String> getAvailableItems(Player player, List<String> ids) {
+        List<String> filteredIds = filterIds(player, ids);
+        Map<Integer, String> availableItems = new HashMap<>();
+        return availableItems;
+    }
+
+    private static List<String> filterIds(Player player, List<String> ids) {
+        return ids;
     }
 }
