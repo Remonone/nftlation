@@ -8,6 +8,8 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 import remonone.nftilation.Store;
+import remonone.nftilation.components.PlayerInteractComponent;
+import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.OnTokenTransactionEvent;
@@ -40,8 +42,12 @@ public class GiveTokenToPlayer implements CommandExecutor, TabCompleter {
             sender.sendMessage("Invalid amount of tokens!");
             return true;
         }
-        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(playerInfo.getPlayerId());
-        GameInstance.getInstance().adjustPlayerTokens(teamName, Bukkit.getPlayer(playerInfo.getPlayerId()), amount, OnTokenTransactionEvent.TransactionType.TRANSFER);
+        PlayerInteractComponent playerInteract = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
+        if(playerInteract == null) {
+            sender.sendMessage("Incorrect stage to give tokens!");
+            return true;
+        }
+        playerInteract.adjustPlayerTokens(Bukkit.getPlayer(playerInfo.getPlayerId()), amount, OnTokenTransactionEvent.TransactionType.TRANSFER);
         return true;
     }
 

@@ -12,6 +12,7 @@ import remonone.nftilation.Store;
 import remonone.nftilation.components.IComponent;
 import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.MessageConstant;
+import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.events.OnTokenTransactionEvent;
@@ -26,8 +27,6 @@ import remonone.nftilation.utils.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static org.bukkit.Bukkit.*;
 
 public class GameInstance {
 
@@ -115,28 +114,9 @@ public class GameInstance {
     public Iterator<ITeam> getTeamIterator() {
         return teamRaw.iterator();
     }
-
-    public boolean adjustPlayerTokens(String teamName, Player player, float tokens, OnTokenTransactionEvent.TransactionType type) {
-        PlayerModel model = getPlayerModelFromTeam(teamName, player);
-        return adjustPlayerTokens(model, tokens, type);
-    }
-    
-    public boolean haveEnoughMoney(String teamName, Player player, int amount) {
-        return getPlayerModelFromTeam(teamName, player).getTokens() >= amount;
-    }
-
-    public boolean adjustPlayerTokens(PlayerModel model, float tokens, OnTokenTransactionEvent.TransactionType type) {
-        if(tokens == 0) return false;
-        if(model.getTokens() + tokens < 0) return false;
-        OnTokenTransactionEvent e = new OnTokenTransactionEvent(type, tokens, model);
-        getServer().getPluginManager().callEvent(e);
-        if(e.isCancelled()) return false;
-        model.setTokens(model.getTokens() + e.getTokensAmount());
-        ScoreboardHandler.updateScoreboard(model);
-        return true;
-    }
     
     public ITeam getTeam(String teamName) {
+        if(teamName == null) return null;
         return teamData.getOrDefault(teamName, null);
     }
     
@@ -181,15 +161,17 @@ public class GameInstance {
         IModifiableTeam team = teamData.get(teamName);
         if(team == null) return;
         if(team.getCoreInstance() == null) return;
-        if(!haveEnoughMoney(teamName, player, price)) {
-            player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
-            return;
-        }
-        if(!team.getCoreInstance().Heal()) {
+        if(team.getCoreInstance().isCoreCannotBeHealed()) {
             player.sendMessage(ChatColor.RED + MessageConstant.CANNOT_HEAL_CORE);
             return;
         }
-        adjustPlayerTokens(teamName, player, -price, OnTokenTransactionEvent.TransactionType.SPEND);
+        PlayerInteractComponent component = (PlayerInteractComponent) getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
+        if(component == null) return;
+        if(!component.adjustPlayerTokens(player, -price, OnTokenTransactionEvent.TransactionType.PURCHASE)) {
+            player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
+            return;
+        }
+        team.getCoreInstance().Heal();
         team.getPlayers().forEach(ScoreboardHandler::updateScoreboard);
         World world = player.getWorld();
         world.playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, 1f, 1f);

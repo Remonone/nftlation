@@ -45,5 +45,6 @@ public class PropertyConstant {
     public static final String PLAYER_TEAM_NAME = "teamName";
     public static final String PLAYER_RUNE_ID = "rune_id";
     public static final String PLAYER_STUN_DURATION = "stunDuration";
-
+    
+    public static final String TEAM_RESOURCE_INCOME = "resourceIncome";
 }

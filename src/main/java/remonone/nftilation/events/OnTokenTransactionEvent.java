@@ -46,8 +46,10 @@ public class OnTokenTransactionEvent extends Event implements Cancellable {
     }
 
     public enum TransactionType {
-        SPEND,
-        GAIN,
+        PURCHASE,
+        RESOURCE_GAIN,
+        KILL_GAIN,
+        DESTROY_GAIN,
         TRANSFER
     }
 }

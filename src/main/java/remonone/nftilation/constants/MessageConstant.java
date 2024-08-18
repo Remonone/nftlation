@@ -69,4 +69,5 @@ public class MessageConstant {
     public static final String TOKEN_TRANSFER_INSUFFICIENT_AMOUNT = "Неверное количество токенов для перевода!";
     public static final String TOKEN_TRANSFER_IMPOSSIBLE_TO_TRANSFER = "Невозможно перевести токены этому игроку!";
     public static final String TOKEN_TRANSFER_TOO_FAR = "Игрок слишком далеко! Нельзя сделать перевод!";
+    public static final String TOKEN_TRANSFER_INCORRECT_STAGE = "Вы не можете совершать переводы в данный момент!";
 }

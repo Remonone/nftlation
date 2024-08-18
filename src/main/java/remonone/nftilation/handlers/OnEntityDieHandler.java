@@ -13,9 +13,11 @@ import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.EntityHandleComponent;
+import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
+import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.OnPlayerKillPlayerEvent;
@@ -72,12 +74,13 @@ public class OnEntityDieHandler implements Listener {
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
         LivingEntity entity = (LivingEntity) event.getEntity();
         if(!EntityHandleComponent.isEntityHostile(entity) ) return;
+        PlayerInteractComponent component = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
+        if(component == null) return;
         if(entity.getHealth() - event.getFinalDamage() <= 0) {
             Player attacker = EntityDamageByPlayerLog.getEventLogForLivingEntity(entity.getUniqueId());
             if(attacker == null) return;
-            String attackerTeam = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getUniqueId());
             EntityDamageByPlayerLog.removeLogEvent(entity.getUniqueId());
-            GameInstance.getInstance().adjustPlayerTokens(attackerTeam, attacker, EntityHandleComponent.getEntityBounty(entity), OnTokenTransactionEvent.TransactionType.GAIN);
+            component.adjustPlayerTokens(attacker, EntityHandleComponent.getEntityBounty(entity), OnTokenTransactionEvent.TransactionType.KILL_GAIN);
         }
     }
     
@@ -93,8 +96,9 @@ public class OnEntityDieHandler implements Listener {
             return;
         }
         if(target.getHealth() - event.getFinalDamage() <= 0) {
-            String team = Store.getInstance().getDataInstance().getPlayerTeam(info.attacker.getUniqueId());
-            GameInstance.getInstance().adjustPlayerTokens(team, info.attacker, EntityHandleComponent.getEntityBounty(target), OnTokenTransactionEvent.TransactionType.GAIN);
+            PlayerInteractComponent component = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
+            if(component == null) return;
+            component.adjustPlayerTokens(info.attacker, EntityHandleComponent.getEntityBounty(target), OnTokenTransactionEvent.TransactionType.KILL_GAIN);
             EntityDamageByPlayerLog.removeLogEvent(info.attacker.getUniqueId());
         } else {
             EntityDamageByPlayerLog.insertLogEvent(target, info.attacker);

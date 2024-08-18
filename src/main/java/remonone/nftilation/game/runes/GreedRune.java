@@ -22,7 +22,9 @@ public class GreedRune extends Rune {
     
     @EventHandler
     public void onPlayerAward(OnTokenTransactionEvent e) {
-        if(e.isCancelled() || !e.getTransactionType().equals(OnTokenTransactionEvent.TransactionType.GAIN)) {
+        if(e.isCancelled()
+                || e.getTransactionType().equals(OnTokenTransactionEvent.TransactionType.PURCHASE)
+                || e.getTransactionType().equals(OnTokenTransactionEvent.TransactionType.TRANSFER)) {
             return;
         }
         PlayerModel model = e.getPlayer();

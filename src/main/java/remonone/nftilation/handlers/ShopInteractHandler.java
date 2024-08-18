@@ -11,6 +11,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import remonone.nftilation.Store;
+import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.enums.Stage;
@@ -73,8 +74,9 @@ public class ShopInteractHandler implements Listener {
     }
 
     private void HandleItemPurchase(Player player, ItemStack item, int price) {
-        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-        if (!GameInstance.getInstance().adjustPlayerTokens(teamName, player, -price, OnTokenTransactionEvent.TransactionType.SPEND)) {
+        PlayerInteractComponent playerInteract = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
+        if(playerInteract == null) return;
+        if (!playerInteract.adjustPlayerTokens(player, -price, OnTokenTransactionEvent.TransactionType.PURCHASE)) {
             player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
             return;
         }

@@ -1,4 +1,4 @@
-﻿package remonone.nftilation.game.models;
+package remonone.nftilation.game.models;
 
 
 import lombok.AllArgsConstructor;
@@ -9,6 +9,7 @@ import org.bukkit.configuration.serialization.SerializableAs;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 @Getter
 @AllArgsConstructor
@@ -23,7 +24,7 @@ public class Requisite implements ConfigurationSerializable {
         if(value.equals("*")) {
             return true;
         }
-        return this.value.equals(value);
+        return Objects.hash(value) == Objects.hash(this.value);
     }
 
     @Override

@@ -16,6 +16,7 @@ import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.scoreboard.ScoreboardHandler;
 import remonone.nftilation.utils.Logger;
+import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,11 @@ public class PlayerInteractComponent implements IComponent {
         }
     }
 
+    public boolean adjustPlayerTokens(Player player, float tokens, OnTokenTransactionEvent.TransactionType type) {
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        return adjustPlayerTokens(model, tokens, type);
+    }
+
     /**
      * @param model Player model
      * @param tokens Tokens to give(positive/negative)
@@ -50,7 +56,8 @@ public class PlayerInteractComponent implements IComponent {
         OnTokenTransactionEvent e = new OnTokenTransactionEvent(type, tokens, model);
         getServer().getPluginManager().callEvent(e);
         if(e.isCancelled()) return false;
-        model.setTokens(model.getTokens() + e.getTokensAmount());
+        float roundedTokens = (float) Math.round(model.getTokens() + e.getTokensAmount() * 100) / 100;
+        model.setTokens(roundedTokens);
         ScoreboardHandler.updateScoreboard(model);
         return true;
     }
@@ -70,32 +77,31 @@ public class PlayerInteractComponent implements IComponent {
         params.put(PropertyConstant.PLAYER_DEATH_COUNT, ++killCount);
         ScoreboardHandler.updateScoreboard(model);
     }
-
-    public boolean haveEnoughMoney(String teamName, Player player, int amount) {
-        return instance.getPlayerModelFromTeam(teamName, player).getTokens() >= amount;
+    
+    public static boolean isPlayerAbleToUpgrade(Player player, int nextLevel) {
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        Map<String, Object> params = model.getParameters();
+        
+        if(!params.containsKey(PropertyConstant.PLAYER_LEVEL_PARAM)) {
+            Logger.error("Cannot fetch upgrade level for player: " + player.getDisplayName());
+            return false;
+        }
+        if(nextLevel - (int)params.get(PropertyConstant.PLAYER_LEVEL_PARAM) != 1) {
+            player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_UPGRADE_LEVEL);
+            return false;
+        }
+        if((int) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_AVAILABLE_TIER, 1) < nextLevel) {
+            player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_STAGE_FOR_UPGRADE);
+            return false;
+        }
+        return true;
     }
 
-    public void upgradePlayer(Player player, int level, int price) {
+    public void upgradePlayer(Player player, int level) {
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         PlayerModel model = instance.getPlayerModelFromTeam(teamName, player);
         Map<String, Object> params = model.getParameters();
-        if(!params.containsKey(PropertyConstant.PLAYER_LEVEL_PARAM)) {
-            Logger.error("Cannot fetch upgrade level for player: " + player.getDisplayName());
-            return;
-        }
-        if(level - (int)params.get(PropertyConstant.PLAYER_LEVEL_PARAM) != 1) {
-            player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_UPGRADE_LEVEL);
-            return;
-        }
-        if((int) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_AVAILABLE_TIER, 1) < level) {
-            player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_STAGE_FOR_UPGRADE);
-            return;
-        }
-        if(!haveEnoughMoney(teamName, player, price)) {
-            player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
-            return;
-        }
-        adjustPlayerTokens(model, -price, OnTokenTransactionEvent.TransactionType.SPEND);
+        
         player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, .5f, 1f);
         params.put(PropertyConstant.PLAYER_LEVEL_PARAM, level);
 
@@ -104,17 +110,19 @@ public class PlayerInteractComponent implements IComponent {
             Logger.error("Cannot upgrade level for player: " + player.getDisplayName());
             return;
         }
-        if(role instanceof Guts) {
-            if(level == 2) {
-                Logger.broadcast(ChatColor.RED + "Мишка потерял концентрацию и его внимание расплывчато!");
+        if(isPlayerAbleToUpgrade(player, level)) {
+            if(role instanceof Guts) {
+                if(level == 2) {
+                    Logger.broadcast(ChatColor.RED + "Мишка потерял концентрацию и его внимание расплывчато!");
+                }
+                if(level == 3) {
+                    Logger.broadcast(ChatColor.DARK_RED + "Мишка сильно ослаб и находится в предсмертном состоянии!");
+                }
             }
-            if(level == 3) {
-                Logger.broadcast(ChatColor.DARK_RED + "Мишка сильно ослаб и находится в предсмертном состоянии!");
-            }
+            Role.setInventoryItems(model);
+            Role.updatePlayerAbilities(player);
+            ScoreboardHandler.updateScoreboard(model);
         }
-        Role.setInventoryItems(model);
-        Role.updatePlayerAbilities(player);
-        ScoreboardHandler.updateScoreboard(model);
     }
 
     @Override

@@ -12,13 +12,17 @@ import remonone.nftilation.components.ItemStatModifierComponent;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.DataInstance;
+import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.IInventoryHelder;
+import remonone.nftilation.game.models.ITeam;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Guts;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.runes.Rune;
 import remonone.nftilation.game.shop.content.*;
 import remonone.nftilation.game.shop.registry.ShopItemRegistry;
 import remonone.nftilation.utils.Logger;
+import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -89,7 +93,9 @@ public class InventoryBuilder {
         Inventory inventory = Bukkit.createInventory(player, 27, NameConstants.SHOP_TAB);
         Map<Integer, String> availableItems = getAvailableItems(player, el.getExpandableElements());
         for(Map.Entry<Integer, String> element : availableItems.entrySet()) {
+            Logger.debug(element.getValue());
             IShopElement shopElement = ShopItemRegistry.getItem(element.getValue());
+            Logger.debug(shopElement.getDisplay().toString());
             if(shopElement == null) {
                 Logger.error("Category " + el.getId() + "contains item which not exists! Id: " + element.getValue() + ". Skipping...");
                 continue;
@@ -115,14 +121,47 @@ public class InventoryBuilder {
         }
         return inventory;
     }
-
+    
     private static Map<Integer, String> getAvailableItems(Player player, List<String> ids) {
         List<String> filteredIds = filterIds(player, ids);
         Map<Integer, String> availableItems = new HashMap<>();
+        int count = filteredIds.size();
+        int slots = 9;
+        int center = 4;
+        
+        if(count == 1) {
+            availableItems.put(slots + center, filteredIds.get(0));
+        }
+        if(count == 2) {
+            availableItems.put(slots + center - 1, filteredIds.get(0));
+            availableItems.put(slots + center + 1, filteredIds.get(1));
+        }
+        if(count > 2) {
+            int gap = Math.round((float)slots / (count + 1));
+            int startPosition = center - (count / 2) * gap;
+            for(int i = 0; i < count; i++) {
+                availableItems.put(slots + startPosition + i * gap, filteredIds.get(i));
+            }
+        }
         return availableItems;
     }
 
     private static List<String> filterIds(Player player, List<String> ids) {
-        return ids;
+        List<String> result = new ArrayList<>();
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        Map<String, Object> requisites = new HashMap<>(model.getParameters());
+        String teamName = (String)model.getParameters().get(PropertyConstant.PLAYER_TEAM_NAME);
+        ITeam team = GameInstance.getInstance().getTeam(teamName);
+        if(team != null) {
+            requisites.putAll(team.getParameters());            
+        }
+        for(String id : ids) {
+            IShopElement element = ShopItemRegistry.getItem(id);
+            if(element == null) continue;
+            if(element.getRequisites().checkForRequisites(requisites)) {
+                result.add(id);
+            }
+        }
+        return result;
     }
 }

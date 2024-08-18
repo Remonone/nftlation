@@ -10,8 +10,10 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 import remonone.nftilation.Store;
+import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
+import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
@@ -72,12 +74,17 @@ public class TokenTransferCommand implements CommandExecutor, TabCompleter {
             return false;
         }
 
-        boolean result = GameInstance.getInstance().adjustPlayerTokens(model, -tokenToTransfer, OnTokenTransactionEvent.TransactionType.TRANSFER);
+        PlayerInteractComponent interactComponent = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
+        if(interactComponent == null) {
+            commandSender.sendMessage(MessageConstant.TOKEN_TRANSFER_INCORRECT_STAGE);
+            return true;
+        }
+        boolean result = interactComponent.adjustPlayerTokens(model, -tokenToTransfer, OnTokenTransactionEvent.TransactionType.TRANSFER);
         if(!result) {
             commandSender.sendMessage(MessageConstant.TOKEN_TRANSFER_INSUFFICIENT_AMOUNT);
             return true;
         }
-        GameInstance.getInstance().adjustPlayerTokens(recipientModel, tokenToTransfer, OnTokenTransactionEvent.TransactionType.TRANSFER);
+        interactComponent.adjustPlayerTokens(recipientModel, tokenToTransfer, OnTokenTransactionEvent.TransactionType.TRANSFER);
         return true;
     }
 

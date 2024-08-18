@@ -22,13 +22,14 @@ import remonone.nftilation.game.meta.RoleInfo;
 import remonone.nftilation.game.meta.RuneInfo;
 import remonone.nftilation.game.models.AttributeModifier;
 import remonone.nftilation.game.models.EffectPotion;
+import remonone.nftilation.game.models.Requisite;
+import remonone.nftilation.game.models.RequisiteContainer;
 import remonone.nftilation.game.roles.*;
 import remonone.nftilation.game.runes.*;
 import remonone.nftilation.game.shop.ShopBuilder;
 import remonone.nftilation.game.shop.content.CategoryElement;
 import remonone.nftilation.game.shop.content.ItemElement;
 import remonone.nftilation.game.shop.content.ServiceElement;
-import remonone.nftilation.game.shop.content.ShopItemPosition;
 import remonone.nftilation.game.shop.registry.ShopItemRegistry;
 import remonone.nftilation.handlers.*;
 import remonone.nftilation.utils.CustomEntities;
@@ -89,12 +90,13 @@ public final class Nftilation extends JavaPlugin {
         ConfigurationSerialization.registerClass(CategoryElement.class);
         ConfigurationSerialization.registerClass(ItemElement.class);
         ConfigurationSerialization.registerClass(ServiceElement.class);
-        ConfigurationSerialization.registerClass(ShopItemPosition.class);
         ConfigurationSerialization.registerClass(RoleInfo.class);
         ConfigurationSerialization.registerClass(RuneInfo.class);
         ConfigurationSerialization.registerClass(RoleItemDispenser.EnchantInfo.class);
         ConfigurationSerialization.registerClass(AttributeModifier.class);
         ConfigurationSerialization.registerClass(EffectPotion.class);
+        ConfigurationSerialization.registerClass(RequisiteContainer.class);
+        ConfigurationSerialization.registerClass(Requisite.class);
     }
 
     private void RegisterRoles() {
@@ -127,6 +129,7 @@ public final class Nftilation extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ExplosionDestructionDisable(), this);
         getServer().getPluginManager().registerEvents(new OnChunkUnloadHandler(), this);
         getServer().getPluginManager().registerEvents(new OnPlayerKillHandler(), this);
+        getServer().getPluginManager().registerEvents(new OnTokenGainHandler(), this);
     }
     
     private void InitCommands() {

@@ -1,9 +1,10 @@
-﻿package remonone.nftilation.game.models;
+package remonone.nftilation.game.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
+import remonone.nftilation.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +23,7 @@ public class RequisiteContainer implements ConfigurationSerializable {
             if(!paramsList.containsKey(req.getName())) {
                 return false;
             }
+            Logger.debug(req.getName());
             Object value = paramsList.get(req.getName());
             if(!req.isRequisiteFulfilled(value)) {
                 return false;

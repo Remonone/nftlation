@@ -20,10 +20,10 @@ import remonone.nftilation.config.TeamSpawnPoint;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.damage.TeamAttackInvoker;
 import remonone.nftilation.game.ingame.core.Core;
-import remonone.nftilation.game.ingame.services.RepairCoreService;
-import remonone.nftilation.game.ingame.services.SecondTierService;
-import remonone.nftilation.game.ingame.services.ServiceContainer;
-import remonone.nftilation.game.ingame.services.ThirdTierService;
+import remonone.nftilation.game.ingame.services.*;
+import remonone.nftilation.game.ingame.services.teams.resource.FourthResourceIncomeService;
+import remonone.nftilation.game.ingame.services.teams.resource.SecondResourceIncomeService;
+import remonone.nftilation.game.ingame.services.teams.resource.ThirdResourceIncomeService;
 import remonone.nftilation.game.mob.AngryGolem;
 import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.roles.Role;
@@ -55,6 +55,9 @@ public class GameConfiguration {
         ServiceContainer.registerService(new RepairCoreService());
         ServiceContainer.registerService(new SecondTierService());
         ServiceContainer.registerService(new ThirdTierService());
+        ServiceContainer.registerService(new SecondResourceIncomeService());
+        ServiceContainer.registerService(new ThirdResourceIncomeService());
+        ServiceContainer.registerService(new FourthResourceIncomeService());
     }
 
     public static void spawnGolems() {
@@ -153,10 +156,17 @@ public class GameConfiguration {
                     .teamColor(ChatColor.getByChar(teamInfo.getTeamColor()))
                     .isTeamActive(true)
                     .isCoreAlive(true)
+                    .parameters(composeParams())
                     .build();
             teamData.put(teamName, team);
         }
         return teamData;
+    }
+
+    private static Map<String, Object> composeParams() {
+        Map<String, Object> params = new HashMap<>();
+        params.put(PropertyConstant.TEAM_RESOURCE_INCOME, 0D);
+        return params;
     }
 
     private static Rune getRandomRune() {

@@ -16,10 +16,8 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.constants.BlockConstants;
-import remonone.nftilation.constants.DataConstants;
-import remonone.nftilation.constants.MessageConstant;
-import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.components.PlayerInteractComponent;
+import remonone.nftilation.constants.*;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
@@ -42,6 +40,7 @@ public class OnBlockDestroyHandler implements Listener {
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
         Block block = e.getBlock();
         Player player = e.getPlayer();
+        PlayerInteractComponent component = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
         if(BlockConstants.isRespawnableBlock(e.getBlock())) {
             List<MetadataValue> list = e.getBlock().getMetadata("placer");
             if(!list.isEmpty()) {
@@ -66,9 +65,8 @@ public class OnBlockDestroyHandler implements Listener {
             boolean isResourcesRespawnable = (boolean)rules.getRuleOrDefault(PropertyConstant.RULE_RESOURCE_RESPAWNABLE, false);
             long timer = BlockConstants.getMaterialCooldown(mat);
             int tokens = BlockConstants.getTokensFromBlock(mat);
-            String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
             if(drops.length != 0) {
-                GameInstance.getInstance().adjustPlayerTokens(team, player, tokens, OnTokenTransactionEvent.TransactionType.GAIN);
+                component.adjustPlayerTokens(player, tokens, OnTokenTransactionEvent.TransactionType.RESOURCE_GAIN);
             }
             if(timer == -1) return;
             if(!isResourcesRespawnable) {
@@ -99,7 +97,7 @@ public class OnBlockDestroyHandler implements Listener {
             if(GameInstance.getInstance().damageCore(team.getTeamName(), true)) {
                 List<PlayerModel> players = GameInstance.getInstance().getTeam(playerTeam).getPlayers();
                 for(PlayerModel model : players) {
-                    GameInstance.getInstance().adjustPlayerTokens(model, DataConstants.TOKEN_PER_DESTRUCTION, OnTokenTransactionEvent.TransactionType.GAIN);
+                    component.adjustPlayerTokens(model, DataConstants.TOKEN_PER_DESTRUCTION, OnTokenTransactionEvent.TransactionType.DESTROY_GAIN);
                 }
                 block.setType(Material.AIR);
             }

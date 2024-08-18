@@ -31,8 +31,12 @@ public class Core implements ICoreData{
         return false;
     }
     
+    public boolean isCoreCannotBeHealed() {
+        return health < 1 || health >= 100;
+    }
+    
     public boolean Heal() {
-        if(health < 1 || health >= 100) return false;
+        if(isCoreCannotBeHealed()) return false;
         health++;
         return true;
     }
