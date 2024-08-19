@@ -38,6 +38,7 @@ public class GameInstance {
     private PhaseCounter counter;
 
     private static Map<String, IComponent> components;
+    private int repeatedTask;
 
     @Getter
     private boolean isFinished;
@@ -60,6 +61,7 @@ public class GameInstance {
             }
         }
         initComponents();
+        this.repeatedTask = GameConfiguration.startRepeatedTask();
     }
 
     private void initComponents() {

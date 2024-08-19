@@ -11,16 +11,24 @@ import org.bukkit.craftbukkit.v1_12_R1.entity.CraftIronGolem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.scheduler.BukkitRunnable;
+import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.TeamData;
 import remonone.nftilation.application.services.SkinCache;
 import remonone.nftilation.components.EntityHandleComponent;
+import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
+import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.damage.TeamAttackInvoker;
 import remonone.nftilation.game.ingame.core.Core;
 import remonone.nftilation.game.ingame.services.*;
+import remonone.nftilation.game.ingame.services.teams.income.FourthTierPassiveIncome;
+import remonone.nftilation.game.ingame.services.teams.income.SecondTierPassiveIncome;
+import remonone.nftilation.game.ingame.services.teams.income.ThirdTierPassiveIncome;
 import remonone.nftilation.game.ingame.services.teams.resource.FourthResourceIncomeService;
 import remonone.nftilation.game.ingame.services.teams.resource.SecondResourceIncomeService;
 import remonone.nftilation.game.ingame.services.teams.resource.ThirdResourceIncomeService;
@@ -58,6 +66,9 @@ public class GameConfiguration {
         ServiceContainer.registerService(new SecondResourceIncomeService());
         ServiceContainer.registerService(new ThirdResourceIncomeService());
         ServiceContainer.registerService(new FourthResourceIncomeService());
+        ServiceContainer.registerService(new SecondTierPassiveIncome());
+        ServiceContainer.registerService(new ThirdTierPassiveIncome());
+        ServiceContainer.registerService(new FourthTierPassiveIncome());
     }
 
     public static void spawnGolems() {
@@ -226,4 +237,21 @@ public class GameConfiguration {
         return parameters;
     }
 
+    public static int startRepeatedTask() {
+        PlayerInteractComponent component = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
+        BukkitRunnable runnable = new BukkitRunnable() {
+            @Override
+            public void run() {
+                Iterator<ITeam> teamIt = GameInstance.getInstance().getTeamIterator();
+                while(teamIt.hasNext()) {
+                    ITeam team = teamIt.next();
+                    double passiveIncome = (Double) team.getParameters().getOrDefault(PropertyConstant.TEAM_PASSIVE_INCOME, 0D);
+                    double tickIncome = passiveIncome / 10;
+                    team.getPlayers().forEach(player -> component.adjustPlayerTokens(player.getReference(), (float) tickIncome, OnTokenTransactionEvent.TransactionType.PASSIVE_GAIN));
+                }
+            }
+        };
+        runnable.runTaskTimer(Nftilation.getInstance(), 10L, 10L);
+        return runnable.getTaskId();
+    }
 }

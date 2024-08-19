@@ -47,4 +47,5 @@ public class PropertyConstant {
     public static final String PLAYER_STUN_DURATION = "stunDuration";
     
     public static final String TEAM_RESOURCE_INCOME = "resourceIncome";
+    public static final String TEAM_PASSIVE_INCOME = "passiveIncome";
 }

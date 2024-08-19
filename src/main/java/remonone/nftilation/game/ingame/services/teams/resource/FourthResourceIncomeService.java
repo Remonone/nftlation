@@ -1,7 +1,9 @@
 package remonone.nftilation.game.ingame.services.teams.resource;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import remonone.nftilation.Store;
 import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
@@ -38,6 +40,11 @@ public class FourthResourceIncomeService implements IPurchasableService {
         Map<String, Object> params = team.getParameters();
         params.put(PropertyConstant.TEAM_RESOURCE_INCOME, 90D);
         buyer.closeInventory();
-        team.getPlayers().forEach(playerModel -> playerModel.getReference().playSound(playerModel.getReference().getLocation(), Sound.ITEM_ARMOR_EQUIP_GOLD, 1f, 1f));
+        String playerName = Store.getInstance().getDataInstance().FindPlayerByName(buyer.getUniqueId()).getData().getLogin();
+        team.getPlayers().forEach(playerModel -> {
+            Player player = playerModel.getReference();
+            player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GOLD, 1f, 1f);
+            player.sendMessage(ChatColor.WHITE + playerName + ChatColor.GOLD + MessageConstant.TEAM_UPGRADE + MessageConstant.TEAM_UPGRADE_RESOURCE_INCOME + 3);
+        });
     }
 }

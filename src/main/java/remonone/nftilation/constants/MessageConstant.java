@@ -70,4 +70,7 @@ public class MessageConstant {
     public static final String TOKEN_TRANSFER_IMPOSSIBLE_TO_TRANSFER = "Невозможно перевести токены этому игроку!";
     public static final String TOKEN_TRANSFER_TOO_FAR = "Игрок слишком далеко! Нельзя сделать перевод!";
     public static final String TOKEN_TRANSFER_INCORRECT_STAGE = "Вы не можете совершать переводы в данный момент!";
+    public static final String TEAM_UPGRADE = " купил командное улучшение: ";
+    public static final String TEAM_UPGRADE_RESOURCE_INCOME = "Увеличенный приток";
+    public static final String TEAM_UPGRADE_PASSIVE_INCOME = "Пасивная прибыль";
 }
