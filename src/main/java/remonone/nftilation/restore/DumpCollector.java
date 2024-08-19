@@ -41,6 +41,8 @@ public class DumpCollector {
     }
 
     private static Object getTeams() {
+        List<ITeam> teams = new ArrayList<>();
+        GameInstance.getInstance().getTeamIterator().forEachRemaining(teams::add);
         return null;
     }
 
@@ -59,7 +61,7 @@ public class DumpCollector {
     }
 
     public static List<PlayerCollection> getPlayers() {
-        List<PlayerCollection> players = new ArrayList<PlayerCollection>();
+        List<PlayerCollection> players = new ArrayList<>();
         Iterator<ITeam> teams = GameInstance.getInstance().getTeamIterator();
         while(teams.hasNext()) {
             ITeam team = teams.next();

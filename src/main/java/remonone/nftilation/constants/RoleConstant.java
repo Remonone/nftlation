@@ -42,7 +42,6 @@ public class RoleConstant {
     public static final String INDIAN_NBT_CONTAINER = "indian_items";
     public static final String INDIAN_NBT_RECALL = "recall_to_base";
 
-    public static final int DOUBLE_JUMP_COOLDOWN = 3;
     public static final String MONKEY_ABILITY_ITEM = "Стиль макаки";
     public static final String MONKEY_NBT_CONTAINER = "monkey_items";
     public static final String MONKEY_NBT_WAND = "wand";

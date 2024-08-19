@@ -38,7 +38,8 @@ public class GameInstance {
     private PhaseCounter counter;
 
     private static Map<String, IComponent> components;
-    
+
+    @Getter
     private boolean isFinished;
     
     public void startGame() {
@@ -82,7 +83,7 @@ public class GameInstance {
         return components.get(name);
     }
 
-    private final Function<String, Void> destroyTeam = (String teamName) -> {
+    public final Function<String, Void> destroyTeam = (String teamName) -> {
         IModifiableTeam team = teamData.get(teamName);
         team.setCoreAlive(false);
 

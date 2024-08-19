@@ -32,6 +32,7 @@ import remonone.nftilation.game.shop.content.ItemElement;
 import remonone.nftilation.game.shop.content.ServiceElement;
 import remonone.nftilation.game.shop.registry.ShopItemRegistry;
 import remonone.nftilation.handlers.*;
+import remonone.nftilation.restore.DumpCollector;
 import remonone.nftilation.utils.CustomEntities;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
@@ -167,6 +168,9 @@ public final class Nftilation extends JavaPlugin {
     @Override
     public void onDisable() {
         Logger.log("Disabling...");
+        if(!GameInstance.getInstance().isFinished()) {
+            DumpCollector.GenerateDump();
+        }
         if(GameInstance.getInstance().getCounter() != null) {
             GameInstance.getInstance().getCounter().bar.setVisible(false);
         }

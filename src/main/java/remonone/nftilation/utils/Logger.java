@@ -7,22 +7,31 @@ import static org.bukkit.Bukkit.getServer;
 public class Logger {
     
     public static void log(String message) {
-        getServer().getLogger().info("[LOG] " + message);
+        StackTraceElement caller = getCallerElement();
+        getServer().getLogger().info("[LOG] " + caller.getClassName() + "[" + caller.getLineNumber() + "]: " + message);
     }
     
     public static void debug(String message) {
-        getServer().getLogger().info("[DEBUG] " + message);
+        StackTraceElement caller = getCallerElement();
+        getServer().getLogger().info("[DEBUG] " + caller.getClassName() + "[" + caller.getLineNumber() + "]: " + message);
     }
     
     public static void warn(String message) {
-        getServer().getLogger().info("[WARN] " + message);
+        StackTraceElement caller = getCallerElement();
+        getServer().getLogger().info("[WARN] " + caller.getClassName() + "[" + caller.getLineNumber() + "]: " + message);
     }
 
     public static void error(String message) {
-        getServer().getLogger().info("[ERROR] " + message);
+        StackTraceElement caller = getCallerElement();
+        getServer().getLogger().info("[ERROR] " + caller.getClassName() + "[" + caller.getLineNumber() + "]: " + message);
     }
     
     public static void broadcast(String message) {
         Bukkit.broadcastMessage(message);
+    }
+
+    private static StackTraceElement getCallerElement() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        return stackTrace[3];
     }
 }
