@@ -1,14 +1,16 @@
 package remonone.nftilation.game.meta;
 
+import lombok.Data;
 import lombok.Getter;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.SerializableAs;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.utils.Logger;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class MetaConfig {
 
@@ -23,6 +25,9 @@ public class MetaConfig {
     
     @Getter
     private List<RuneInfo> runes = new ArrayList<>();
+    
+    @Getter
+    private Map<String, Object> upgrades;
     
     public MetaConfig() {}
     
@@ -54,6 +59,8 @@ public class MetaConfig {
         if(runes != null) {
             this.runes = runes;
         }
+        UpgradesInfo list = (UpgradesInfo) configuration.get(MetaConstants.META_UPGRADES);
+        this.upgrades = list.upgrades;
     }
     
     public Object getValue(String key) {
@@ -61,5 +68,24 @@ public class MetaConfig {
             return configuration.get(key);
         }
         return null;
+    }
+    
+    @Data
+    @SerializableAs("UpgradesInfo")
+    public static class UpgradesInfo implements ConfigurationSerializable {
+        private Map<String, Object> upgrades = new HashMap<>();
+
+        @Override
+        public Map<String, Object> serialize() {
+            return Collections.emptyMap();
+        }
+        
+        public static UpgradesInfo deserialize(Map<String, Object> map) {
+            UpgradesInfo info = new UpgradesInfo();
+            if(map.containsKey("info")) {
+                info.upgrades = (Map<String, Object>) map.get("info");
+            }
+            return info;
+        }
     }
 }

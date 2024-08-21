@@ -23,7 +23,6 @@ public class RequisiteContainer implements ConfigurationSerializable {
             if(!paramsList.containsKey(req.getName())) {
                 return false;
             }
-            Logger.debug(req.getName());
             Object value = paramsList.get(req.getName());
             if(!req.isRequisiteFulfilled(value)) {
                 return false;

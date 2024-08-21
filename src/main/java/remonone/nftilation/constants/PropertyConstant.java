@@ -48,4 +48,6 @@ public class PropertyConstant {
     
     public static final String TEAM_RESOURCE_INCOME = "resourceIncome";
     public static final String TEAM_PASSIVE_INCOME = "passiveIncome";
+    public static final String TEAM_UTILITY_ITEM_LEVEL = "utilityItemLevel";
+    public static final String TEAM_CORE_BLOCK = "coreBlock";
 }

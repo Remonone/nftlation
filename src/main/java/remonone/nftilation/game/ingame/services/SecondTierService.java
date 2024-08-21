@@ -23,6 +23,7 @@ public class SecondTierService implements IPurchasableService {
         if(!PlayerInteractComponent.isPlayerAbleToUpgrade(buyer, 2)) return;
         if(playerInteract.adjustPlayerTokens(model, -price, OnTokenTransactionEvent.TransactionType.PURCHASE)) {
             playerInteract.upgradePlayer(buyer, 2);
+            buyer.closeInventory();
         }
     }
 }

@@ -17,8 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DumpCollector {
-
-
+    
     public static void GenerateDump() {
         File file = generateDumpFile();
         YamlConfiguration dump = new YamlConfiguration();

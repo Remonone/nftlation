@@ -19,5 +19,5 @@ public class DataConstants {
     public static final int INVULNERABILITY_RANGE = 35;
     public static final int DAMAGE_REPORT_LIFETIME = 12;
     public static final int DISTANCE_FOR_TRANSFER = 5;
-    public static final double ZERO_THRESHOLD = 0.0001;
+    public static final double ZERO_THRESHOLD = 0.001;
 }

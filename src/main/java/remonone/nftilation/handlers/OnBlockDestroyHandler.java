@@ -14,9 +14,12 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.PlayerInteractComponent;
+import remonone.nftilation.config.ConfigManager;
+import remonone.nftilation.config.TeamSpawnPoint;
 import remonone.nftilation.constants.*;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.OnTokenTransactionEvent;
@@ -25,7 +28,11 @@ import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.rules.RuleManager;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 import static org.bukkit.Bukkit.getServer;
 
@@ -82,7 +89,8 @@ public class OnBlockDestroyHandler implements Listener {
             };
             getServer().getScheduler().runTaskLater(Nftilation.getInstance(), task, timer);
         }
-        if(block.getType() == Material.BEACON) {
+        List<Vector> corePositions = ConfigManager.getInstance().getTeamSpawnList().stream().map(TeamSpawnPoint::getCoreCenter).collect(Collectors.toList());
+        if(corePositions.stream().anyMatch(position -> position.distance(block.getLocation().toVector()) < DataConstants.ZERO_THRESHOLD)) {
             ITeam team = GameInstance.getInstance().getTeamByCorePosition(block.getLocation().toVector());
             String playerTeam = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
             e.setCancelled(true);

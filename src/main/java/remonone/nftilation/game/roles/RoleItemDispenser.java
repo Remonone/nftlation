@@ -4,6 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -16,12 +17,12 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.utils.ColorUtils;
 import remonone.nftilation.utils.NestedObjectFetcher;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,16 +30,6 @@ import java.util.Map;
 public class RoleItemDispenser {
     
     //TODO: Replace for Team Upgrades
-    private static final Map<ItemType, Material> defaultItems = new HashMap<ItemType, Material>() {{
-        put(ItemType.SWORD, Material.STONE_SWORD);
-        put(ItemType.PICKAXE, Material.STONE_PICKAXE);
-        put(ItemType.AXE, Material.STONE_AXE);
-        put(ItemType.SHOVEL, Material.STONE_SPADE);
-        put(ItemType.HELMET, Material.LEATHER_HELMET);
-        put(ItemType.CHESTPLATE, Material.LEATHER_CHESTPLATE);
-        put(ItemType.LEGGINGS, Material.LEATHER_LEGGINGS);
-        put(ItemType.BOOTS, Material.LEATHER_BOOTS);
-    }};
     
     public static ItemStack getItem(ItemType type, Map<String, Object> playerParams, Map<String, Object> roleMeta) {
         if(roleMeta.containsKey(type.name)) {
@@ -49,18 +40,26 @@ public class RoleItemDispenser {
     }
     
     private static ItemStack getDefaultItem(ItemType type,  Map<String, Object> playerParams) {
-        // TODO: Team upgrades
-        ItemStack itemStack = new ItemStack(defaultItems.get(type));
+        String teamName = (String) playerParams.get(PropertyConstant.PLAYER_TEAM_NAME);
+        if(StringUtils.isBlank(teamName)) return new ItemStack(Material.AIR);
+        ITeam team = GameInstance.getInstance().getTeam(teamName);
+        if(team == null) return new ItemStack(Material.AIR);
+        Map<String, Object> teamParams = team.getParameters();
+        int level = (Integer) teamParams.getOrDefault(PropertyConstant.TEAM_UTILITY_ITEM_LEVEL, 1);
+        String materialName = (String)NestedObjectFetcher.getNestedObject(MetaConstants.META_UPGRADES_UTILITY + type.name, MetaConfig.getInstance().getUpgrades(), level);
+        if(StringUtils.isBlank(materialName)) return new ItemStack(Material.AIR);
+        Material material = Material.getMaterial(materialName);
+        ItemStack itemStack = new ItemStack(material);
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setUnbreakable(true);
         itemMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(itemMeta);
         if(type.isArmor) {
-            String teamName = (String) playerParams.get(PropertyConstant.PLAYER_TEAM_NAME);
             LeatherArmorMeta meta = (LeatherArmorMeta) itemStack.getItemMeta();
-            ITeam team = GameInstance.getInstance().getTeam(teamName);
-            meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(team.getTeamColor())));
-            itemStack.setItemMeta(meta);
+            if(meta != null) {
+                meta.setColor(ColorUtils.TranslateToColor(ChatColor.getByChar(team.getTeamColor())));
+                itemStack.setItemMeta(meta);
+            }
         }
         return itemStack;
     }

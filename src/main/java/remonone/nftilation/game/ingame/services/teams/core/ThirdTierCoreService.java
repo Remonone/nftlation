@@ -1,10 +1,12 @@
-package remonone.nftilation.game.ingame.services.teams.resource;
+package remonone.nftilation.game.ingame.services.teams.core;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import remonone.nftilation.Store;
-import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
@@ -15,24 +17,19 @@ import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.utils.NestedObjectFetcher;
 import remonone.nftilation.utils.PlayerUtils;
 
-import java.util.Map;
 
-public class SecondResourceIncomeService implements IPurchasableService {
+public class ThirdTierCoreService implements IPurchasableService {
     @Override
     public String getServiceName() {
-        return "resource-income-second";
+        return "third-tier-core";
     }
 
     @Override
     public void OnPurchase(Player buyer, int price) {
         ITeam team = PlayerUtils.getTeamFromPlayer(buyer);
         if(team == null) return;
-        Double currentValue = (Double) team.getParameters().get(PropertyConstant.TEAM_RESOURCE_INCOME);
-        Double requiredValue = (Double) NestedObjectFetcher.getNestedObject(MetaConstants.META_UPGRADES_RESOURCE, MetaConfig.getInstance().getUpgrades(), 0);
-        if(requiredValue == null) {
-            requiredValue = 0D;
-        }
-        if(currentValue == null || currentValue - DataConstants.ZERO_THRESHOLD > requiredValue) {
+        Integer currentLevel = (Integer) team.getParameters().get(PropertyConstant.TEAM_CORE_BLOCK);
+        if(currentLevel != 1) {
             buyer.closeInventory();
             return;
         }
@@ -40,15 +37,18 @@ public class SecondResourceIncomeService implements IPurchasableService {
             buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
             return;
         }
-        Map<String, Object> params = team.getParameters();
-        Double nextLevelValue = (Double) NestedObjectFetcher.getNestedObject(MetaConstants.META_UPGRADES_RESOURCE, MetaConfig.getInstance().getUpgrades(), 1);
-        params.put(PropertyConstant.TEAM_RESOURCE_INCOME, nextLevelValue);
-        buyer.closeInventory();
+        String nextLevelMaterial = (String) NestedObjectFetcher.getNestedObject(MetaConstants.META_UPGRADES_CORE, MetaConfig.getInstance().getUpgrades(), 2);
+        team.getParameters().put(PropertyConstant.TEAM_CORE_BLOCK, 2);
+        Material material = Material.getMaterial(nextLevelMaterial);
+        Vector corePos = team.getTeamSpawnPoint().getCoreCenter();
+        Location location = new Location(buyer.getWorld(), corePos.getX(), corePos.getY(), corePos.getZ());
+        location.getBlock().setType(material);
         String playerName = Store.getInstance().getDataInstance().FindPlayerByName(buyer.getUniqueId()).getData().getLogin();
+        buyer.closeInventory();
         team.getPlayers().forEach(playerModel -> {
             Player player = playerModel.getReference();
-            player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GOLD, 1f, 1f);
-            player.sendMessage(ChatColor.WHITE + playerName + ChatColor.GOLD + MessageConstant.TEAM_UPGRADE + MessageConstant.TEAM_UPGRADE_RESOURCE_INCOME + " " + 1);
+            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, .8f, .6f);
+            player.sendMessage(ChatColor.WHITE + playerName + ChatColor.GOLD + MessageConstant.TEAM_UPGRADE + MessageConstant.TEAM_UPGRADE_CORE + " " + 2);
         });
     }
 }

@@ -17,7 +17,6 @@ public class StageSwitchCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         CommandUtils.State state = CommandUtils.verifyPlayerSender(sender, args, 1);
-        Logger.log(state.toString());
         if(!state.equals(CommandUtils.State.NONE)) return state.getValue();
         Player player = (Player) sender;
         String stage = args[0];

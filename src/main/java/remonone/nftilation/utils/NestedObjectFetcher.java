@@ -27,7 +27,7 @@ public class NestedObjectFetcher {
         Map<String, Object> values = (Map<String, Object>) value;
         if(!values.containsKey("level_base")) return values;
         if(!values.containsKey(String.valueOf(i))) {
-            if (i == 1) return null;
+            if (i <= 1) return null;
             return getLevelBasedObject(i - 1, value);
         }
         return values.get(String.valueOf(i));

@@ -26,21 +26,24 @@ import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.damage.TeamAttackInvoker;
 import remonone.nftilation.game.ingame.core.Core;
 import remonone.nftilation.game.ingame.services.*;
+import remonone.nftilation.game.ingame.services.teams.core.SecondTierCoreService;
+import remonone.nftilation.game.ingame.services.teams.core.ThirdTierCoreService;
 import remonone.nftilation.game.ingame.services.teams.income.FourthTierPassiveIncome;
 import remonone.nftilation.game.ingame.services.teams.income.SecondTierPassiveIncome;
 import remonone.nftilation.game.ingame.services.teams.income.ThirdTierPassiveIncome;
 import remonone.nftilation.game.ingame.services.teams.resource.FourthResourceIncomeService;
 import remonone.nftilation.game.ingame.services.teams.resource.SecondResourceIncomeService;
 import remonone.nftilation.game.ingame.services.teams.resource.ThirdResourceIncomeService;
+import remonone.nftilation.game.ingame.services.teams.utility.SecondUtilityService;
+import remonone.nftilation.game.ingame.services.teams.utility.ThirdUtilityService;
+import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.mob.AngryGolem;
 import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.runes.Rune;
-import remonone.nftilation.utils.EntityList;
-import remonone.nftilation.utils.Logger;
-import remonone.nftilation.utils.PlayerNMSUtil;
-import remonone.nftilation.utils.PlayerUtils;
+import remonone.nftilation.utils.*;
 
+import javax.xml.ws.Service;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -69,6 +72,10 @@ public class GameConfiguration {
         ServiceContainer.registerService(new SecondTierPassiveIncome());
         ServiceContainer.registerService(new ThirdTierPassiveIncome());
         ServiceContainer.registerService(new FourthTierPassiveIncome());
+        ServiceContainer.registerService(new SecondUtilityService());
+        ServiceContainer.registerService(new ThirdUtilityService());
+        ServiceContainer.registerService(new SecondTierCoreService());
+        ServiceContainer.registerService(new ThirdTierCoreService());
     }
 
     public static void spawnGolems() {
@@ -177,6 +184,9 @@ public class GameConfiguration {
     private static Map<String, Object> composeParams() {
         Map<String, Object> params = new HashMap<>();
         params.put(PropertyConstant.TEAM_RESOURCE_INCOME, 0D);
+        params.put(PropertyConstant.TEAM_PASSIVE_INCOME, 0D);
+        params.put(PropertyConstant.TEAM_UTILITY_ITEM_LEVEL, 1);
+        params.put(PropertyConstant.TEAM_CORE_BLOCK, 0);
         return params;
     }
 
@@ -198,7 +208,8 @@ public class GameConfiguration {
         Core core = new Core(() -> {});
         World world = Store.getInstance().getDataInstance().getMainWorld();
         Location location = point.getCoreCenter().toLocation(world);
-        location.getBlock().setType(Material.BEACON);
+        String matName = (String)NestedObjectFetcher.getNestedObject("coreUpgrade", MetaConfig.getInstance().getUpgrades(), 0);
+        location.getBlock().setType(Material.getMaterial(matName));
         return core;
     }
 

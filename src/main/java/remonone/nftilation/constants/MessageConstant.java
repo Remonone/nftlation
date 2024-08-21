@@ -73,4 +73,6 @@ public class MessageConstant {
     public static final String TEAM_UPGRADE = " купил командное улучшение: ";
     public static final String TEAM_UPGRADE_RESOURCE_INCOME = "Увеличенный приток";
     public static final String TEAM_UPGRADE_PASSIVE_INCOME = "Пасивная прибыль";
+    public static final String TEAM_UPGRADE_UTILITY = "Вспомогательные инструменты";
+    public static final String TEAM_UPGRADE_CORE = "Укрепление ядра";
 }

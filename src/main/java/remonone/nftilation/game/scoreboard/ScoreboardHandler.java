@@ -13,6 +13,7 @@ import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Role;
+import remonone.nftilation.game.runes.Rune;
 import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.PlayerUtils;
 
@@ -44,6 +45,7 @@ public class ScoreboardHandler {
         }
         objective.getScore("Level: " + playerParams.get(PropertyConstant.PLAYER_LEVEL_PARAM)).setScore(++counter);
         objective.getScore("Tokens: " + model.getTokens()).setScore(++counter);
+        objective.getScore("Rune: " + Rune.getRuneByID((String)playerParams.get(PropertyConstant.PLAYER_RUNE_ID)).getName()).setScore(++counter);
         objective.getScore("Role: " + Role.getRoleByID((String)playerParams.get(PropertyConstant.PLAYER_ROLE_ID)).getName()).setScore(++counter);
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(model.getReference().getUniqueId());
         ITeam team = GameInstance.getInstance().getTeam(teamName);

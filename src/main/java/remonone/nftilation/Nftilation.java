@@ -98,6 +98,7 @@ public final class Nftilation extends JavaPlugin {
         ConfigurationSerialization.registerClass(EffectPotion.class);
         ConfigurationSerialization.registerClass(RequisiteContainer.class);
         ConfigurationSerialization.registerClass(Requisite.class);
+        ConfigurationSerialization.registerClass(MetaConfig.UpgradesInfo.class);
     }
 
     private void RegisterRoles() {
@@ -168,9 +169,6 @@ public final class Nftilation extends JavaPlugin {
     @Override
     public void onDisable() {
         Logger.log("Disabling...");
-        if(!GameInstance.getInstance().isFinished()) {
-            DumpCollector.GenerateDump();
-        }
         if(GameInstance.getInstance().getCounter() != null) {
             GameInstance.getInstance().getCounter().bar.setVisible(false);
         }
@@ -179,6 +177,9 @@ public final class Nftilation extends JavaPlugin {
         }
         EntityList.clearEntities();
         CustomEntities.unregisterEntities();
+        if(!GameInstance.getInstance().isFinished()) {
+            DumpCollector.GenerateDump();
+        }
     }
     
     

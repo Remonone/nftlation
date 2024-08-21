@@ -8,22 +8,22 @@ public class Logger {
     
     public static void log(String message) {
         StackTraceElement caller = getCallerElement();
-        getServer().getLogger().info("[LOG] " + caller.getClassName() + "[" + caller.getLineNumber() + "]: " + message);
+        getServer().getLogger().info("[LOG] " + caller.getFileName() + "[" + caller.getLineNumber() + "]: " + message);
     }
     
     public static void debug(String message) {
         StackTraceElement caller = getCallerElement();
-        getServer().getLogger().info("[DEBUG] " + caller.getClassName() + "[" + caller.getLineNumber() + "]: " + message);
+        getServer().getLogger().info("[DEBUG] " + caller.getFileName() + "[" + caller.getLineNumber() + "]: " + message);
     }
     
     public static void warn(String message) {
         StackTraceElement caller = getCallerElement();
-        getServer().getLogger().info("[WARN] " + caller.getClassName() + "[" + caller.getLineNumber() + "]: " + message);
+        getServer().getLogger().info("[WARN] " + caller.getFileName() + "[" + caller.getLineNumber() + "]: " + message);
     }
 
     public static void error(String message) {
         StackTraceElement caller = getCallerElement();
-        getServer().getLogger().info("[ERROR] " + caller.getClassName() + "[" + caller.getLineNumber() + "]: " + message);
+        getServer().getLogger().info("[ERROR] " + caller.getFileName() + "[" + caller.getLineNumber() + "]: " + message);
     }
     
     public static void broadcast(String message) {

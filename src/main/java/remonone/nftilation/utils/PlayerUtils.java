@@ -1,15 +1,19 @@
 package remonone.nftilation.utils;
 
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.PlayerData;
 import remonone.nftilation.components.EntityHandleComponent;
+import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.MessageConstant;
+import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
+import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
@@ -93,6 +97,26 @@ public class PlayerUtils {
     public static PlayerModel getModelFromPlayer(Player player) {
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         return GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
+    }
+    
+    public static boolean tryWithdrawTokens(Player player, float amount, OnTokenTransactionEvent.TransactionType type) {
+        PlayerModel model = getModelFromPlayer(player);
+        if(model == null) return false;
+        return tryWithdrawTokens(model, amount, type);
+    }
+    
+    public static boolean tryWithdrawTokens(PlayerModel model, float amount, OnTokenTransactionEvent.TransactionType type) {
+        PlayerInteractComponent component = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
+         if(component == null) return false;
+        return component.adjustPlayerTokens(model, -amount, type);
+    }
+    
+    public static ITeam getTeamFromPlayer(Player player) {
+        PlayerModel model = getModelFromPlayer(player);
+        if(model == null) return null;
+        String teamName = (String) model.getParameters().get(PropertyConstant.PLAYER_TEAM_NAME);
+        if(StringUtils.isBlank(teamName)) return null;
+        return GameInstance.getInstance().getTeam(teamName);
     }
     
     @AllArgsConstructor

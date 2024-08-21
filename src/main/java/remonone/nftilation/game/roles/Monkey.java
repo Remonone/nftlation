@@ -142,7 +142,7 @@ public class Monkey extends Role {
         World world = player.getWorld();
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, length * DataConstants.TICKS_IN_SECOND, 0, false, false));
         world.playSound(player.getLocation(), Sound.BLOCK_LAVA_EXTINGUISH, .5f, .8f);
-        float cooldown = (Float) getMetaInfo(MetaConstants.META_MONKEY_INVISIBILITY_COOLDOWN, level);
+        float cooldown = ((Double) getMetaInfo(MetaConstants.META_MONKEY_INVISIBILITY_COOLDOWN, level)).floatValue();
         InventoryUtils.setCooldownForItem(model, item, cooldown);
     }
 

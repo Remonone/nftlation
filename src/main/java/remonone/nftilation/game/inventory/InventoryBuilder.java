@@ -67,9 +67,7 @@ public class InventoryBuilder {
         for(Rune rune : Rune.getRunes()) {
             ItemStack itemStack;
             Material mat = rune.getMaterial();
-            Logger.debug(mat.toString());
             if(mat == Material.AIR) continue;
-            player.sendMessage(rune.getName() + rune.getIndex());
             itemStack = new ItemStack(mat);
             FillMeta(itemStack, rune);
             NBT.modify(itemStack, nbt -> {
@@ -93,9 +91,7 @@ public class InventoryBuilder {
         Inventory inventory = Bukkit.createInventory(player, 27, NameConstants.SHOP_TAB);
         Map<Integer, String> availableItems = getAvailableItems(player, el.getExpandableElements());
         for(Map.Entry<Integer, String> element : availableItems.entrySet()) {
-            Logger.debug(element.getValue());
             IShopElement shopElement = ShopItemRegistry.getItem(element.getValue());
-            Logger.debug(shopElement.getDisplay().toString());
             if(shopElement == null) {
                 Logger.error("Category " + el.getId() + "contains item which not exists! Id: " + element.getValue() + ". Skipping...");
                 continue;

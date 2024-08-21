@@ -56,7 +56,8 @@ public class PlayerInteractComponent implements IComponent {
         OnTokenTransactionEvent e = new OnTokenTransactionEvent(type, tokens, model);
         getServer().getPluginManager().callEvent(e);
         if(e.isCancelled()) return false;
-        float roundedTokens = (float) Math.round(model.getTokens() + e.getTokensAmount() * 100) / 100;
+        float roundedTokens = model.getTokens() + e.getTokensAmount();
+        roundedTokens = (float) Math.round(roundedTokens * 100) / 100;
         model.setTokens(roundedTokens);
         ScoreboardHandler.updateScoreboard(model);
         return true;
@@ -98,6 +99,7 @@ public class PlayerInteractComponent implements IComponent {
     }
 
     public void upgradePlayer(Player player, int level) {
+        if(!isPlayerAbleToUpgrade(player, level)) return;
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         PlayerModel model = instance.getPlayerModelFromTeam(teamName, player);
         Map<String, Object> params = model.getParameters();
@@ -110,19 +112,17 @@ public class PlayerInteractComponent implements IComponent {
             Logger.error("Cannot upgrade level for player: " + player.getDisplayName());
             return;
         }
-        if(isPlayerAbleToUpgrade(player, level)) {
-            if(role instanceof Guts) {
-                if(level == 2) {
-                    Logger.broadcast(ChatColor.RED + "Мишка потерял концентрацию и его внимание расплывчато!");
-                }
-                if(level == 3) {
-                    Logger.broadcast(ChatColor.DARK_RED + "Мишка сильно ослаб и находится в предсмертном состоянии!");
-                }
+        if(role instanceof Guts) {
+            if(level == 2) {
+                Logger.broadcast(ChatColor.RED + "Мишка потерял концентрацию и его внимание расплывчато!");
             }
-            Role.setInventoryItems(model);
-            Role.updatePlayerAbilities(player);
-            ScoreboardHandler.updateScoreboard(model);
+            if(level == 3) {
+                Logger.broadcast(ChatColor.DARK_RED + "Мишка сильно ослаб и находится в предсмертном состоянии!");
+            }
         }
+        Role.setInventoryItems(model);
+        Role.updatePlayerAbilities(player);
+        ScoreboardHandler.updateScoreboard(model);
     }
 
     @Override
