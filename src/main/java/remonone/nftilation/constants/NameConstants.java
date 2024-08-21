@@ -11,7 +11,7 @@ public class NameConstants {
     public static final String CHECKER_CHEST = "Чекер";
     public static final String CHECKER_NAME = "Браян";
     
-    public static final String SHOP_TAB = "Торговец";
+    public static final String SHOP_TAB = "Торговец: ";
 
     public static final String PLAYER_INTERACT_NAME = "PlayerInteract";
 }

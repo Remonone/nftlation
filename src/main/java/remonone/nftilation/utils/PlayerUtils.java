@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.models.PlayerData;
 import remonone.nftilation.components.EntityHandleComponent;
@@ -15,9 +17,13 @@ import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.inventory.InventoryBuilder;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Role;
+import remonone.nftilation.game.shop.content.CategoryElement;
+import remonone.nftilation.game.shop.content.IExpandable;
+import remonone.nftilation.game.shop.registry.ShopItemRegistry;
 
 import java.util.List;
 import java.util.Map;
@@ -117,6 +123,19 @@ public class PlayerUtils {
         String teamName = (String) model.getParameters().get(PropertyConstant.PLAYER_TEAM_NAME);
         if(StringUtils.isBlank(teamName)) return null;
         return GameInstance.getInstance().getTeam(teamName);
+    }
+
+    public static void updateShopInventoryForPlayer(Player player) {
+        if(player.getOpenInventory() == null) return; // TODO: check if actually null on closed
+        InventoryView view = player.getOpenInventory();
+        String inventoryName = view.getTopInventory().getName();
+        if(!inventoryName.startsWith(NameConstants.SHOP_TAB)) return;
+        String tabName = inventoryName.substring(NameConstants.SHOP_TAB.length());
+        IExpandable expandable = ShopItemRegistry.getExpandable(tabName);
+        if(!(expandable instanceof CategoryElement)) return;
+        CategoryElement element = (CategoryElement) expandable;
+        Inventory inventory = InventoryBuilder.buildShopKeeperInventory(player, element);
+        player.openInventory(inventory);
     }
     
     @AllArgsConstructor

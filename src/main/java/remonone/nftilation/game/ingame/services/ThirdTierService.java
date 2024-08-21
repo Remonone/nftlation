@@ -24,7 +24,7 @@ public class ThirdTierService implements IPurchasableService {
         if(!PlayerInteractComponent.isPlayerAbleToUpgrade(buyer, 3)) return;
         if(playerInteract.adjustPlayerTokens(model, -price, OnTokenTransactionEvent.TransactionType.PURCHASE)) {
             playerInteract.upgradePlayer(buyer, 3);
-            buyer.closeInventory();
+            PlayerUtils.updateShopInventoryForPlayer(buyer);
         }
     }
 }

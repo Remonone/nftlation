@@ -32,4 +32,21 @@ public class NestedObjectFetcher {
         }
         return values.get(String.valueOf(i));
     }
+    public static boolean containsExactLevelForPath(String path, int i, Object scope) {
+        if(!(scope instanceof Map)) return false;
+        int index = path.indexOf('.');
+        Map<String, Object> values = (Map<String, Object>) scope;
+        if(index == -1) {
+            if(!values.containsKey("level_base")) return false;
+            return values.containsKey(String.valueOf(i));
+        }
+        String firstPart = path.substring(0, index);
+        for(Map.Entry<String, Object> entry : values.entrySet()) {
+            if(entry.getKey().equals(firstPart)) {
+                return containsExactLevelForPath(path.substring(index + 1), i, entry.getValue());
+            }
+        }
+        return false;
+
+    }
 }

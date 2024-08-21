@@ -16,15 +16,16 @@ import java.util.*;
 @SerializableAs("CategoryElement")
 public class CategoryElement implements IShopElement, IExpandable, ConfigurationSerializable {
 
-    @Getter
     private final String id;
     private final List<String> elements;
     private final ItemStack displayItem;
+    private final String expandableName;
     @Getter
     private final RequisiteContainer requisites;
 
     public CategoryElement(String id, Material mat, String name, List<String> elements, RequisiteContainer requisites) {
         this.elements = elements;
+        this.expandableName = name;
         this.displayItem = new ItemStack(mat);
         ItemMeta meta = displayItem.getItemMeta();
         meta.setDisplayName(name);

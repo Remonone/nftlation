@@ -61,6 +61,7 @@ public class ShopBuilder {
         }
         for(CategoryElement categoryElement : categoryElements) {
             ShopItemRegistry.addRegistry(categoryElement);
+            ShopItemRegistry.addCategoryRegistryByName(categoryElement.getExpandableName(), categoryElement);
         }
     }
     

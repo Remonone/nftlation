@@ -20,22 +20,18 @@ import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
+import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.damage.TeamAttackInvoker;
 import remonone.nftilation.game.ingame.core.Core;
 import remonone.nftilation.game.ingame.services.*;
-import remonone.nftilation.game.ingame.services.teams.core.SecondTierCoreService;
-import remonone.nftilation.game.ingame.services.teams.core.ThirdTierCoreService;
-import remonone.nftilation.game.ingame.services.teams.income.FourthTierPassiveIncome;
-import remonone.nftilation.game.ingame.services.teams.income.SecondTierPassiveIncome;
-import remonone.nftilation.game.ingame.services.teams.income.ThirdTierPassiveIncome;
-import remonone.nftilation.game.ingame.services.teams.resource.FourthResourceIncomeService;
-import remonone.nftilation.game.ingame.services.teams.resource.SecondResourceIncomeService;
-import remonone.nftilation.game.ingame.services.teams.resource.ThirdResourceIncomeService;
-import remonone.nftilation.game.ingame.services.teams.utility.SecondUtilityService;
-import remonone.nftilation.game.ingame.services.teams.utility.ThirdUtilityService;
+import remonone.nftilation.game.ingame.services.teams.CoreUpgradeService;
+import remonone.nftilation.game.ingame.services.teams.PassiveIncomeUpgrade;
+import remonone.nftilation.game.ingame.services.teams.ResourceIncomeService;
+import remonone.nftilation.game.ingame.services.teams.ItemUtilityService;
 import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.mob.AngryGolem;
 import remonone.nftilation.game.models.*;
@@ -43,7 +39,6 @@ import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.runes.Rune;
 import remonone.nftilation.utils.*;
 
-import javax.xml.ws.Service;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -66,16 +61,10 @@ public class GameConfiguration {
         ServiceContainer.registerService(new RepairCoreService());
         ServiceContainer.registerService(new SecondTierService());
         ServiceContainer.registerService(new ThirdTierService());
-        ServiceContainer.registerService(new SecondResourceIncomeService());
-        ServiceContainer.registerService(new ThirdResourceIncomeService());
-        ServiceContainer.registerService(new FourthResourceIncomeService());
-        ServiceContainer.registerService(new SecondTierPassiveIncome());
-        ServiceContainer.registerService(new ThirdTierPassiveIncome());
-        ServiceContainer.registerService(new FourthTierPassiveIncome());
-        ServiceContainer.registerService(new SecondUtilityService());
-        ServiceContainer.registerService(new ThirdUtilityService());
-        ServiceContainer.registerService(new SecondTierCoreService());
-        ServiceContainer.registerService(new ThirdTierCoreService());
+        ServiceContainer.registerService(new ResourceIncomeService());
+        ServiceContainer.registerService(new PassiveIncomeUpgrade());
+        ServiceContainer.registerService(new ItemUtilityService());
+        ServiceContainer.registerService(new CoreUpgradeService());
     }
 
     public static void spawnGolems() {
@@ -183,9 +172,9 @@ public class GameConfiguration {
 
     private static Map<String, Object> composeParams() {
         Map<String, Object> params = new HashMap<>();
-        params.put(PropertyConstant.TEAM_RESOURCE_INCOME, 0D);
-        params.put(PropertyConstant.TEAM_PASSIVE_INCOME, 0D);
-        params.put(PropertyConstant.TEAM_UTILITY_ITEM_LEVEL, 1);
+        params.put(PropertyConstant.TEAM_RESOURCE_INCOME, 0);
+        params.put(PropertyConstant.TEAM_PASSIVE_INCOME, 0);
+        params.put(PropertyConstant.TEAM_UTILITY_ITEM_LEVEL, 0);
         params.put(PropertyConstant.TEAM_CORE_BLOCK, 0);
         return params;
     }
@@ -256,9 +245,16 @@ public class GameConfiguration {
                 Iterator<ITeam> teamIt = GameInstance.getInstance().getTeamIterator();
                 while(teamIt.hasNext()) {
                     ITeam team = teamIt.next();
-                    double passiveIncome = (Double) team.getParameters().getOrDefault(PropertyConstant.TEAM_PASSIVE_INCOME, 0D);
+                    int level = (Integer) team.getParameters().getOrDefault(PropertyConstant.TEAM_PASSIVE_INCOME, 0);
+                    Double passiveIncome = (Double)NestedObjectFetcher.getNestedObject(MetaConstants.META_UPGRADES_PASSIVE, MetaConfig.getInstance().getUpgrades(), level);
+                    if(passiveIncome == null || passiveIncome - DataConstants.ZERO_THRESHOLD < 0) {
+                        continue;
+                    }
                     double tickIncome = passiveIncome / 10;
-                    team.getPlayers().forEach(player -> component.adjustPlayerTokens(player.getReference(), (float) tickIncome, OnTokenTransactionEvent.TransactionType.PASSIVE_GAIN));
+                    team.getPlayers().forEach(player -> {
+                        if(!player.getReference().isOnline()) return;
+                        component.adjustPlayerTokens(player.getReference(), (float) tickIncome, OnTokenTransactionEvent.TransactionType.PASSIVE_GAIN);
+                    });
                 }
             }
         };

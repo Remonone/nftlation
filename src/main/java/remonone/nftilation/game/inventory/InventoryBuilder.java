@@ -88,7 +88,7 @@ public class InventoryBuilder {
     }
     
     public static Inventory buildShopKeeperInventory(Player player, CategoryElement el) {
-        Inventory inventory = Bukkit.createInventory(player, 27, NameConstants.SHOP_TAB);
+        Inventory inventory = Bukkit.createInventory(player, 27, NameConstants.SHOP_TAB + el.getExpandableName());
         Map<Integer, String> availableItems = getAvailableItems(player, el.getExpandableElements());
         for(Map.Entry<Integer, String> element : availableItems.entrySet()) {
             IShopElement shopElement = ShopItemRegistry.getItem(element.getValue());
@@ -124,7 +124,7 @@ public class InventoryBuilder {
         int count = filteredIds.size();
         int slots = 9;
         int center = 4;
-        
+
         if(count == 1) {
             availableItems.put(slots + center, filteredIds.get(0));
         }
