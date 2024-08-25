@@ -18,6 +18,7 @@ import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Guts;
 import remonone.nftilation.game.roles.Role;
+import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.runes.Rune;
 import remonone.nftilation.game.shop.content.*;
 import remonone.nftilation.game.shop.registry.ShopItemRegistry;
@@ -90,6 +91,7 @@ public class InventoryBuilder {
     public static Inventory buildShopKeeperInventory(Player player, CategoryElement el) {
         Inventory inventory = Bukkit.createInventory(player, 27, NameConstants.SHOP_TAB + el.getExpandableName());
         Map<Integer, String> availableItems = getAvailableItems(player, el.getExpandableElements());
+        Float discount = (Float) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_PRICE_SCALE, 1F);
         for(Map.Entry<Integer, String> element : availableItems.entrySet()) {
             IShopElement shopElement = ShopItemRegistry.getItem(element.getValue());
             if(shopElement == null) {
@@ -103,13 +105,23 @@ public class InventoryBuilder {
             if(shopElement instanceof ItemElement) {
                 ItemElement itemElement = (ItemElement) shopElement;
                 ItemMeta itemMeta = stack.getItemMeta();
-                itemMeta.setLore(Collections.singletonList("Price: " + itemElement.getPrice()));
+                List<String> lore = new ArrayList<>();
+                if(discount != 1F) {
+                    lore.add("Discount: " + (float)Math.round((1f - discount) * 1000) / 10 + "%");
+                }
+                lore.add("Price: " + itemElement.getPrice() * discount);
+                itemMeta.setLore(lore);
                 stack.setItemMeta(itemMeta);
             }
             if(shopElement instanceof ServiceElement) {
                 ServiceElement serviceElement = (ServiceElement) shopElement;
                 ItemMeta itemMeta = stack.getItemMeta();
-                itemMeta.setLore(Collections.singletonList("Price: " + serviceElement.getPrice()));
+                List<String> lore = new ArrayList<>();
+                if(discount != 1F) {
+                    lore.add("Discount: " + (float)Math.round((1f - discount) * 1000) / 10 + "%");
+                }
+                lore.add("Price: " + serviceElement.getPrice() * discount);
+                itemMeta.setLore(lore);
                 stack.setItemMeta(itemMeta);
             }
             ItemStatModifierComponent.markItemAsUndroppable(stack);

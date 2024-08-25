@@ -160,7 +160,7 @@ public class GameInstance {
         return isDestroyed;
     }
     
-    public void healCore(Player player, String teamName, int price) {
+    public void healCore(Player player, String teamName, float price) {
         IModifiableTeam team = teamData.get(teamName);
         if(team == null) return;
         if(team.getCoreInstance() == null) return;

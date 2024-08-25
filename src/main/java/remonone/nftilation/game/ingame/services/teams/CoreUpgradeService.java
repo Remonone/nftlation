@@ -25,28 +25,29 @@ public class CoreUpgradeService implements IPurchasableService {
     }
 
     @Override
-    public void OnPurchase(Player buyer, int price) {
+    public void OnPurchase(Player buyer, float price) {
         ITeam team = PlayerUtils.getTeamFromPlayer(buyer);
         if(team == null) return;
         int currentLevel = (Integer) team.getParameters().getOrDefault(PropertyConstant.TEAM_CORE_BLOCK, 0);
-        if(!NestedObjectFetcher.containsExactLevelForPath(MetaConstants.META_UPGRADES_CORE, currentLevel + 1, MetaConfig.getInstance().getUpgrades())) {
+        if(!NestedObjectFetcher.containsExactLevelForPath(MetaConstants.META_UPGRADES_CORE, ++currentLevel, MetaConfig.getInstance().getUpgrades())) {
             return;
         }
         if(!PlayerUtils.tryWithdrawTokens(buyer, price, OnTokenTransactionEvent.TransactionType.PURCHASE)) {
             buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
             return;
         }
-        String nextLevelMaterial = (String) NestedObjectFetcher.getNestedObject(MetaConstants.META_UPGRADES_CORE, MetaConfig.getInstance().getUpgrades(), currentLevel + 1);
-        team.getParameters().put(PropertyConstant.TEAM_CORE_BLOCK, currentLevel + 1);
+        String nextLevelMaterial = (String) NestedObjectFetcher.getNestedObject(MetaConstants.META_UPGRADES_CORE, MetaConfig.getInstance().getUpgrades(), currentLevel);
+        team.getParameters().put(PropertyConstant.TEAM_CORE_BLOCK, currentLevel);
         Material material = Material.getMaterial(nextLevelMaterial);
         Vector corePos = team.getTeamSpawnPoint().getCoreCenter();
         Location location = new Location(buyer.getWorld(), corePos.getX(), corePos.getY(), corePos.getZ());
         location.getBlock().setType(material);
         String playerName = Store.getInstance().getDataInstance().FindPlayerByName(buyer.getUniqueId()).getData().getLogin();
+        int finalCurrentLevel = currentLevel;
         team.getPlayers().forEach(playerModel -> {
             Player player = playerModel.getReference();
             player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, .8f, .6f);
-            player.sendMessage(ChatColor.WHITE + playerName + ChatColor.GOLD + MessageConstant.TEAM_UPGRADE + MessageConstant.TEAM_UPGRADE_CORE + " " + currentLevel);
+            player.sendMessage(ChatColor.WHITE + playerName + ChatColor.GOLD + MessageConstant.TEAM_UPGRADE + MessageConstant.TEAM_UPGRADE_CORE + " " + finalCurrentLevel);
         });
     }
 }

@@ -21,23 +21,24 @@ public class PassiveIncomeUpgrade implements IPurchasableService {
     }
 
     @Override
-    public void OnPurchase(Player buyer, int price) {
+    public void OnPurchase(Player buyer, float price) {
         ITeam team = PlayerUtils.getTeamFromPlayer(buyer);
         if(team == null) return;
         int currentLevel = (Integer) team.getParameters().getOrDefault(PropertyConstant.TEAM_PASSIVE_INCOME, 0);
-        if(!NestedObjectFetcher.containsExactLevelForPath(MetaConstants.META_UPGRADES_PASSIVE, currentLevel + 1, MetaConfig.getInstance().getUpgrades())) {
+        if(!NestedObjectFetcher.containsExactLevelForPath(MetaConstants.META_UPGRADES_PASSIVE, ++currentLevel, MetaConfig.getInstance().getUpgrades())) {
             return;
         }
         if(!PlayerUtils.tryWithdrawTokens(buyer, price, OnTokenTransactionEvent.TransactionType.PURCHASE)) {
             buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
             return;
         }
-        team.getParameters().put(PropertyConstant.TEAM_PASSIVE_INCOME, currentLevel + 1);
+        team.getParameters().put(PropertyConstant.TEAM_PASSIVE_INCOME, currentLevel);
         String playerName = Store.getInstance().getDataInstance().FindPlayerByName(buyer.getUniqueId()).getData().getLogin();
+        int finalCurrentLevel = currentLevel;
         team.getPlayers().forEach(playerModel -> {
             Player player = playerModel.getReference();
             player.playSound(player.getLocation(), Sound.ITEM_SHIELD_BREAK, 1f, 2f);
-            player.sendMessage(ChatColor.WHITE + playerName + ChatColor.GOLD + MessageConstant.TEAM_UPGRADE + MessageConstant.TEAM_UPGRADE_PASSIVE_INCOME + " " + currentLevel);
+            player.sendMessage(ChatColor.WHITE + playerName + ChatColor.GOLD + MessageConstant.TEAM_UPGRADE + MessageConstant.TEAM_UPGRADE_PASSIVE_INCOME + " " + finalCurrentLevel);
             PlayerUtils.updateShopInventoryForPlayer(player);
         });
     }

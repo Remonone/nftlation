@@ -23,11 +23,11 @@ public class ResourceIncomeService implements IPurchasableService {
     }
 
     @Override
-    public void OnPurchase(Player buyer, int price) {
+    public void OnPurchase(Player buyer, float price) {
         ITeam team = PlayerUtils.getTeamFromPlayer(buyer);
         if(team == null) return;
         Integer currentLevel = (Integer) team.getParameters().getOrDefault(PropertyConstant.TEAM_RESOURCE_INCOME, 0);
-        if(!NestedObjectFetcher.containsExactLevelForPath(MetaConstants.META_UPGRADES_RESOURCE, currentLevel + 1, MetaConfig.getInstance().getUpgrades())) {
+        if(!NestedObjectFetcher.containsExactLevelForPath(MetaConstants.META_UPGRADES_RESOURCE, ++currentLevel, MetaConfig.getInstance().getUpgrades())) {
             return;
         }
         if(!PlayerUtils.tryWithdrawTokens(buyer, price, OnTokenTransactionEvent.TransactionType.PURCHASE)) {
@@ -35,12 +35,13 @@ public class ResourceIncomeService implements IPurchasableService {
             return;
         }
         Map<String, Object> params = team.getParameters();
-        params.put(PropertyConstant.TEAM_RESOURCE_INCOME, currentLevel + 1);
+        params.put(PropertyConstant.TEAM_RESOURCE_INCOME, currentLevel);
         String playerName = Store.getInstance().getDataInstance().FindPlayerByName(buyer.getUniqueId()).getData().getLogin();
+        Integer finalCurrentLevel = currentLevel;
         team.getPlayers().forEach(playerModel -> {
             Player player = playerModel.getReference();
             player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GOLD, 1f, 1f);
-            player.sendMessage(ChatColor.WHITE + playerName + ChatColor.GOLD + MessageConstant.TEAM_UPGRADE + MessageConstant.TEAM_UPGRADE_RESOURCE_INCOME + " " + currentLevel);
+            player.sendMessage(ChatColor.WHITE + playerName + ChatColor.GOLD + MessageConstant.TEAM_UPGRADE + MessageConstant.TEAM_UPGRADE_RESOURCE_INCOME + " " + finalCurrentLevel);
             PlayerUtils.updateShopInventoryForPlayer(player);
         });
     }

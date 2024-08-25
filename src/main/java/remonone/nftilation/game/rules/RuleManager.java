@@ -33,6 +33,7 @@ public class RuleManager {
         inGameRules.put(PropertyConstant.RULE_IMMINENT_DEATH, false);
         inGameRules.put(PropertyConstant.RULE_PLAYERS_ABLE_TO_MOVE, true);
         inGameRules.put(PropertyConstant.RULE_GAME_IS_RUNNING, true);
+        inGameRules.put(PropertyConstant.RULE_PRICE_SCALE, 1F);
     }
     
     public Object getRuleOrDefault(String rule, Object defaultValue) {

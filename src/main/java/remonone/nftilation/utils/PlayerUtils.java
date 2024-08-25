@@ -126,6 +126,7 @@ public class PlayerUtils {
     }
 
     public static void updateShopInventoryForPlayer(Player player) {
+        if(getModelFromPlayer(player) == null) return;
         if(player.getOpenInventory() == null) return; // TODO: check if actually null on closed
         InventoryView view = player.getOpenInventory();
         String inventoryName = view.getTopInventory().getName();

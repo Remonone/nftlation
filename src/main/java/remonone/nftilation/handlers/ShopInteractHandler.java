@@ -14,12 +14,14 @@ import remonone.nftilation.Store;
 import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
+import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.services.IPurchasableService;
 import remonone.nftilation.game.ingame.services.ServiceContainer;
 import remonone.nftilation.game.inventory.InventoryBuilder;
+import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.shop.content.CategoryElement;
 import remonone.nftilation.game.shop.content.IShopElement;
 import remonone.nftilation.game.shop.content.ItemElement;
@@ -33,7 +35,7 @@ public class ShopInteractHandler implements Listener {
     public void onShopInteract(final InventoryClickEvent e) {
         if(!Store.getInstance().getGameStage().getStage().equals(Stage.IN_GAME)) return;
         
-        if(!e.getInventory().getName().equals(NameConstants.SHOP_TAB)) return;
+        if(!e.getInventory().getName().startsWith(NameConstants.SHOP_TAB)) return;
         if(!(e.getInventory().getHolder() instanceof Player)) return;
         Player player = (Player) e.getInventory().getHolder();
         ItemStack item = e.getCurrentItem();
@@ -70,13 +72,15 @@ public class ShopInteractHandler implements Listener {
             Logger.error("Service name is incorrect! Provided: " + serviceName);
             return;
         }
-        service.OnPurchase(player, price);
+        Float discount = (Float) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_PRICE_SCALE, 1F);
+        service.OnPurchase(player, price * discount);
     }
 
     private void HandleItemPurchase(Player player, ItemStack item, int price) {
         PlayerInteractComponent playerInteract = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
+        Float discount = (Float) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_PRICE_SCALE, 1F);
         if(playerInteract == null) return;
-        if (!playerInteract.adjustPlayerTokens(player, -price, OnTokenTransactionEvent.TransactionType.PURCHASE)) {
+        if (!playerInteract.adjustPlayerTokens(player, -price * discount, OnTokenTransactionEvent.TransactionType.PURCHASE)) {
             player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
             return;
         }

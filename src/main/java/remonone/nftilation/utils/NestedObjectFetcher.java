@@ -37,8 +37,9 @@ public class NestedObjectFetcher {
         int index = path.indexOf('.');
         Map<String, Object> values = (Map<String, Object>) scope;
         if(index == -1) {
-            if(!values.containsKey("level_base")) return false;
-            return values.containsKey(String.valueOf(i));
+            Map<String, Object> value = (Map<String, Object>) values.get(path);
+            if(!value.containsKey("level_base")) return false;
+            return value.containsKey(String.valueOf(i));
         }
         String firstPart = path.substring(0, index);
         for(Map.Entry<String, Object> entry : values.entrySet()) {

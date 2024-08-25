@@ -166,7 +166,7 @@ public class OnEntityDieHandler implements Listener {
                 if((boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_INVENTORY_AUTO_CLEAR, true))
                     Role.refillInventoryWithItems(model);
             }
-        }, (long) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_RESPAWN_TIMER, 5 * DataConstants.TICKS_IN_SECOND));
+        }, (long) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_RESPAWN_TIMER, (long) 5 * DataConstants.TICKS_IN_SECOND));
     }
     
     

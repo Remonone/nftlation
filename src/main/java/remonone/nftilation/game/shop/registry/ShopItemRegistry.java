@@ -63,5 +63,6 @@ public class ShopItemRegistry {
 
     public static void clearRegister() {
         itemRegistry.clear();
+        expandableRegistry.clear();
     }
 }

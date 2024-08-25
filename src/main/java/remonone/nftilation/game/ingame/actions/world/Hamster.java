@@ -25,6 +25,7 @@ import static org.bukkit.Bukkit.getServer;
 public class Hamster implements IAction, Listener {
     @Override
     public void Init(Map<String, Object> params) {
+        Logger.log("Starting an " + getClass().getSimpleName() + " event...");
         Location location = ConfigManager.getInstance().getCenterLocation();
         if(!location.getChunk().load()) {
             Logger.error("Chunk wasn't loaded properly!");

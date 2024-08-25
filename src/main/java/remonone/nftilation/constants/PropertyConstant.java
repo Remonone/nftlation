@@ -23,6 +23,7 @@ public class PropertyConstant {
     public static final String RULE_IMMINENT_DEATH = "imminentDeath";
     public static final String RULE_PLAYERS_ABLE_TO_MOVE = "playersAbleToMove";
     public static final String RULE_GAME_IS_RUNNING = "gameIsRunning";
+    public static final String RULE_PRICE_SCALE = "priceScale";
     
     public static final String NBT_ROLE = "role-name";
     public static final String NBT_RUNE = "rune-name";

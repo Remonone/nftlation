@@ -42,14 +42,9 @@ public class PhaseUpdateHandler implements Listener {
         cache.clear();
         switch (stage) {
             case 1: {
-                BukkitRunnable runnable = new BukkitRunnable() {
-                    public void run() {
-                        ActionContainer.InitAction(ActionType.CHECKER, new HashMap<>());
-                    }
-                };
                 int checkerDelay = 10 * DataConstants.TICKS_IN_MINUTE;
-                runnable.runTaskLater(Nftilation.getInstance(), checkerDelay);
-                cache.add(new TaskContainer(runnable, System.currentTimeMillis(), checkerDelay, 0));
+                BukkitRunnable task = getInitiatedAction(ActionType.CHECKER, checkerDelay);
+                cache.add(new TaskContainer(task, System.currentTimeMillis(), checkerDelay, 0));
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.FIRST_PHASE_TITLE, MessageConstant.FIRST_PHASE_SUBTITLE, 10, 80, 10);
                     sendMessagesToPlayer(player,
@@ -61,6 +56,15 @@ public class PhaseUpdateHandler implements Listener {
             case 2: {
                 RuleManager.getInstance().setRule(PropertyConstant.RULE_AVAILABLE_TIER, 2);
                 SummonDiamonds();
+                int deliriumDelay = 10 * DataConstants.TICKS_IN_SECOND;
+                BukkitRunnable delirium = getInitiatedAction(ActionType.MASSIVE_DELIRIUM, deliriumDelay);
+                cache.add(new TaskContainer(delirium, System.currentTimeMillis(), deliriumDelay, 0));
+                int delay = 10 * DataConstants.TICKS_IN_MINUTE;
+                BukkitRunnable runnable = getInitiatedAction(ActionType.MONEY_RAIN, delay);
+                cache.add(new TaskContainer(runnable, System.currentTimeMillis(), delay, 0));
+                int summerDelay = 5 * DataConstants.TICKS_IN_MINUTE;
+                BukkitRunnable summer = getInitiatedAction(ActionType.HOT_SUMMER, summerDelay);
+                cache.add(new TaskContainer(summer, System.currentTimeMillis(), summerDelay, 0));
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.SECOND_PHASE_TITLE, MessageConstant.SECOND_PHASE_SUBTITLE, 10, 80, 10);
                     sendMessagesToPlayer(player,
@@ -79,12 +83,10 @@ public class PhaseUpdateHandler implements Listener {
                             MessageConstant.THIRD_PHASE_DESCRIPTION_1,
                             MessageConstant.THIRD_PHASE_DESCRIPTION_2);
                 }
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        ActionContainer.InitAction(ActionType.ROBOSYBIL_ATTACK, new HashMap<>());
-                    }
-                }.runTaskLater(Nftilation.getInstance(), 105);
+                getInitiatedAction(ActionType.ROBOSYBIL_ATTACK, 105);
+                int delay = 15 * DataConstants.TICKS_IN_MINUTE;
+                BukkitRunnable runnable = getInitiatedAction(ActionType.TOTAL_SALE, delay);
+                cache.add(new TaskContainer(runnable, System.currentTimeMillis(), delay, 0));
                 break;
             }
             case 4: {
@@ -102,15 +104,12 @@ public class PhaseUpdateHandler implements Listener {
                         ActionContainer.InitAction(ActionType.HAMSTER, new HashMap<>());
                     }
                 }.runTaskLater(Nftilation.getInstance(), 105);
-                BukkitRunnable runnable = new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        ActionContainer.InitAction(ActionType.CRYPT_DROP, new HashMap<>());
-                    }
-                };
                 int cryptDropDelay = 10 * DataConstants.TICKS_IN_MINUTE;
-                runnable.runTaskLater(Nftilation.getInstance(), cryptDropDelay);
-                cache.add(new TaskContainer(runnable, System.currentTimeMillis(), cryptDropDelay, 0));
+                BukkitRunnable cryptDrop = getInitiatedAction(ActionType.CRYPT_DROP, cryptDropDelay);
+                cache.add(new TaskContainer(cryptDrop, System.currentTimeMillis(), cryptDropDelay, 0));
+                int deliriumDelay = 20 * DataConstants.TICKS_IN_MINUTE;
+                BukkitRunnable massiveDelirium = getInitiatedAction(ActionType.MASSIVE_DELIRIUM, deliriumDelay);
+                cache.add(new TaskContainer(massiveDelirium, System.currentTimeMillis(), deliriumDelay, 0));
                 break;
             }
             case 5: {
@@ -213,5 +212,16 @@ public class PhaseUpdateHandler implements Listener {
         for(String message : messages) {
             player.sendMessage(MessageConstant.LINE_STARTED + message);
         }
+    }
+    
+    private BukkitRunnable getInitiatedAction(ActionType type, long delay) {
+        BukkitRunnable runnable =  new BukkitRunnable() {
+            @Override
+            public void run() {
+                ActionContainer.InitAction(type, new HashMap<>());
+            }
+        };
+        runnable.runTaskLater(Nftilation.getInstance(), delay);
+        return runnable;
     }
 }

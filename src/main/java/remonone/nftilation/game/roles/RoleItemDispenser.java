@@ -45,7 +45,7 @@ public class RoleItemDispenser {
         ITeam team = GameInstance.getInstance().getTeam(teamName);
         if(team == null) return new ItemStack(Material.AIR);
         Map<String, Object> teamParams = team.getParameters();
-        int level = (Integer) teamParams.getOrDefault(PropertyConstant.TEAM_UTILITY_ITEM_LEVEL, 1);
+        int level = (Integer) teamParams.getOrDefault(PropertyConstant.TEAM_UTILITY_ITEM_LEVEL, 0);
         String materialName = (String)NestedObjectFetcher.getNestedObject(MetaConstants.META_UPGRADES_UTILITY + type.name, MetaConfig.getInstance().getUpgrades(), level);
         if(StringUtils.isBlank(materialName)) return new ItemStack(Material.AIR);
         Material material = Material.getMaterial(materialName);

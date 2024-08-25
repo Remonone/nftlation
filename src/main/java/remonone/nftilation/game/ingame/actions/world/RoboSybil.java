@@ -22,6 +22,7 @@ import java.util.Map;
 public class RoboSybil implements IAction {
     @Override
     public void Init(Map<String, Object> params) {
+        Logger.log("Starting an " + getClass().getSimpleName() + " event...");
         List<Location> spawnPoints = ConfigManager.getInstance().getRoboSybilsSpawnList();
         spawnPoints.forEach(spawnPoint -> {
             spawnPoint.getChunk().load();

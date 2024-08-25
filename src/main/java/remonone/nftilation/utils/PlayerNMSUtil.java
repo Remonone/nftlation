@@ -20,34 +20,36 @@ public class PlayerNMSUtil {
             return;
         }
         GameProfile profile = ((CraftPlayer)p).getProfile();
+        profile.getProperties().removeAll("textures");
+        profile.getProperties().put("textures", new Property("textures", texture, signature));
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.hidePlayer(Nftilation.getInstance(), p);
-            profile.getProperties().removeAll("textures");
-            profile.getProperties().put("textures", new Property("textures", texture, signature));
             player.showPlayer(Nftilation.getInstance(), p);
         }
     }
 
     @SuppressWarnings("deprecation")
     public static void changePlayerName(Player p, String newName){
+        GameProfile gp = ((CraftPlayer)p).getProfile();
+        try {
+            Field nameField = GameProfile.class.getDeclaredField("name");
+            nameField.setAccessible(true);
+
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(nameField, nameField.getModifiers() & ~Modifier.FINAL);
+            if(newName.length() > 16) newName = newName.substring(0, 16);
+            nameField.set(gp, ChatColor.translateAlternateColorCodes('&', newName));
+        } catch (IllegalAccessException | NoSuchFieldException ex) {
+            throw new IllegalStateException(ex);
+        }
         for(Player pl : Bukkit.getOnlinePlayers()) {
             if (pl == p) continue;
             //CHANGES THE PLAYER'S GAME PROFILE
-            GameProfile gp = ((CraftPlayer)p).getProfile();
+            
             pl.hidePlayer(p);
-            try {
-                Field nameField = GameProfile.class.getDeclaredField("name");
-                nameField.setAccessible(true);
-
-                Field modifiersField = Field.class.getDeclaredField("modifiers");
-                modifiersField.setAccessible(true);
-                modifiersField.setInt(nameField, nameField.getModifiers() & ~Modifier.FINAL);
-                if(newName.length() > 16) newName = newName.substring(0, 16);
-                nameField.set(gp, ChatColor.translateAlternateColorCodes('&', newName));
-                pl.showPlayer(p);
-            } catch (IllegalAccessException | NoSuchFieldException ex) {
-                throw new IllegalStateException(ex);
-            }
+            pl.showPlayer(p);
+            
         }
 
     }

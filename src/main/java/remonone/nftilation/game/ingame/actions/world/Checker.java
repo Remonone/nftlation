@@ -26,6 +26,7 @@ import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.IAction;
 import remonone.nftilation.utils.EntityList;
+import remonone.nftilation.utils.Logger;
 
 import java.util.*;
 
@@ -39,6 +40,7 @@ public class Checker implements IAction, Listener {
     
     @Override
     public void Init(Map<String, Object> params) {
+        Logger.log("Starting an " + getClass().getSimpleName() + " event...");
         teamsCompletion = new HashMap<>();
         List<TeamData> teams = Store.getInstance().getDataInstance().getTeamData();
         for(TeamData data : teams) {

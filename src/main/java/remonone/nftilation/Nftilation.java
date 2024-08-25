@@ -12,10 +12,7 @@ import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
 import remonone.nftilation.game.ingame.actions.donate.*;
-import remonone.nftilation.game.ingame.actions.world.Checker;
-import remonone.nftilation.game.ingame.actions.world.CryptDrop;
-import remonone.nftilation.game.ingame.actions.world.Hamster;
-import remonone.nftilation.game.ingame.actions.world.RoboSybil;
+import remonone.nftilation.game.ingame.actions.world.*;
 import remonone.nftilation.game.lobby.LobbyDisposer;
 import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.meta.RoleInfo;
@@ -76,6 +73,11 @@ public final class Nftilation extends JavaPlugin {
         ActionContainer.registerAction(ActionType.HAMSTER, new Hamster());
         ActionContainer.registerAction(ActionType.ROBOSYBIL_ATTACK, new RoboSybil());
         ActionContainer.registerAction(ActionType.CHECKER, new Checker());
+        ActionContainer.registerAction(ActionType.MONEY_RAIN, new MoneyRain());
+        ActionContainer.registerAction(ActionType.TOTAL_SALE, new TotalSale());
+        ActionContainer.registerAction(ActionType.HOT_SUMMER, new HotSummer());
+        ActionContainer.registerAction(ActionType.MASSIVE_DELIRIUM, new MassiveDelirium());
+        
         ActionContainer.registerAction(ActionType.INSPIRATION, new Inspiration());
         ActionContainer.registerAction(ActionType.AIRSTRIKE, new AirStrike());
         ActionContainer.registerAction(ActionType.AIR_DROP, new AirDrop());
@@ -132,6 +134,7 @@ public final class Nftilation extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new OnChunkUnloadHandler(), this);
         getServer().getPluginManager().registerEvents(new OnPlayerKillHandler(), this);
         getServer().getPluginManager().registerEvents(new OnTokenGainHandler(), this);
+        getServer().getPluginManager().registerEvents(new MoneyRainPickupHandler(), this);
     }
     
     private void InitCommands() {
