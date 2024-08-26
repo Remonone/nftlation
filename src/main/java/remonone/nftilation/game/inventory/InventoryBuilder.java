@@ -135,22 +135,24 @@ public class InventoryBuilder {
         Map<Integer, String> availableItems = new HashMap<>();
         int count = filteredIds.size();
         int slots = 9;
-        int center = 4;
 
-        if(count == 1) {
-            availableItems.put(slots + center, filteredIds.get(0));
+        int spacing = 1;
+
+        for(int i = 2; i <= 4; i++) {
+            int reservedSpace = count + (count - 1) * (i - 1);
+            int remaining = slots - reservedSpace;
+            if(remaining < 0) break;
+            spacing = i;
+            if(remaining % 2 == 0) break;
         }
-        if(count == 2) {
-            availableItems.put(slots + center - 1, filteredIds.get(0));
-            availableItems.put(slots + center + 1, filteredIds.get(1));
+
+        int finalReservation = count + (count - 1) * (spacing - 1);
+        int offset = (slots - finalReservation) / 2;
+
+        for(int i = 0; i < count; i++) {
+            availableItems.put(offset + i * spacing, filteredIds.get(i));
         }
-        if(count > 2) {
-            int gap = Math.round((float)slots / (count + 1));
-            int startPosition = center - (count / 2) * gap;
-            for(int i = 0; i < count; i++) {
-                availableItems.put(slots + startPosition + i * gap, filteredIds.get(i));
-            }
-        }
+
         return availableItems;
     }
 
