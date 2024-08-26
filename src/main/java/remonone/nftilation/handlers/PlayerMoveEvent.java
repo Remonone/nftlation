@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class PlayerMoveEvent implements Listener {
 
-    public static RuleManager rules = RuleManager.getInstance();
+    public final static RuleManager rules = RuleManager.getInstance();
 
     @EventHandler
     public void onPlayerMove(final org.bukkit.event.player.PlayerMoveEvent event) {

@@ -5,6 +5,7 @@ import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.utils.NestedObjectFetcher;
 
 import java.util.Map;
@@ -23,8 +24,8 @@ public class GreedRune extends Rune {
     @EventHandler
     public void onPlayerAward(OnTokenTransactionEvent e) {
         if(e.isCancelled()
-                || e.getTransactionType().equals(OnTokenTransactionEvent.TransactionType.PURCHASE)
-                || e.getTransactionType().equals(OnTokenTransactionEvent.TransactionType.TRANSFER)) {
+                || e.getTransactionType().equals(TransactionType.PURCHASE)
+                || e.getTransactionType().equals(TransactionType.TRANSFER)) {
             return;
         }
         PlayerModel model = e.getPlayer();

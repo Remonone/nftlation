@@ -10,10 +10,10 @@ import remonone.nftilation.Store;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
-import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.ingame.services.IPurchasableService;
 import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.models.ITeam;
+import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.utils.NestedObjectFetcher;
 import remonone.nftilation.utils.PlayerUtils;
 
@@ -32,7 +32,7 @@ public class CoreUpgradeService implements IPurchasableService {
         if(!NestedObjectFetcher.containsExactLevelForPath(MetaConstants.META_UPGRADES_CORE, ++currentLevel, MetaConfig.getInstance().getUpgrades())) {
             return;
         }
-        if(!PlayerUtils.tryWithdrawTokens(buyer, price, OnTokenTransactionEvent.TransactionType.PURCHASE)) {
+        if(!PlayerUtils.tryWithdrawTokens(buyer, price, TransactionType.PURCHASE)) {
             buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
             return;
         }

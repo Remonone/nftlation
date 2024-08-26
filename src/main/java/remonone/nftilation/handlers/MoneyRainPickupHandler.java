@@ -11,9 +11,9 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.NameConstants;
-import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.utils.PlayerUtils;
 
 public class MoneyRainPickupHandler implements Listener {
@@ -35,7 +35,7 @@ public class MoneyRainPickupHandler implements Listener {
         PlayerInteractComponent component = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
         if(component == null) return;
         int amount = stack.getAmount();
-        component.adjustPlayerTokens(player, moneyChip * amount, OnTokenTransactionEvent.TransactionType.RESOURCE_GAIN);
+        component.adjustPlayerTokens(player, moneyChip * amount, TransactionType.RESOURCE_GAIN);
         player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 2f);
         e.setCancelled(true);
         item.remove();

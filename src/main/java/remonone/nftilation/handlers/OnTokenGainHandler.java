@@ -10,6 +10,7 @@ import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.utils.NestedObjectFetcher;
 
 import java.util.Map;
@@ -18,7 +19,7 @@ public class OnTokenGainHandler implements Listener {
     
     @EventHandler(priority = EventPriority.HIGH)
     public void onTransactionEvent(OnTokenTransactionEvent event) {
-        if(!event.getTransactionType().equals(OnTokenTransactionEvent.TransactionType.RESOURCE_GAIN)) {
+        if(!event.getTransactionType().equals(TransactionType.RESOURCE_GAIN)) {
             return;
         }
         float initialTokens = event.getTokensAmount();

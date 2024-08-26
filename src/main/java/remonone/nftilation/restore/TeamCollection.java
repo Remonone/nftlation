@@ -1,18 +1,23 @@
 package remonone.nftilation.restore;
 
-import org.bukkit.ChatColor;
+import lombok.Builder;
+import lombok.Getter;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import remonone.nftilation.config.ConfigManager;
-import remonone.nftilation.config.TeamSpawnPoint;
-import remonone.nftilation.game.ingame.core.Core;
+import org.bukkit.configuration.serialization.SerializableAs;
+import org.bukkit.entity.Player;
+import remonone.nftilation.Store;
+import remonone.nftilation.application.models.PlayerData;
+import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.models.ITeam;
-import remonone.nftilation.game.models.TeamImpl;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
+@Getter
+@Builder
+@SerializableAs("TeamCollection")
 public class TeamCollection implements ConfigurationSerializable, Cloneable {
 
     private final static String ID = "id";
@@ -22,23 +27,47 @@ public class TeamCollection implements ConfigurationSerializable, Cloneable {
     private final static String TEAM_COLOR = "teamColor";
     private final static String TEAM_ALIVE = "teamAlive";
     private final static String TEAM_ACTIVE = "teamActive";
+    private final static String TEAM_PLAYERS = "teamPlayers";
 
-    private final ITeam team;
+
+    private final String id;
+    private final List<String> playerNames;
+    private final int coreHealth;
+    private final String teamPointId;
+    private final String teamName;
+    private final char teamColor;
+    private final boolean teamAlive;
+    private final boolean teamActive;
 
     public TeamCollection(ITeam team) {
-        this.team = team;
+        this.id = team.getTeamID().toString();
+        this.coreHealth = team.getCoreData().getHealth();
+        this.teamPointId = team.getTeamSpawnPoint().getId();
+        this.teamName = team.getTeamName();
+        this.teamColor = team.getTeamColor();
+        this.teamAlive = team.isCoreAlive();
+        this.teamActive = team.isTeamActive();
+        DataInstance instance = Store.getInstance().getDataInstance();
+        this.playerNames = team.getPlayers().stream()
+                .map(PlayerModel::getReference)
+                .map(Player::getUniqueId)
+                .map(instance::FindPlayerByName)
+                .map(DataInstance.PlayerInfo::getData)
+                .map(PlayerData::getLogin)
+                .collect(Collectors.toList());
+
     }
 
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> info = new HashMap<>();
-        info.put(ID, team.getTeamID());
-        info.put(CORE_HEALTH, team.getCoreData().getHealth());
-        info.put(TEAM_POINT_ID, team.getTeamSpawnPoint().getId());
-        info.put(TEAM_NAME, team.getTeamName());
-        info.put(TEAM_COLOR, team.getTeamColor());
-        info.put(TEAM_ACTIVE, team.isTeamActive());
-        info.put(TEAM_ALIVE, team.isCoreAlive());
+        info.put(ID, getId());
+        info.put(CORE_HEALTH, getCoreHealth());
+        info.put(TEAM_POINT_ID, getTeamPointId());
+        info.put(TEAM_NAME, getTeamName());
+        info.put(TEAM_COLOR, getTeamColor());
+        info.put(TEAM_ACTIVE, isTeamActive());
+        info.put(TEAM_ALIVE, isTeamAlive());
         return info;
     }
 
@@ -48,14 +77,15 @@ public class TeamCollection implements ConfigurationSerializable, Cloneable {
         char teamColor = '\0';
         boolean teamAlive = false;
         boolean teamActive = false;
-        TeamSpawnPoint point = null;
+        String point = "";
+        List<String> players;
         if(!map.containsKey(ID)) {
             Logger.error("Failed deserialization of team!");
             return null;
         }
         id = (UUID) map.get(ID);
         if(map.containsKey(TEAM_POINT_ID)) {
-            point = ConfigManager.getInstance().getTeamSpawnList().stream().filter(temp -> temp.getId().equals((String)map.get(TEAM_POINT_ID))).findFirst().orElse(null);
+            point = (String)map.get(TEAM_POINT_ID);
         }
         if(map.containsKey(TEAM_NAME)) {
             name = (String) map.get(TEAM_NAME);
@@ -69,13 +99,23 @@ public class TeamCollection implements ConfigurationSerializable, Cloneable {
         if(map.containsKey(TEAM_ACTIVE)) {
             teamActive = (boolean) map.get(TEAM_ACTIVE);
         }
-        ITeam team = TeamImpl.builder()
+        if(map.containsKey(TEAM_PLAYERS)) {
+            players = (List<String>) map.get(TEAM_PLAYERS);
+        } else {
+            players = new ArrayList<>();
+        }
+        return TeamCollection.builder()
+                .id(id.toString())
                 .teamName(name)
-                .isTeamActive(teamActive)
-                .isCoreAlive(teamAlive)
-                .teamColor(ChatColor.getByChar(teamColor))
-                .spawnPoint(point)
+                .teamColor(teamColor)
+                .teamPointId(point)
+                .teamActive(teamActive)
+                .teamAlive(teamAlive)
+                .playerNames(players)
                 .build();
+    }
+
+    public static TeamCollection getCollectionFromTeam(ITeam team) {
         return new TeamCollection(team);
     }
 

@@ -15,12 +15,11 @@ import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
-import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
-import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.Collections;
@@ -79,12 +78,12 @@ public class TokenTransferCommand implements CommandExecutor, TabCompleter {
             commandSender.sendMessage(MessageConstant.TOKEN_TRANSFER_INCORRECT_STAGE);
             return true;
         }
-        boolean result = interactComponent.adjustPlayerTokens(model, -tokenToTransfer, OnTokenTransactionEvent.TransactionType.TRANSFER);
+        boolean result = interactComponent.adjustPlayerTokens(model, -tokenToTransfer, TransactionType.TRANSFER);
         if(!result) {
             commandSender.sendMessage(MessageConstant.TOKEN_TRANSFER_INSUFFICIENT_AMOUNT);
             return true;
         }
-        interactComponent.adjustPlayerTokens(recipientModel, tokenToTransfer, OnTokenTransactionEvent.TransactionType.TRANSFER);
+        interactComponent.adjustPlayerTokens(recipientModel, tokenToTransfer, TransactionType.TRANSFER);
         return true;
     }
 
@@ -94,10 +93,10 @@ public class TokenTransferCommand implements CommandExecutor, TabCompleter {
         if(!Store.getInstance().getGameStage().getStage().equals(Stage.IN_GAME)) return Collections.emptyList();
         if(!(commandSender instanceof Player)) return Collections.emptyList();
         Player player = (Player) commandSender;
-        DataInstance dataInstance = Store.getInstance().getDataInstance();
-        if(!dataInstance.FindPlayerByName(player.getUniqueId()).getData().getRole().equals(PlayerRole.PLAYER)) return Collections.emptyList();
-        if(strings.length > 1) return Collections.emptyList();
         PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        if(model == null) return Collections.emptyList();
+        if(strings.length != 0 && !strings[0].isEmpty()) return Collections.emptyList();
+
         String team = (String)model.getParameters().get(PropertyConstant.PLAYER_TEAM_NAME);
         if(StringUtils.isBlank(team)) return Collections.emptyList();
         List<PlayerModel> teammates = GameInstance.getInstance().getTeam(team).getPlayers();

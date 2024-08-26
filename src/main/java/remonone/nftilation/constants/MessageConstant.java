@@ -41,7 +41,7 @@ public class MessageConstant {
     public static final String FIRST_PHASE_DESCRIPTION_1 = ChatColor.RED + "Первая стадия: ";
     public static final String FIRST_PHASE_DESCRIPTION_2 = "Ядро нельзя атаковать.";
     public static final String SECOND_PHASE_TITLE = ChatColor.AQUA + "Вторая стадия";
-    public static final String SECOND_PHASE_SUBTITLE = "";
+    public static final String SECOND_PHASE_SUBTITLE = "Минутка терпения, десять лет комфорта";
     public static final String SECOND_PHASE_DESCRIPTION_1 = ChatColor.RED + "Вторая стадия: ";
     public static final String SECOND_PHASE_DESCRIPTION_2 = "В центре началась аномальная материализация алмазов.";
     public static final String SECOND_PHASE_DESCRIPTION_3 = "У торговца появился новый ассортимент для классов.";

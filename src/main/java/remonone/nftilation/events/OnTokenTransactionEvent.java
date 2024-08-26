@@ -6,6 +6,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.models.TransactionType;
 
 @Getter
 public class OnTokenTransactionEvent extends Event implements Cancellable {
@@ -45,12 +46,4 @@ public class OnTokenTransactionEvent extends Event implements Cancellable {
         this.cancelled = b;
     }
 
-    public enum TransactionType {
-        PURCHASE,
-        PASSIVE_GAIN,
-        RESOURCE_GAIN,
-        KILL_GAIN,
-        DESTROY_GAIN,
-        TRANSFER
-    }
 }

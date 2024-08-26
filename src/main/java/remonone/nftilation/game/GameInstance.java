@@ -15,7 +15,6 @@ import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
-import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.phase.PhaseCounter;
 import remonone.nftilation.game.roles.Role;
@@ -170,7 +169,7 @@ public class GameInstance {
         }
         PlayerInteractComponent component = (PlayerInteractComponent) getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
         if(component == null) return;
-        if(!component.adjustPlayerTokens(player, -price, OnTokenTransactionEvent.TransactionType.PURCHASE)) {
+        if(!component.adjustPlayerTokens(player, -price, TransactionType.PURCHASE)) {
             player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
             return;
         }

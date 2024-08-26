@@ -21,11 +21,11 @@ import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.OnPlayerKillPlayerEvent;
-import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.IDamageHandler;
 import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.utils.EntityDamageByPlayerLog;
@@ -80,7 +80,7 @@ public class OnEntityDieHandler implements Listener {
             Player attacker = EntityDamageByPlayerLog.getEventLogForLivingEntity(entity.getUniqueId());
             if(attacker == null) return;
             EntityDamageByPlayerLog.removeLogEvent(entity.getUniqueId());
-            component.adjustPlayerTokens(attacker, EntityHandleComponent.getEntityBounty(entity), OnTokenTransactionEvent.TransactionType.KILL_GAIN);
+            component.adjustPlayerTokens(attacker, EntityHandleComponent.getEntityBounty(entity), TransactionType.KILL_GAIN);
         }
     }
     
@@ -98,7 +98,7 @@ public class OnEntityDieHandler implements Listener {
         if(target.getHealth() - event.getFinalDamage() <= 0) {
             PlayerInteractComponent component = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
             if(component == null) return;
-            component.adjustPlayerTokens(info.attacker, EntityHandleComponent.getEntityBounty(target), OnTokenTransactionEvent.TransactionType.KILL_GAIN);
+            component.adjustPlayerTokens(info.attacker, EntityHandleComponent.getEntityBounty(target), TransactionType.KILL_GAIN);
             EntityDamageByPlayerLog.removeLogEvent(info.attacker.getUniqueId());
         } else {
             EntityDamageByPlayerLog.insertLogEvent(target, info.attacker);
@@ -114,6 +114,10 @@ public class OnEntityDieHandler implements Listener {
         }
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
         Player target = (Player) event.getEntity();
+        if(target.getHealth() - event.getFinalDamage() <= 0) {
+            event.setCancelled(true);
+            OnDeath(target);
+        }
         PlayerUtils.AttackerInfo attackerData = PlayerUtils.getAttackerPlayer(event.getDamager());
         if(attackerData == null) return;
         PlayerModel targetModel = PlayerUtils.getModelFromPlayer(target);
@@ -133,8 +137,6 @@ public class OnEntityDieHandler implements Listener {
         }
         if(event.isCancelled()) return;
         if(target.getHealth() - event.getFinalDamage() <= 0) {
-            event.setCancelled(true);
-            OnDeath(target);
             EntityDamageByPlayerLog.removeLogEvent(target.getUniqueId());
             OnPlayerKillPlayerEvent e = new OnPlayerKillPlayerEvent(attackerModel, targetModel);
             getServer().getPluginManager().callEvent(e);

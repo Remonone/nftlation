@@ -11,6 +11,7 @@ import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.game.roles.Guts;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
@@ -39,7 +40,7 @@ public class PlayerInteractComponent implements IComponent {
         }
     }
 
-    public boolean adjustPlayerTokens(Player player, float tokens, OnTokenTransactionEvent.TransactionType type) {
+    public boolean adjustPlayerTokens(Player player, float tokens, TransactionType type) {
         PlayerModel model = PlayerUtils.getModelFromPlayer(player);
         return adjustPlayerTokens(model, tokens, type);
     }
@@ -50,7 +51,7 @@ public class PlayerInteractComponent implements IComponent {
      * @param type Transaction type: GAIN, SPEND, TRANSFER
      * @return state if operation was successful
      */
-    public boolean adjustPlayerTokens(PlayerModel model, float tokens, OnTokenTransactionEvent.TransactionType type) {
+    public boolean adjustPlayerTokens(PlayerModel model, float tokens, TransactionType type) {
         if(tokens == 0) return false;
         if(model.getTokens() + tokens < 0) return false;
         OnTokenTransactionEvent e = new OnTokenTransactionEvent(type, tokens, model);
@@ -79,27 +80,27 @@ public class PlayerInteractComponent implements IComponent {
         ScoreboardHandler.updateScoreboard(model);
     }
     
-    public static boolean isPlayerAbleToUpgrade(Player player, int nextLevel) {
+    public static boolean isPlayerNotAbleToUpgrade(Player player, int nextLevel) {
         PlayerModel model = PlayerUtils.getModelFromPlayer(player);
         Map<String, Object> params = model.getParameters();
         
         if(!params.containsKey(PropertyConstant.PLAYER_LEVEL_PARAM)) {
             Logger.error("Cannot fetch upgrade level for player: " + player.getDisplayName());
-            return false;
+            return true;
         }
         if(nextLevel - (int)params.get(PropertyConstant.PLAYER_LEVEL_PARAM) != 1) {
             player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_UPGRADE_LEVEL);
-            return false;
+            return true;
         }
         if((int) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_AVAILABLE_TIER, 1) < nextLevel) {
             player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_STAGE_FOR_UPGRADE);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     public void upgradePlayer(Player player, int level) {
-        if(!isPlayerAbleToUpgrade(player, level)) return;
+        if(isPlayerNotAbleToUpgrade(player, level)) return;
         String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         PlayerModel model = instance.getPlayerModelFromTeam(teamName, player);
         Map<String, Object> params = model.getParameters();

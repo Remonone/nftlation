@@ -4,8 +4,10 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.server.v1_12_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_12_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
@@ -124,14 +126,9 @@ public class MassiveDelirium implements IAction {
                 player.die();
             }
             Logger.debug(this.duplicates.size() + "");
-            PlayerModel model = this.duplicates.get(random.nextInt(this.duplicates.size()));
-            EntityPlayer playerToCopy = ((CraftPlayer)model.getReference()).getHandle();
-            WorldServer worldServer = ((CraftWorld)this.player.getWorld()).getHandle();
-            GameProfile profileToCopy = playerToCopy.getProfile();
-            GameProfile newProfile = new GameProfile(UUID.randomUUID(), profileToCopy.getName());
-            profileToCopy.getProperties().get("textures").stream().findFirst().ifPresent(property -> newProfile.getProperties().put("textures", property));
             MinecraftServer server = ((CraftServer) getServer()).getHandle().getServer();
-            EntityPlayer newPlayer = new EntityPlayer(server, worldServer, newProfile, new PlayerInteractManager(worldServer));
+            WorldServer worldServer = ((CraftWorld)this.player.getWorld()).getHandle();
+            EntityPlayer newPlayer = createPlayer(server, worldServer);
             Location clonePos = getEmptyBlockLocation();
             newPlayer.setPosition(clonePos.getX(), clonePos.getY(), clonePos.getZ());
             newPlayer.playerConnection = new PlayerConnection(server,
@@ -141,13 +138,24 @@ public class MassiveDelirium implements IAction {
                 playerToHide.hidePlayer(Nftilation.getInstance(), newPlayer.getBukkitEntity());
             }
             this.player.showPlayer(Nftilation.getInstance(), newPlayer.getBukkitEntity());
+            server.getPlayerList().players.remove(newPlayer);
             playerClones.add(newPlayer);
+        }
+
+        private EntityPlayer createPlayer(MinecraftServer server, WorldServer worldServer) {
+            PlayerModel model = this.duplicates.get(random.nextInt(this.duplicates.size()));
+            EntityPlayer playerToCopy = ((CraftPlayer)model.getReference()).getHandle();
+            GameProfile profileToCopy = playerToCopy.getProfile();
+            GameProfile newProfile = new GameProfile(UUID.randomUUID(), profileToCopy.getName());
+            profileToCopy.getProperties().get("textures").stream().findFirst().ifPresent(property -> newProfile.getProperties().put("textures", property));
+            return new EntityPlayer(server, worldServer, newProfile, new PlayerInteractManager(worldServer));
         }
         
         private Location getEmptyBlockLocation() {
             while(true) {
-                Vector posToSpread = VectorUtils.getRandomPosInCircle(this.player.getLocation().toVector(), 10);
+                Vector posToSpread = VectorUtils.getRandomPosInSphere(this.player.getLocation().toVector(), 10);
                 Block block = this.player.getWorld().getBlockAt(posToSpread.getBlockX(), posToSpread.getBlockY(), posToSpread.getBlockZ());
+                if(block.getRelative(BlockFace.DOWN).getType().equals(Material.AIR)) continue;
                 Location clonePos = BlockUtils.getNearestEmptySpace(block, 5);
                 if(clonePos != null) {
                     return clonePos;
@@ -156,7 +164,10 @@ public class MassiveDelirium implements IAction {
         }
         
         public void clearDelirious() {
-            playerClones.forEach(EntityLiving::killEntity);
+            playerClones.forEach(clone -> {
+                clone.die();
+                clone.playerConnection.disconnect("");
+            });
             playerClones.clear();
             duplicates.clear();
         }

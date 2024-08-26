@@ -22,10 +22,10 @@ import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.config.TeamSpawnPoint;
 import remonone.nftilation.constants.*;
 import remonone.nftilation.enums.Stage;
-import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.game.rules.RuleManager;
 
 import java.util.Arrays;
@@ -73,7 +73,7 @@ public class OnBlockDestroyHandler implements Listener {
             long timer = BlockConstants.getMaterialCooldown(mat);
             int tokens = BlockConstants.getTokensFromBlock(mat);
             if(drops.length != 0) {
-                component.adjustPlayerTokens(player, tokens, OnTokenTransactionEvent.TransactionType.RESOURCE_GAIN);
+                component.adjustPlayerTokens(player, tokens, TransactionType.RESOURCE_GAIN);
             }
             if(timer == -1) return;
             if(!isResourcesRespawnable) {
@@ -105,7 +105,7 @@ public class OnBlockDestroyHandler implements Listener {
             if(GameInstance.getInstance().damageCore(team.getTeamName(), true)) {
                 List<PlayerModel> players = GameInstance.getInstance().getTeam(playerTeam).getPlayers();
                 for(PlayerModel model : players) {
-                    component.adjustPlayerTokens(model, DataConstants.TOKEN_PER_DESTRUCTION, OnTokenTransactionEvent.TransactionType.DESTROY_GAIN);
+                    component.adjustPlayerTokens(model, DataConstants.TOKEN_PER_DESTRUCTION, TransactionType.DESTROY_GAIN);
                 }
                 block.setType(Material.AIR);
             }

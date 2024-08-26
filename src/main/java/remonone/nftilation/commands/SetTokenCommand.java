@@ -8,6 +8,7 @@ import org.bukkit.command.TabCompleter;
 import remonone.nftilation.Store;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.scoreboard.ScoreboardHandler;
 import remonone.nftilation.utils.CommandUtils;
 
 import java.util.Collections;
@@ -24,9 +25,8 @@ public class SetTokenCommand implements CommandExecutor, TabCompleter {
             PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, online);
             if(model == null) return;
             model.setTokens(Integer.parseInt(args[0]));
+            ScoreboardHandler.updateScoreboard(model);
         });
-//        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-//        GameInstance.getInstance().awardPlayer(teamName, player, Integer.parseInt(args[0]));
         return true;
     }
 

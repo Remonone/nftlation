@@ -20,7 +20,7 @@ import static org.bukkit.Bukkit.getServer;
 
 public class DDoSAttack implements IAction {
     
-    public static Random random = new Random();
+    public final static Random random = new Random();
     
     @Override
     public void Init(Map<String, Object> params) {

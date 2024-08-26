@@ -34,7 +34,7 @@ public class PhaseUpdateHandler implements Listener {
     
     int taskId = -1;
 
-    public TaskCache cache = new TaskCache();
+    public final TaskCache cache = new TaskCache();
     
     @EventHandler
     public void onPhaseUpdate(final OnPhaseUpdateEvent event) {
@@ -192,9 +192,7 @@ public class PhaseUpdateHandler implements Listener {
                 task.setTicksAfterStart(ticksAfterStart);
             });
         } else {
-            tasks.forEach(task -> {
-                task.getRunnable().runTaskLater(Nftilation.getInstance(), task.getTicksBeforeStart() - task.getTicksAfterStart());
-            });
+            tasks.forEach(task -> task.getRunnable().runTaskLater(Nftilation.getInstance(), task.getTicksBeforeStart() - task.getTicksAfterStart()));
         }
     }
 

@@ -31,8 +31,19 @@ public class VectorUtils {
     }
     
     public static Vector getRandomPosInSphere(Vector vec, float range) {
-        
-        return new Vector();
+        double u = Math.random();
+        double v = Math.random();
+        double theta = u * 2.0 * Math.PI;
+        double phi = Math.acos(2.0 * v - 1.0);
+        double r = Math.cbrt(Math.random() * range);
+        double sinTheta = Math.sin(theta);
+        double cosTheta = Math.cos(theta);
+        double sinPhi = Math.sin(phi);
+        double cosPhi = Math.cos(phi);
+        double x = r * sinPhi * cosTheta;
+        double y = r * sinPhi * sinTheta;
+        double z = r * cosPhi;
+        return new Vector(x, y, z).add(vec);
     }
     
     public static Vector getBlockPositionOnDirection(World world, Vector origin, Vector direction, double maxDistance) {

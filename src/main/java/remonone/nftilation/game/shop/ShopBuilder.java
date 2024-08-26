@@ -32,8 +32,7 @@ public class ShopBuilder {
         try {
             configuration.load(file);
         } catch(Exception e) {
-            e.printStackTrace();
-            Logger.error("Error during loading a configurations: " + e.getMessage());
+            Logger.error("Error during loading a configurations: " + e);
         }
 
         LoadData();

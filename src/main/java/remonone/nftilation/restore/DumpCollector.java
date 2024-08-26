@@ -40,9 +40,12 @@ public class DumpCollector {
     }
 
     private static Object getTeams() {
-        List<ITeam> teams = new ArrayList<>();
-        GameInstance.getInstance().getTeamIterator().forEachRemaining(teams::add);
-        return null;
+        List<TeamCollection> teams = new ArrayList<>();
+        GameInstance.getInstance().getTeamIterator().forEachRemaining(team -> {
+            TeamCollection collection = TeamCollection.getCollectionFromTeam(team);
+            teams.add(collection);
+        });
+        return teams;
     }
 
     private static File generateDumpFile() {
@@ -52,9 +55,10 @@ public class DumpCollector {
         int index = time.lastIndexOf(".");
         time = time.substring(0, index).replaceAll(":", ".");
         String fileName = "data_dump" + time + ".yml";
+        Nftilation.getInstance().saveResource(fileName, false);
         File file = new File(Nftilation.getInstance().getDataFolder(), fileName);
         if(!file.exists()) {
-            Nftilation.getInstance().saveResource(fileName, false);
+            return null;
         }
         return file;
     }

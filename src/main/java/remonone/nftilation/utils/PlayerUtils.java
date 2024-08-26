@@ -15,11 +15,11 @@ import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
-import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.inventory.InventoryBuilder;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.shop.content.CategoryElement;
 import remonone.nftilation.game.shop.content.IExpandable;
@@ -105,13 +105,13 @@ public class PlayerUtils {
         return GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
     }
     
-    public static boolean tryWithdrawTokens(Player player, float amount, OnTokenTransactionEvent.TransactionType type) {
+    public static boolean tryWithdrawTokens(Player player, float amount, TransactionType type) {
         PlayerModel model = getModelFromPlayer(player);
         if(model == null) return false;
         return tryWithdrawTokens(model, amount, type);
     }
     
-    public static boolean tryWithdrawTokens(PlayerModel model, float amount, OnTokenTransactionEvent.TransactionType type) {
+    public static boolean tryWithdrawTokens(PlayerModel model, float amount, TransactionType type) {
         PlayerInteractComponent component = (PlayerInteractComponent) GameInstance.getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
          if(component == null) return false;
         return component.adjustPlayerTokens(model, -amount, type);

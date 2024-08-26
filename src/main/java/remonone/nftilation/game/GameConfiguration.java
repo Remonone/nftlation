@@ -24,10 +24,10 @@ import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
-import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.damage.TeamAttackInvoker;
 import remonone.nftilation.game.ingame.core.Core;
 import remonone.nftilation.game.ingame.services.*;
+import remonone.nftilation.game.ingame.services.events.NukeEvent;
 import remonone.nftilation.game.ingame.services.teams.CoreUpgradeService;
 import remonone.nftilation.game.ingame.services.teams.PassiveIncomeUpgrade;
 import remonone.nftilation.game.ingame.services.teams.ResourceIncomeService;
@@ -51,9 +51,7 @@ public class GameConfiguration {
 
     public static void disposePlayers(Set<ITeam> teams) {
         for(ITeam team : teams) {
-            team.getPlayers().forEach(playerModel -> {
-                playerModel.getReference().teleport(team.getTeamSpawnPoint().getPosition());
-            });
+            team.getPlayers().forEach(playerModel -> playerModel.getReference().teleport(team.getTeamSpawnPoint().getPosition()));
         }
     }
 
@@ -65,6 +63,7 @@ public class GameConfiguration {
         ServiceContainer.registerService(new PassiveIncomeUpgrade());
         ServiceContainer.registerService(new ItemUtilityService());
         ServiceContainer.registerService(new CoreUpgradeService());
+        ServiceContainer.registerService(new NukeEvent());
     }
 
     public static void spawnGolems() {
@@ -203,14 +202,12 @@ public class GameConfiguration {
     }
 
     private static Collection<? extends IDamageHandler> constructDamageHandlers(PlayerModel model) {
-        List<IDamageHandler> invokers = new ArrayList<>();
         Role role = Role.getRoleByID(model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID).toString());
         if(role == null) {
             Logger.error("Unexpected issue have encountered during construction damage invokers for: " + model.getReference().getDisplayName());
             return Collections.emptyList();
         }
-        invokers.addAll(role.getDamageHandlers());
-        return invokers;
+        return new ArrayList<>(role.getDamageHandlers());
     }
 
     private static Collection<? extends IDamageInvoker> constructDamageInvokers(PlayerModel model) {
@@ -253,7 +250,7 @@ public class GameConfiguration {
                     double tickIncome = passiveIncome / 10;
                     team.getPlayers().forEach(player -> {
                         if(!player.getReference().isOnline()) return;
-                        component.adjustPlayerTokens(player.getReference(), (float) tickIncome, OnTokenTransactionEvent.TransactionType.PASSIVE_GAIN);
+                        component.adjustPlayerTokens(player.getReference(), (float) tickIncome, TransactionType.PASSIVE_GAIN);
                     });
                 }
             }

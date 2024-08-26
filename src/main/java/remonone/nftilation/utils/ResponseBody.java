@@ -16,11 +16,11 @@ public class ResponseBody<T> {
     }
 
     public static <T> ResponseBody<T> createOKResponse(T data) {
-        return new ResponseBody<T>(data, 200, null);
+        return new ResponseBody<>(data, 200, null);
     }
 
     public static <T> ResponseBody<T> createBadRequestResponse(String message) {
-        return new ResponseBody<T>(null, 400, message);
+        return new ResponseBody<>(null, 400, message);
     }
 
 }

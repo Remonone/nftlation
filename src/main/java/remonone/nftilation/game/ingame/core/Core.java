@@ -35,10 +35,9 @@ public class Core implements ICoreData{
         return health < 1 || health >= 100;
     }
     
-    public boolean Heal() {
-        if(isCoreCannotBeHealed()) return false;
+    public void Heal() {
+        if(isCoreCannotBeHealed()) return;
         health++;
-        return true;
     }
     
     

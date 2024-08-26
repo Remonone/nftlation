@@ -12,9 +12,9 @@ import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
-import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.utils.CommandUtils;
 
 import java.util.Collections;
@@ -47,7 +47,7 @@ public class GiveTokenToPlayer implements CommandExecutor, TabCompleter {
             sender.sendMessage("Incorrect stage to give tokens!");
             return true;
         }
-        playerInteract.adjustPlayerTokens(Bukkit.getPlayer(playerInfo.getPlayerId()), amount, OnTokenTransactionEvent.TransactionType.TRANSFER);
+        playerInteract.adjustPlayerTokens(Bukkit.getPlayer(playerInfo.getPlayerId()), amount, TransactionType.TRANSFER);
         return true;
     }
 

@@ -8,8 +8,8 @@ import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.events.OnPlayerKillPlayerEvent;
-import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.TransactionType;
 
 public class OnPlayerKillHandler implements Listener {
     @EventHandler
@@ -22,7 +22,7 @@ public class OnPlayerKillHandler implements Listener {
         if(!e.getVictim().getParameters().containsKey(PropertyConstant.PLAYER_TEAM_NAME)) return;
         String victimTeam = (String)e.getVictim().getParameters().get(PropertyConstant.PLAYER_TEAM_NAME);
         PlayerInteractComponent playerInteract = (PlayerInteractComponent)GameInstance.getComponentByName("PlayerInteract");
-        playerInteract.adjustPlayerTokens(e.getKiller(), DataConstants.TOKEN_PER_KILL, OnTokenTransactionEvent.TransactionType.KILL_GAIN);
+        playerInteract.adjustPlayerTokens(e.getKiller(), DataConstants.TOKEN_PER_KILL, TransactionType.KILL_GAIN);
         playerInteract.increasePlayerKillCounter(attackerTeam, attacker);
         playerInteract.increasePlayerDeathCounter(victimTeam, victim);
     }

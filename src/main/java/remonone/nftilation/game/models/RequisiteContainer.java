@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
-import remonone.nftilation.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
