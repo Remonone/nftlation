@@ -2,7 +2,7 @@ package remonone.nftilation.game.ingame.core;
 
 import lombok.Getter;
 import lombok.Setter;
-import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.RuleConstants;
 import remonone.nftilation.game.rules.RuleManager;
 
 @Setter
@@ -21,7 +21,7 @@ public class Core implements ICoreData{
     public boolean TakeDamage(boolean isPlayerDamager) {
         if(health < 1) return false;
         int damage = 1;
-        if(isPlayerDamager) damage = (int) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_CORE_DAMAGE_INTAKE, 1);
+        if(isPlayerDamager) damage = (int) RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_CORE_DAMAGE_INTAKE, 1);
         health -= damage;
         if(health < 1) {
             health = 0;

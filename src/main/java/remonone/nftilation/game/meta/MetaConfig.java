@@ -28,6 +28,9 @@ public class MetaConfig {
     
     @Getter
     private Map<String, Object> upgrades;
+
+    @Getter
+    private Map<String, Object> events;
     
     public MetaConfig() {}
     
@@ -59,8 +62,10 @@ public class MetaConfig {
         if(runes != null) {
             this.runes = runes;
         }
-        UpgradesInfo list = (UpgradesInfo) configuration.get(MetaConstants.META_UPGRADES);
-        this.upgrades = list.upgrades;
+        ContentInfo upgradeList = (ContentInfo) configuration.get(MetaConstants.META_UPGRADES);
+        this.upgrades = upgradeList.content;
+        ContentInfo eventList = (ContentInfo) configuration.get(MetaConstants.META_EVENTS);
+        this.events = eventList.content;
     }
     
     public Object getValue(String key) {
@@ -71,19 +76,19 @@ public class MetaConfig {
     }
     
     @Data
-    @SerializableAs("UpgradesInfo")
-    public static class UpgradesInfo implements ConfigurationSerializable {
-        private Map<String, Object> upgrades = new HashMap<>();
+    @SerializableAs("ContentInfo")
+    public static class ContentInfo implements ConfigurationSerializable {
+        private Map<String, Object> content = new HashMap<>();
 
         @Override
         public Map<String, Object> serialize() {
             return Collections.emptyMap();
         }
         
-        public static UpgradesInfo deserialize(Map<String, Object> map) {
-            UpgradesInfo info = new UpgradesInfo();
+        public static ContentInfo deserialize(Map<String, Object> map) {
+            ContentInfo info = new ContentInfo();
             if(map.containsKey("info")) {
-                info.upgrades = (Map<String, Object>) map.get("info");
+                info.content = (Map<String, Object>) map.get("info");
             }
             return info;
         }

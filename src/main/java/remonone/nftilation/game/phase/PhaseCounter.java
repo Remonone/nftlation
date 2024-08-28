@@ -7,7 +7,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.constants.DataConstants;
-import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.RuleConstants;
 import remonone.nftilation.events.OnPhaseUpdateEvent;
 import remonone.nftilation.game.rules.RuleManager;
 
@@ -56,11 +56,11 @@ public class PhaseCounter {
 
     public void PauseCounter() {
         getServer().getScheduler().cancelTask(taskId);
-        RuleManager.getInstance().setRule(PropertyConstant.RULE_GAME_IS_RUNNING, false);
+        RuleManager.getInstance().setRule(RuleConstants.RULE_GAME_IS_RUNNING, false);
     }
 
     public void ResumeCounter() {
-        RuleManager.getInstance().setRule(PropertyConstant.RULE_GAME_IS_RUNNING, true);
+        RuleManager.getInstance().setRule(RuleConstants.RULE_GAME_IS_RUNNING, true);
         if(phaseCounter >= phases.size()) return;
         long delay = phases.get(phaseCounter);
         StartCounter((int)delay);

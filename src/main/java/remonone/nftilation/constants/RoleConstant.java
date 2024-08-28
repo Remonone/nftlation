@@ -45,6 +45,8 @@ public class RoleConstant {
     public static final String MONKEY_NBT_INVISIBILITY = "invisibility";
     public static final String MONKEY_JUMP_COUNT = "jumpCount";
 
+    public static final String WATCHER_NBT_CONTAINER = "watcher_items";
+
     public static final String DEFAULT_SWORD_NAME = "Тупой меч";
     public static final String DEFAULT_PICKAXE_NAME = "Хрупкая кирка";
     public static final String DEFAULT_AXE_NAME = "Треснувший топор";

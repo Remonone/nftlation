@@ -7,6 +7,7 @@ import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.runes.BloodLustRune;
 import remonone.nftilation.game.runes.Rune;
+import remonone.nftilation.utils.MathUtils;
 import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.Map;
@@ -33,6 +34,6 @@ public class BloodLustInvoker extends BaseDamageInvoker {
         double damage = e.getDamage();
         double heal = damage * percentage / 100;
         double maxHealth = attacker.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
-        info.attacker.setHealth(Math.min(maxHealth, Math.max(0, info.attacker.getHealth() + heal)));
+        info.attacker.setHealth(MathUtils.boundValues(info.attacker.getHealth() + heal, 0 , maxHealth));
     }
 }

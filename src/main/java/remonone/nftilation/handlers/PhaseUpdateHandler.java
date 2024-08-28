@@ -13,7 +13,7 @@ import remonone.nftilation.application.models.TeamData;
 import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
-import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.RuleConstants;
 import remonone.nftilation.events.OnCounterPauseEvent;
 import remonone.nftilation.events.OnPhaseUpdateEvent;
 import remonone.nftilation.game.GameInstance;
@@ -54,7 +54,7 @@ public class PhaseUpdateHandler implements Listener {
                 break;
             }
             case 2: {
-                RuleManager.getInstance().setRule(PropertyConstant.RULE_AVAILABLE_TIER, 2);
+                RuleManager.getInstance().setRule(RuleConstants.RULE_AVAILABLE_TIER, 2);
                 SummonDiamonds();
                 int deliriumDelay = 10 * DataConstants.TICKS_IN_SECOND;
                 BukkitRunnable delirium = getInitiatedAction(ActionType.MASSIVE_DELIRIUM, deliriumDelay);
@@ -75,8 +75,8 @@ public class PhaseUpdateHandler implements Listener {
                 break;
             }
             case 3: {
-                RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_INVULNERABLE, false);
-                RuleManager.getInstance().setRule(PropertyConstant.RULE_RESPAWN_TIMER, (long) 10 * DataConstants.TICKS_IN_SECOND);
+                RuleManager.getInstance().setRule(RuleConstants.RULE_CORE_INVULNERABLE, false);
+                RuleManager.getInstance().setRule(RuleConstants.RULE_RESPAWN_TIMER, (long) 10 * DataConstants.TICKS_IN_SECOND);
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.THIRD_PHASE_TITLE, MessageConstant.THIRD_PHASE_SUBTITLE, 10, 80, 10);
                     sendMessagesToPlayer(player,
@@ -90,8 +90,8 @@ public class PhaseUpdateHandler implements Listener {
                 break;
             }
             case 4: {
-                RuleManager.getInstance().setRule(PropertyConstant.RULE_AVAILABLE_TIER, 3);
-                RuleManager.getInstance().setRule(PropertyConstant.RULE_RESPAWN_TIMER, (long) 15 * DataConstants.TICKS_IN_SECOND);
+                RuleManager.getInstance().setRule(RuleConstants.RULE_AVAILABLE_TIER, 3);
+                RuleManager.getInstance().setRule(RuleConstants.RULE_RESPAWN_TIMER, (long) 15 * DataConstants.TICKS_IN_SECOND);
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.FOURTH_PHASE_TITLE, MessageConstant.FOURTH_PHASE_SUBTITLE, 10, 80, 10);
                     sendMessagesToPlayer(player,
@@ -114,14 +114,14 @@ public class PhaseUpdateHandler implements Listener {
             }
             case 5: {
                 RuleManager instance = RuleManager.getInstance();
-                instance.setRule(PropertyConstant.RULE_CORE_SELF_DESTRUCTIVE, true);
-                instance.setRule(PropertyConstant.RULE_INVENTORY_AUTO_CLEAR, false);
-                instance.setRule(PropertyConstant.RULE_CORE_DAMAGE_INTAKE, 4);
-                instance.setRule(PropertyConstant.RULE_RESPAWN_TIMER, 20 * DataConstants.TICKS_IN_SECOND);
+                instance.setRule(RuleConstants.RULE_CORE_SELF_DESTRUCTIVE, true);
+                instance.setRule(RuleConstants.RULE_INVENTORY_AUTO_CLEAR, false);
+                instance.setRule(RuleConstants.RULE_CORE_DAMAGE_INTAKE, 4);
+                instance.setRule(RuleConstants.RULE_RESPAWN_TIMER, 20 * DataConstants.TICKS_IN_SECOND);
                 BukkitRunnable runnable = new BukkitRunnable() {
                     @Override
                     public void run() {
-                        if(!(Boolean)instance.getRuleOrDefault(PropertyConstant.RULE_GAME_IS_RUNNING, true)) return;
+                        if(!(Boolean)instance.getRuleOrDefault(RuleConstants.RULE_GAME_IS_RUNNING, true)) return;
                         Iterator<ITeam> teamIterator = GameInstance.getInstance().getTeamIterator();
                         while(teamIterator.hasNext()) {
                             ITeam team = teamIterator.next();
@@ -139,13 +139,13 @@ public class PhaseUpdateHandler implements Listener {
                             MessageConstant.FIFTH_PHASE_DESCRIPTION_3,
                             MessageConstant.FIFTH_PHASE_DESCRIPTION_4);
                 }
-                runnable.runTaskTimer(Nftilation.getInstance(), 0, (long) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, 9 * 20));
+                runnable.runTaskTimer(Nftilation.getInstance(), 0, (long) RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_CORE_HEALTH_LOST_PERIOD, 9 * 20));
                 taskId = runnable.getTaskId();
                 break;
             }
             case 6: {
-                RuleManager.getInstance().setRule(PropertyConstant.RULE_IMMINENT_DEATH, true);
-                RuleManager.getInstance().setRule(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, DataConstants.TICKS_IN_SECOND);
+                RuleManager.getInstance().setRule(RuleConstants.RULE_IMMINENT_DEATH, true);
+                RuleManager.getInstance().setRule(RuleConstants.RULE_CORE_HEALTH_LOST_PERIOD, DataConstants.TICKS_IN_SECOND);
                 Iterator<ITeam> teamIt = GameInstance.getInstance().getTeamIterator();
                 while(teamIt.hasNext()) {
                     String teamName = teamIt.next().getTeamName();
@@ -168,7 +168,7 @@ public class PhaseUpdateHandler implements Listener {
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.SIXTH_PHASE_TITLE, MessageConstant.SIXTH_PHASE_SUBTITLE, 10, 80, 10);
                 }
-                runnable.runTaskTimer(Nftilation.getInstance(), 0, (int) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_CORE_HEALTH_LOST_PERIOD, 20));
+                runnable.runTaskTimer(Nftilation.getInstance(), 0, (int) RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_CORE_HEALTH_LOST_PERIOD, 20));
             }
         }
     }

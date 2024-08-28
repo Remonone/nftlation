@@ -5,7 +5,7 @@ import org.bukkit.Sound;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.constants.DataConstants;
-import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.RuleConstants;
 import remonone.nftilation.game.ingame.actions.IAction;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.utils.Logger;
@@ -16,13 +16,13 @@ public class CryptDrop implements IAction {
     @Override
     public void Init(Map<String, Object> params) {
         Logger.log("Starting an " + getClass().getSimpleName() + " event...");
-        RuleManager.getInstance().setRule(PropertyConstant.RULE_RESOURCE_RESPAWNABLE, false);
+        RuleManager.getInstance().setRule(RuleConstants.RULE_RESOURCE_RESPAWNABLE, false);
         long timeToSpawnAgain = System.currentTimeMillis() + 2 * DataConstants.ONE_MINUTE;
-        RuleManager.getInstance().setRule(PropertyConstant.RULE_RESOURCE_SPAWN_AUTO_ENABLE_AT, timeToSpawnAgain);
+        RuleManager.getInstance().setRule(RuleConstants.RULE_RESOURCE_SPAWN_AUTO_ENABLE_AT, timeToSpawnAgain);
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
-                RuleManager.getInstance().setRule(PropertyConstant.RULE_RESOURCE_RESPAWNABLE, true);
+                RuleManager.getInstance().setRule(RuleConstants.RULE_RESOURCE_RESPAWNABLE, true);
             }
         };
         task.runTaskLater(Nftilation.getInstance(), 2 * DataConstants.TICKS_IN_MINUTE);

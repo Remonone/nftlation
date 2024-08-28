@@ -69,7 +69,7 @@ public class OnBlockDestroyHandler implements Listener {
             block.setType(Material.AIR);
             player.getInventory().addItem(drops);
             RuleManager rules = RuleManager.getInstance();
-            boolean isResourcesRespawnable = (boolean)rules.getRuleOrDefault(PropertyConstant.RULE_RESOURCE_RESPAWNABLE, false);
+            boolean isResourcesRespawnable = (boolean)rules.getRuleOrDefault(RuleConstants.RULE_RESOURCE_RESPAWNABLE, false);
             long timer = BlockConstants.getMaterialCooldown(mat);
             int tokens = BlockConstants.getTokensFromBlock(mat);
             if(drops.length != 0) {
@@ -77,7 +77,7 @@ public class OnBlockDestroyHandler implements Listener {
             }
             if(timer == -1) return;
             if(!isResourcesRespawnable) {
-                long spawnAt = (long) rules.getRuleOrDefault(PropertyConstant.RULE_RESOURCE_SPAWN_AUTO_ENABLE_AT, System.currentTimeMillis());
+                long spawnAt = (long) rules.getRuleOrDefault(RuleConstants.RULE_RESOURCE_SPAWN_AUTO_ENABLE_AT, System.currentTimeMillis());
                 timer += (spawnAt - System.currentTimeMillis()) / DataConstants.ONE_SECOND;
             }
             timer *= 20;
@@ -97,7 +97,7 @@ public class OnBlockDestroyHandler implements Listener {
             if(team.getTeamName().equals(playerTeam)) {
                 return;
             }
-            boolean isInvulnerable = (boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_CORE_INVULNERABLE, false);
+            boolean isInvulnerable = (boolean)RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_CORE_INVULNERABLE, false);
             if(isInvulnerable) {
                 player.sendMessage(ChatColor.RED + MessageConstant.CORE_INVULNERABLE);
                 return;

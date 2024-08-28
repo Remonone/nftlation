@@ -11,6 +11,7 @@ import remonone.nftilation.Store;
 import remonone.nftilation.components.ItemStatModifierComponent;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.RuleConstants;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.IInventoryHelder;
@@ -91,7 +92,7 @@ public class InventoryBuilder {
     public static Inventory buildShopKeeperInventory(Player player, CategoryElement el) {
         Inventory inventory = Bukkit.createInventory(player, 27, NameConstants.SHOP_TAB + el.getExpandableName());
         Map<Integer, String> availableItems = getAvailableItems(player, el.getExpandableElements());
-        Float discount = (Float) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_PRICE_SCALE, 1F);
+        Float discount = (Float) RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_PRICE_SCALE, 1F);
         for(Map.Entry<Integer, String> element : availableItems.entrySet()) {
             IShopElement shopElement = ShopItemRegistry.getItem(element.getValue());
             if(shopElement == null) {

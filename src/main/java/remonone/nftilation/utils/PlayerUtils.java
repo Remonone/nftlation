@@ -15,6 +15,7 @@ import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
+import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.inventory.InventoryBuilder;
 import remonone.nftilation.game.models.ITeam;
@@ -25,6 +26,7 @@ import remonone.nftilation.game.shop.content.CategoryElement;
 import remonone.nftilation.game.shop.content.IExpandable;
 import remonone.nftilation.game.shop.registry.ShopItemRegistry;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,6 +54,8 @@ public class PlayerUtils {
         String roleId = playerParams.getOrDefault(PropertyConstant.PLAYER_ROLE_ID, emptyRole).toString();
         if(roleId.equals(emptyRole)) return false;
         if(Role.getRoleByID(roleId) == null) return false;
+        if(!playerParams.containsKey(PropertyConstant.PLAYER_TEAM_NAME)
+                || GameInstance.getInstance().getTeam((String)playerParams.get(PropertyConstant.PLAYER_TEAM_NAME)) == null) return false;
         return playerParams.containsKey(PropertyConstant.PLAYER_LEVEL_PARAM)
                 && playerParams.containsKey(PropertyConstant.PLAYER_KILL_COUNT)
                 && playerParams.containsKey(PropertyConstant.PLAYER_DEATH_COUNT);
@@ -137,6 +141,23 @@ public class PlayerUtils {
         CategoryElement element = (CategoryElement) expandable;
         Inventory inventory = InventoryBuilder.buildShopKeeperInventory(player, element);
         player.openInventory(inventory);
+    }
+
+    public static String getOriginalPlayerName(Player player) {
+        DataInstance.PlayerInfo info = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId());
+        if(info == null) return NameConstants.NULL_STRING;
+        return info.getData().getLogin();
+    }
+
+    public static boolean isActivePlayer(Player player) {
+        Iterator<ITeam> teamIt = GameInstance.getInstance().getTeamIterator();
+        while(teamIt.hasNext()) {
+            ITeam team = teamIt.next();
+            if(!team.isTeamActive()) continue;
+            if(team.getPlayers().stream().anyMatch(playerModel ->
+                    playerModel.getReference().getUniqueId().equals(player.getUniqueId()))) return true;
+        }
+        return false;
     }
     
     @AllArgsConstructor

@@ -20,6 +20,7 @@ import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.MetaConstants;
+import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
@@ -59,7 +60,7 @@ public class SybilAttacker extends Role {
             bow.addUnsafeEnchantment(Enchantment.getByName(info.getEnchantment()), info.getLevel());
         }
         ItemMeta bowMeta = bow.getItemMeta();
-        String name = (String) Optional.of(getMetaInfo(MetaConstants.META_SA_ABILITY_NAME, upgradeLevel)).orElse("UNDEFINED");
+        String name = (String) Optional.of(getMetaInfo(MetaConstants.META_SA_ABILITY_NAME, upgradeLevel)).orElse(NameConstants.NULL_STRING);
         bowMeta.setDisplayName(name);
         bowMeta.setUnbreakable(true);
         bowMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);

@@ -75,4 +75,7 @@ public class MessageConstant {
     public static final String TEAM_UPGRADE_PASSIVE_INCOME = "Пасивная прибыль";
     public static final String TEAM_UPGRADE_UTILITY = "Вспомогательные инструменты";
     public static final String TEAM_UPGRADE_CORE = "Укрепление ядра";
+    public static final String EVENT_PURCHASE = " купил событие: ";
+    public static final String PESTILENCE_KILL = "Мор пожрал еще одну душу...";
+    public static final String PESTILENCE_START = "Ваше состояние удручающее. Ваша жизнь начала гаснуть...";
 }

@@ -14,6 +14,7 @@ import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.RuleConstants;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.phase.PhaseCounter;
@@ -45,6 +46,7 @@ public class GameInstance {
     public void startGame() {
         Map<String, List<DataInstance.PlayerInfo>> teams = Store.getInstance().getDataInstance().getTeams();
         teamData = GameConfiguration.constructTeamData(teams, destroyTeam);
+
         teamRaw.addAll(teamData.values());
         GameConfiguration.disposePlayers(teamRaw);
         GameConfiguration.initServices();
@@ -97,7 +99,7 @@ public class GameInstance {
             team.setTeamActive(false);
             checkOnActiveTeams();
         }
-        if((Boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_IMMINENT_DEATH, false) && !isFinished) {
+        if((Boolean)RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_IMMINENT_DEATH, false) && !isFinished) {
             team.getPlayers().forEach(playerModel -> OnEntityDieHandler.OnDeath(playerModel.getReference()));
         }
         for(ITeam currentTeam : teamData.values()) {

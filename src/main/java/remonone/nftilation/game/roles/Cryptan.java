@@ -15,6 +15,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.MetaConstants;
+import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
@@ -45,7 +46,7 @@ public class Cryptan extends Role {
         int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         int hookAvailability = (int) Optional.of(getMetaInfo(MetaConstants.META_HOOK_AVAILABILITY, upgradeLevel)).orElse(1);
         if(upgradeLevel < hookAvailability) return Collections.emptyList();
-        String name = (String) Optional.of(getMetaInfo(MetaConstants.META_CRYPTAN_ABILITY_NAME, upgradeLevel)).orElse("UNDEFINED");
+        String name = (String) Optional.of(getMetaInfo(MetaConstants.META_CRYPTAN_ABILITY_NAME, upgradeLevel)).orElse(NameConstants.NULL_STRING);
         ItemStack itemStack = new ItemStack(Material.FISHING_ROD);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setDisplayName(name);

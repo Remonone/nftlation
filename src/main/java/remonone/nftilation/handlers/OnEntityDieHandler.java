@@ -15,10 +15,7 @@ import remonone.nftilation.Store;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.config.ConfigManager;
-import remonone.nftilation.constants.DataConstants;
-import remonone.nftilation.constants.MessageConstant;
-import remonone.nftilation.constants.NameConstants;
-import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.*;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.events.OnPlayerKillPlayerEvent;
 import remonone.nftilation.game.GameInstance;
@@ -165,10 +162,10 @@ public class OnEntityDieHandler implements Listener {
             if(GameInstance.getInstance().getTeam(teamName).isCoreAlive()) {
                 GameInstance.getInstance().respawnPlayer(player, teamName);
                 ResetUtils.globalResetPlayerStats(player);
-                if((boolean)RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_INVENTORY_AUTO_CLEAR, true))
+                if((boolean)RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_INVENTORY_AUTO_CLEAR, true))
                     Role.refillInventoryWithItems(model);
             }
-        }, (long) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_RESPAWN_TIMER, (long) 5 * DataConstants.TICKS_IN_SECOND));
+        }, (long) RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_RESPAWN_TIMER, (long) 5 * DataConstants.TICKS_IN_SECOND));
     }
     
     

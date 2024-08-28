@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.RuleConstants;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.models.PlayerModel;
@@ -57,7 +58,7 @@ public class PlayerMoveEvent implements Listener {
     }
 
     private boolean isMoveForbidden() {
-        return !(Boolean)rules.getRuleOrDefault(PropertyConstant.RULE_PLAYERS_ABLE_TO_MOVE, true);
+        return !(Boolean)rules.getRuleOrDefault(RuleConstants.RULE_PLAYERS_ABLE_TO_MOVE, true);
     }
 
     private boolean isNotAuthenticated(final Player player) {

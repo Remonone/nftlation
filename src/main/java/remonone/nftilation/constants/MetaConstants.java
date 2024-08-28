@@ -32,10 +32,14 @@ public class MetaConstants {
     public static final String META_RUNE_TIME_CHANCE = "chance";
     
     public static final String META_UPGRADES = "meta.upgrades";
+    public static final String META_EVENTS = "meta.events";
+
     public static final String META_UPGRADES_UTILITY = "utilities.";
     public static final String META_UPGRADES_PASSIVE = "passiveIncome";
     public static final String META_UPGRADES_RESOURCE = "resourceIncome";
     public static final String META_UPGRADES_CORE = "coreUpgrade";
+
+    public static final String META_EVENTS_PESTILENCE = "pestilence";
 
     public static final String META_CRYPTAN_ABILITY_NAME = "ability.name";
     public static final String META_CRYPTAN_ABILITY_RANGE = "ability.range";

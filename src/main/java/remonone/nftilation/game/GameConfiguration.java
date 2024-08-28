@@ -27,7 +27,9 @@ import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.damage.TeamAttackInvoker;
 import remonone.nftilation.game.ingame.core.Core;
 import remonone.nftilation.game.ingame.services.*;
+import remonone.nftilation.game.ingame.services.events.ArmorEnforcementEvent;
 import remonone.nftilation.game.ingame.services.events.NukeEvent;
+import remonone.nftilation.game.ingame.services.events.PestilenceEvent;
 import remonone.nftilation.game.ingame.services.teams.CoreUpgradeService;
 import remonone.nftilation.game.ingame.services.teams.PassiveIncomeUpgrade;
 import remonone.nftilation.game.ingame.services.teams.ResourceIncomeService;
@@ -64,6 +66,8 @@ public class GameConfiguration {
         ServiceContainer.registerService(new ItemUtilityService());
         ServiceContainer.registerService(new CoreUpgradeService());
         ServiceContainer.registerService(new NukeEvent());
+        ServiceContainer.registerService(new ArmorEnforcementEvent());
+        ServiceContainer.registerService(new PestilenceEvent());
     }
 
     public static void spawnGolems() {
@@ -124,6 +128,7 @@ public class GameConfiguration {
         EntityHandleComponent.setEntityUnloadLocked(villager);
         EntityList.addEntity(villager);
     }
+
 
     public static Map<String, IModifiableTeam> constructTeamData(Map<String, List<DataInstance.PlayerInfo>> teams, Function<String, Void> onTeamDestroy) {
         Map<String, IModifiableTeam> teamData = new HashMap<>();

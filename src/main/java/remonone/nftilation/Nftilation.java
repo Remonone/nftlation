@@ -100,7 +100,7 @@ public final class Nftilation extends JavaPlugin {
         ConfigurationSerialization.registerClass(EffectPotion.class);
         ConfigurationSerialization.registerClass(RequisiteContainer.class);
         ConfigurationSerialization.registerClass(Requisite.class);
-        ConfigurationSerialization.registerClass(MetaConfig.UpgradesInfo.class);
+        ConfigurationSerialization.registerClass(MetaConfig.ContentInfo.class);
     }
 
     private void RegisterRoles() {
@@ -112,6 +112,7 @@ public final class Nftilation extends JavaPlugin {
         Role.registerRole(Indian.class);
         Role.registerRole(Monkey.class);
         Role.registerRole(Guts.class);
+        Role.registerRole(CyberExpert.class);
     }
 
     private void InitHandlers() {

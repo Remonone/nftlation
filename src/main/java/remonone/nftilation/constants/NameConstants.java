@@ -14,4 +14,6 @@ public class NameConstants {
     public static final String SHOP_TAB = "Торговец: ";
 
     public static final String PLAYER_INTERACT_NAME = "PlayerInteract";
+
+    public static final String NULL_STRING = "UNDEFINED";
 }

@@ -7,6 +7,7 @@ import remonone.nftilation.Store;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.RuleConstants;
 import remonone.nftilation.events.OnTokenTransactionEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.ITeam;
@@ -92,7 +93,7 @@ public class PlayerInteractComponent implements IComponent {
             player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_UPGRADE_LEVEL);
             return true;
         }
-        if((int) RuleManager.getInstance().getRuleOrDefault(PropertyConstant.RULE_AVAILABLE_TIER, 1) < nextLevel) {
+        if((int) RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_AVAILABLE_TIER, 1) < nextLevel) {
             player.sendMessage(ChatColor.RED + MessageConstant.INCORRECT_STAGE_FOR_UPGRADE);
             return true;
         }
