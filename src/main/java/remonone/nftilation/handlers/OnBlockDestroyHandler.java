@@ -90,7 +90,7 @@ public class OnBlockDestroyHandler implements Listener {
             getServer().getScheduler().runTaskLater(Nftilation.getInstance(), task, timer);
         }
         List<Vector> corePositions = ConfigManager.getInstance().getTeamSpawnList().stream().map(TeamSpawnPoint::getCoreCenter).collect(Collectors.toList());
-        if(corePositions.stream().anyMatch(position -> position.distance(block.getLocation().toVector()) < DataConstants.ZERO_THRESHOLD)) {
+        if(corePositions.stream().anyMatch(position -> position.distance(block.getLocation().toVector()) < 1D)) {
             ITeam team = GameInstance.getInstance().getTeamByCorePosition(block.getLocation().toVector());
             String playerTeam = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
             e.setCancelled(true);

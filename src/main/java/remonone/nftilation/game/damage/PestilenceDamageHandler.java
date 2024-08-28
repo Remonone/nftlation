@@ -10,6 +10,8 @@ import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.game.meta.MetaConfig;
+import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.utils.EntityDamageByPlayerLog;
 import remonone.nftilation.utils.NestedObjectFetcher;
 import remonone.nftilation.utils.PlayerUtils;
 
@@ -42,15 +44,28 @@ public class PestilenceDamageHandler extends BaseDamageHandler {
         }
         if(!e.getCause().equals(EntityDamageEvent.DamageCause.WITHER)) return;
 
-        if(p.getHealth() - e.getFinalDamage() > 0) return;
+        if(p.getHealth() - e.getFinalDamage() > 0) {
+            EntityDamageByPlayerLog.insertLogEvent(p, infector);
+            return;
+        }
         for(Player player : Bukkit.getOnlinePlayers()) {
             if(!PlayerUtils.isActivePlayer(player)) continue;
             if(player.getLocation().distance(p.getLocation()) > this.infectionRange) continue;
-            int duration = player.getPotionEffect(PotionEffectType.WITHER).getDuration();
+            PotionEffect potionEffect = player.getPotionEffect(PotionEffectType.WITHER);
+            int duration = 0;
+            if(potionEffect == null) {
+                PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+                model.getDamageHandlers().add(new PestilenceDamageHandler(infector));
+            } else {
+                duration = potionEffect.getDuration();
+            }
             player.removePotionEffect(PotionEffectType.WITHER);
             player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, duration + DataConstants.TICKS_IN_MINUTE, 1, true, true));
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 5, 10, false, false));
         }
+//        e.setCancelled(true);
+//        OnEntityDieHandler.OnDeath(p);
+        
         infector.sendMessage(ChatColor.DARK_GREEN + MessageConstant.PESTILENCE_KILL);
     }
 }

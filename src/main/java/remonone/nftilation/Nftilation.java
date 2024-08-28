@@ -113,6 +113,7 @@ public final class Nftilation extends JavaPlugin {
         Role.registerRole(Monkey.class);
         Role.registerRole(Guts.class);
         Role.registerRole(CyberExpert.class);
+        Role.registerRole(Watcher.class);
     }
 
     private void InitHandlers() {

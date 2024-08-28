@@ -1,5 +1,6 @@
 package remonone.nftilation.restore;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Builder
+@AllArgsConstructor
 @SerializableAs("TeamCollection")
 public class TeamCollection implements ConfigurationSerializable, Cloneable {
 
