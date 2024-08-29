@@ -1,10 +1,14 @@
 package remonone.nftilation.utils;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class VectorUtils {
@@ -47,15 +51,12 @@ public class VectorUtils {
     }
     
     public static Vector getBlockPositionOnDirection(World world, Vector origin, Vector direction, double maxDistance) {
-        Vector stepper = origin.clone();
-        double initialPoint = 0;
-        while(initialPoint < maxDistance) {
-            Vector newStep = stepper.add(direction);
-            Block block = world.getBlockAt(newStep.getBlockX(), newStep.getBlockY(), newStep.getBlockZ());
+        BlockIterator blockIt = new BlockIterator(world, origin, direction, 0D, (int)maxDistance);
+        while(blockIt.hasNext()) {
+            Block block = blockIt.next();
             if(!block.getType().equals(Material.AIR)) {
-                return newStep;
+                return block.getLocation().toVector();
             }
-            initialPoint = origin.distance(newStep);
         }
         return null;
     }
