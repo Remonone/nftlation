@@ -1,20 +1,10 @@
 package remonone.nftilation.constants;
 
-import org.bukkit.ChatColor;
-
 public class RoleConstant {
-    public static final String CRYPTAN_ABILITY = ChatColor.BLUE + "Тяга";
-    public static final double CRYPTAN_HOOK_STRENGTH = 2.5D;
-    public static final int CRYPTAN_HOOK_NEGATIVE_SPELLS_DURATION = 4;
-    public static final int CRYPTAN_HOOK_BUFF_DURATION = 4;
-    public static final int CRYPTAN_COOLDOWN_MAX_RANK = 3;
-    public static final int CRYPTAN_COOLDOWN_LOW_RANK = 6;
     public static final String CRYPTAN_NBT_CONTAINER = "cryptan_items";
     public static final String CRYPTAN_NBT_HOOK = "hook";
     
     public static final int SYBIL_EXPLOSION_ARROW_STRENGTH = 3;
-    public static final int SYBIL_ARROW_AMOUNT = 15;
-    public static final String SYBIL_BOW_NAME = "DDoS лук";
     
     public static final String CTYPTOMARINE_SHIELD = "Щит императора";
     public static final int CRYPTOMARINE_EXPLOSION_STRENGTH = 4;
@@ -46,6 +36,8 @@ public class RoleConstant {
     public static final String MONKEY_JUMP_COUNT = "jumpCount";
 
     public static final String WATCHER_NBT_CONTAINER = "watcher_items";
+    
+    public static final String CYBER_EXPERT_NBT_CONTAINER = "cyber_expert_items";
 
     public static final String DEFAULT_SWORD_NAME = "Тупой меч";
     public static final String DEFAULT_PICKAXE_NAME = "Хрупкая кирка";

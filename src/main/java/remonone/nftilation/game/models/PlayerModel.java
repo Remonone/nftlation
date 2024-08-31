@@ -1,10 +1,8 @@
 package remonone.nftilation.game.models;
 
 import lombok.*;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.PriorityQueue;
 
@@ -22,6 +20,5 @@ public class PlayerModel {
         this.reference = reference;
         this.tokens = tokens;
         this.parameters = params;
-
     }
 }

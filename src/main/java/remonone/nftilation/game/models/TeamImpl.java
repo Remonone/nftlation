@@ -4,8 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import remonone.nftilation.config.TeamSpawnPoint;
-import remonone.nftilation.game.ingame.core.Core;
-import remonone.nftilation.game.ingame.core.ICoreData;
+import remonone.nftilation.game.ingame.objects.Core;
+import remonone.nftilation.game.ingame.objects.ICoreData;
 
 import java.util.List;
 import java.util.Map;

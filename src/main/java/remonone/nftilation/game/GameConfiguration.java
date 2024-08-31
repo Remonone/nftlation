@@ -25,7 +25,7 @@ import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.damage.TeamAttackInvoker;
-import remonone.nftilation.game.ingame.core.Core;
+import remonone.nftilation.game.ingame.objects.Core;
 import remonone.nftilation.game.ingame.services.*;
 import remonone.nftilation.game.ingame.services.events.ArmorEnforcementEvent;
 import remonone.nftilation.game.ingame.services.events.NukeEvent;

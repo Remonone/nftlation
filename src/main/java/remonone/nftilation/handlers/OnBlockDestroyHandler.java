@@ -28,7 +28,6 @@ import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.game.rules.RuleManager;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.TimerTask;
@@ -39,8 +38,6 @@ import static org.bukkit.Bukkit.getServer;
 public class OnBlockDestroyHandler implements Listener {
     
     private static final Random RANDOM = new Random();
-    
-    private static final List<Material> GRAVEL_DROPS = Arrays.asList(Material.FEATHER, Material.STRING, Material.FLINT);
     
     @EventHandler
     public void onPlayerInteract(BlockBreakEvent e) {
@@ -56,9 +53,10 @@ public class OnBlockDestroyHandler implements Listener {
             }
             ItemStack stack = player.getInventory().getItemInMainHand();
             ItemStack[] drops;
-            if(block.getType().equals(Material.GRAVEL)) {
+            List<Material> customDrops = BlockConstants.getCustomDrops(block.getType());
+            if(customDrops != null) {
                 drops = new ItemStack[1];
-                drops[0] = new ItemStack(GRAVEL_DROPS.get(RANDOM.nextInt(3)));
+                drops[0] = new ItemStack(customDrops.get(RANDOM.nextInt(customDrops.size())));
             } else {
                 drops = block.getDrops(stack).stream()
                         .map(ItemStack::new)

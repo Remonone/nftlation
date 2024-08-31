@@ -1,4 +1,4 @@
-package remonone.nftilation.game.ingame.core;
+package remonone.nftilation.game.ingame.objects;
 
 import lombok.Getter;
 import lombok.Setter;

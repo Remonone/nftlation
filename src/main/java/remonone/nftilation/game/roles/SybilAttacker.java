@@ -28,6 +28,7 @@ import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.ColorUtils;
+import remonone.nftilation.utils.MathUtils;
 import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.*;
@@ -142,7 +143,7 @@ public class SybilAttacker extends Role {
         float yaw = position.getYaw();
 
         double scale = arrow.getVelocity().getZ() / position.getDirection().getZ();
-        Vector deflectedDirection = GetRotationVector(yaw+deflection);
+        Vector deflectedDirection = MathUtils.getRotationVector(yaw+deflection);
         deflectedDirection.setY(-position.getDirection().getY());
         newPosition.setDirection(deflectedDirection);
 
@@ -152,13 +153,5 @@ public class SybilAttacker extends Role {
         newInstance.setShooter(player);
     }
 
-    private Vector GetRotationVector(float rotation) {
-        double x = Math.sin(Clamp(rotation)*Math.PI/180);
-        double z = Math.cos(Clamp(rotation)*Math.PI/180);
-        return new Vector(x, 0, z);
-    }
-
-    private float Clamp(float value) {
-        return value > 180 ? value - 360 : value < -180 ? value + 360 : value;
-    }
+    
 }

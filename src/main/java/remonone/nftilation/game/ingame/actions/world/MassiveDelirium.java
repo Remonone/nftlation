@@ -153,7 +153,7 @@ public class MassiveDelirium implements IAction {
         
         private Location getEmptyBlockLocation() {
             while(true) {
-                Vector posToSpread = VectorUtils.getRandomPosInSphere(this.player.getLocation().toVector(), 10);
+                Vector posToSpread = VectorUtils.getRandomPosInCircle(this.player.getLocation().toVector(), 10);
                 Block block = this.player.getWorld().getBlockAt(posToSpread.getBlockX(), posToSpread.getBlockY(), posToSpread.getBlockZ());
                 if(block.getRelative(BlockFace.DOWN).getType().equals(Material.AIR)) continue;
                 Location clonePos = BlockUtils.getNearestEmptySpace(block, 5);

@@ -10,13 +10,14 @@ import java.util.*;
 public class BlockConstants {
     
     private static final Map<Material, BlockDetails> RESPAWNABLE_BLOCKS = new HashMap<Material, BlockDetails>() {{
-        put(Material.COAL_ORE, new BlockDetails(20, 3));
-        put(Material.IRON_ORE, new BlockDetails(20, 5));
-        put(Material.DIAMOND_ORE, new BlockDetails(40, 20));
-        put(Material.GRAVEL, new BlockDetails(10, 0));
-        put(Material.MELON_BLOCK, new BlockDetails(10, 0));
-        put(Material.HAY_BLOCK, new BlockDetails(10, 0));
-        put(Material.LOG, new BlockDetails(10, 0));
+        put(Material.COAL_ORE, new BlockDetails(20, 3, null));
+        put(Material.IRON_ORE, new BlockDetails(20, 5, null));
+        put(Material.DIAMOND_ORE, new BlockDetails(40, 20, null));
+        put(Material.GRAVEL, new BlockDetails(10, 0, Arrays.asList(Material.FEATHER, Material.STRING, Material.FLINT)));
+        put(Material.MELON_BLOCK, new BlockDetails(10, 0, null));
+        put(Material.HAY_BLOCK, new BlockDetails(10, 0, null));
+        put(Material.LOG, new BlockDetails(10, 0, null));
+        put(Material.GOLD_ORE, new BlockDetails(30, 10, Collections.singletonList(Material.GOLD_NUGGET)));
     }};
     
     public static boolean isRespawnableBlock(Block block) {
@@ -28,10 +29,14 @@ public class BlockConstants {
     }
     
     public static int getMaterialCooldown(Material mat) {
-        return RESPAWNABLE_BLOCKS.getOrDefault(mat, new BlockDetails(-1, 0)).secondsCooldown;
+        return RESPAWNABLE_BLOCKS.getOrDefault(mat, new BlockDetails(-1, 0, null)).secondsCooldown;
     }
     public static int getTokensFromBlock(Material mat) {
-        return RESPAWNABLE_BLOCKS.getOrDefault(mat, new BlockDetails(-1, 0)).tokenOnCollect;
+        return RESPAWNABLE_BLOCKS.getOrDefault(mat, new BlockDetails(-1, 0, null)).tokenOnCollect;
+    }
+    
+    public static List<Material> getCustomDrops(Material mat) {
+        return RESPAWNABLE_BLOCKS.getOrDefault(mat, new BlockDetails(-1, 0, null)).customDrops;
     }
     
     @Getter
@@ -39,5 +44,6 @@ public class BlockConstants {
     public static class BlockDetails {
         int secondsCooldown;
         int tokenOnCollect;
+        List<Material> customDrops;
     }
 }

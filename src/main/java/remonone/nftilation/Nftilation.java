@@ -174,13 +174,13 @@ public final class Nftilation extends JavaPlugin {
     @Override
     public void onDisable() {
         Logger.log("Disabling...");
+        EntityList.clearEntities();
         if(GameInstance.getInstance().getCounter() != null) {
             GameInstance.getInstance().getCounter().bar.setVisible(false);
         }
         for(Player p : Bukkit.getOnlinePlayers()) {
             p.kickPlayer("Сервер в данный момент перезагружается, перезайдите позже...");
         }
-        EntityList.clearEntities();
         CustomEntities.unregisterEntities();
         if(!GameInstance.getInstance().isFinished()) {
             DumpCollector.GenerateDump();
