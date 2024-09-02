@@ -44,9 +44,12 @@ public class OnEntityDieHandler implements Listener {
         }
 
         Player player = (Player) event.getEntity();
-        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(teamName, player);
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
         if(model == null) return;
+        if(!(Boolean) model.getParameters().getOrDefault(PropertyConstant.PLAYER_IS_ALIVE_PARAM, false)) {
+            event.setCancelled(true);
+            return;
+        }
         PriorityQueue<IDamageHandler> queue = new PriorityQueue<>(model.getDamageHandlers());
         while(!queue.isEmpty()) {
             queue.poll().OnDamageHandle(event);
@@ -158,6 +161,7 @@ public class OnEntityDieHandler implements Listener {
         player.teleport(location);
         player.setGameMode(GameMode.SPECTATOR);
         player.sendTitle(ChatColor.DARK_RED + MessageConstant.PLAYER_ON_DIE, "", 2, 30, 2);
+        model.getParameters().put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, false);
         getServer().getScheduler().runTaskLater(Nftilation.getInstance(), () -> {
             if(GameInstance.getInstance().getTeam(teamName).isCoreAlive()) {
                 GameInstance.getInstance().respawnPlayer(player, teamName);

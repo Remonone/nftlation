@@ -165,6 +165,7 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("giveTokensToPlayer").setExecutor(new GiveTokenToPlayer());
         this.getCommand("reloadProperties").setExecutor(new ReloadConfigCommand());
         this.getCommand("transfer").setExecutor(new TokenTransferCommand());
+        this.getCommand("move").setExecutor(new MoveToPlayer());
     }
     
     public static Nftilation getInstance() {

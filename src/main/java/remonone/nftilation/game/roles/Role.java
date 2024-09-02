@@ -80,7 +80,7 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
                 player.addPotionEffect(new PotionEffect(type, DataConstants.CONSTANT_POTION_DURATION, (int)levelBasedValue, false, false));
             });
         }
-        
+        player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
     }
     
     protected void killPlayer(Player player) {}
