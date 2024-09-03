@@ -3,25 +3,29 @@ package remonone.nftilation.game.roles;
 import de.tr7zw.nbtapi.NBT;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.BlockIterator;
+import org.bukkit.util.Vector;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
+import remonone.nftilation.effects.LineEffect;
+import remonone.nftilation.effects.props.LineProps;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.objects.TrapCircle;
 import remonone.nftilation.game.models.PlayerModel;
-import remonone.nftilation.utils.BoundingBox;
-import remonone.nftilation.utils.InventoryUtils;
-import remonone.nftilation.utils.PlayerUtils;
-import remonone.nftilation.utils.RayTrace;
+import remonone.nftilation.utils.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,9 +70,49 @@ public class CyberExpert extends Role {
         Role role = getRoleByID((String)model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID));
         if(!(role instanceof CyberExpert)) return;
         ItemStack stack = event.getItem();
-        String isJail = NBT.get(stack, (nbt) -> (String)nbt.getString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER));
-        if(isJail == null || !isJail.equals("jail")) return;
+        if(stack == null || stack.getType() == Material.AIR || stack.getAmount() < 1) return;
+        String usedItem = NBT.get(stack, (nbt) -> (String)nbt.getString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER));
+        if(usedItem == null) return;
         event.setCancelled(true);
+        if(usedItem.equals("jail")) {
+            jailTarget(stack, player);
+            return;
+        }
+        if(usedItem.equals("shot")) {
+            shotArrow(stack, player);
+            return;
+        }
+        if(usedItem.equals("teleport")) {
+            teleportWithin(stack, player);
+        }
+    }
+
+    private void teleportWithin(ItemStack stack, Player player) {
+        if(InventoryUtils.isCooldownRemain(stack)) {
+            InventoryUtils.notifyAboutCooldown(player, stack);
+            return;
+        }
+        Location positionToTeleport = getBlockLookedAt(player, 10).add(new Vector(.5F, 0, .5F));
+        LineProps props = LineProps.builder()
+                .world(player.getWorld())
+                .from(player.getEyeLocation().toVector())
+                .to(positionToTeleport.toVector())
+                .step(.3D)
+                .count(0)
+                .build();
+        props.setCustomOffset(RGBConstants.purple);
+        new LineEffect().execute(props);
+        player.teleport(positionToTeleport);
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        if(!PlayerUtils.validateParams(model.getParameters())) return;
+        InventoryUtils.setCooldownForItem(model, stack, 30);
+    }
+
+    private void jailTarget(ItemStack stack, Player player) {
+        if(InventoryUtils.isCooldownRemain(stack)) {
+            InventoryUtils.notifyAboutCooldown(player, stack);
+            return;
+        }
         Entity selectedEntity = getEntityLookedAt(player);
         if(selectedEntity == null) {
             player.sendMessage("Entity has not been found!");
@@ -80,20 +124,9 @@ public class CyberExpert extends Role {
         }
         Player target = (Player)selectedEntity;
         new TrapCircle(target, player, 10 * DataConstants.TICKS_IN_SECOND, player.getWorld());
-    }
-
-    @EventHandler
-    public void onItemUse(final PlayerInteractEvent e) {
-        Player user = e.getPlayer();
-        Role role = Store.getInstance().getDataInstance().getPlayerRole(user.getUniqueId());
-        if(!(role instanceof CyberExpert)) return;
-        ItemStack stack = e.getItem();
-        if(stack == null || stack.getAmount() < 1 || stack.getType().equals(Material.AIR)) return;
-        String pistol = NBT.get(stack, (nbt) -> (String)nbt.getString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER));
-        if(!StringUtils.isEmpty(pistol) && pistol.equals("shot")) {
-            shotArrow(stack, user);
-            return;
-        }
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        if(!PlayerUtils.validateParams(model.getParameters())) return;
+        InventoryUtils.setCooldownForItem(model, stack, 120);
     }
 
     private void shotArrow(ItemStack stack, Player user) {
@@ -103,8 +136,7 @@ public class CyberExpert extends Role {
         }
         Arrow arrow = user.launchProjectile(Arrow.class);
         arrow.setVelocity(arrow.getVelocity().multiply(1.3D));
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(user.getUniqueId());
-        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, user);
+        PlayerModel model = PlayerUtils.getModelFromPlayer(user);
         if(!PlayerUtils.validateParams(model.getParameters())) return;
         int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         long cooldown = 10 - upgradeLevel * 2L;
@@ -121,5 +153,18 @@ public class CyberExpert extends Role {
             if(ray.intersects(box, 6, .1D)) return entity;
         }
         return null;
+    }
+
+    private Location getBlockLookedAt(Player player, int range) {
+        BlockIterator iterator = new BlockIterator(player.getWorld(), player.getEyeLocation().toVector(), player.getEyeLocation().getDirection(), 0, range);
+        Block lastAirBlock = player.getEyeLocation().getBlock();
+        while(iterator.hasNext()) {
+            Block block = iterator.next();
+            if(!block.getType().equals(Material.AIR)) {
+                break;
+            }
+            lastAirBlock = block;
+        }
+        return lastAirBlock.getLocation();
     }
 }

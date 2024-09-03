@@ -12,27 +12,22 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.effects.CircleEffect;
+import remonone.nftilation.effects.SpherePlainEffect;
+import remonone.nftilation.effects.props.CircleProps;
+import remonone.nftilation.effects.props.SpherePlainProps;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.EntityDamageByPlayerLog;
-import remonone.nftilation.utils.MathUtils;
 import remonone.nftilation.utils.PlayerUtils;
+import remonone.nftilation.utils.RGBConstants;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static org.bukkit.Bukkit.getServer;
 
 
 public class TrapCircle implements Listener {
-    
-    private final static Random RANDOM = new Random();
-    
     private final double DISTANCE = 5D;
-    
-    private final double red = 160D / 255;
-    private final double green = 32D / 255;
-    private final double blue = 240D / 255;
     
     private final Player trappee;
     private final Player trapper;
@@ -58,10 +53,19 @@ public class TrapCircle implements Listener {
     private void registerTrap() {
         getServer().getPluginManager().registerEvents(this, Nftilation.getInstance());
         knockbackRedundantPlayers();
+        CircleProps props = CircleProps.builder()
+                .world(this.center.getWorld())
+                .particle(Particle.SPELL_MOB)
+                .radius(DISTANCE)
+                .center(this.center.toVector().clone())
+                .minAngle(0).maxAngle(360).step(2)
+                .count(0).offset(new Vector(0, .5F, 0))
+                .build();
+        props.setCustomOffset(RGBConstants.purple);
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
-                castEffect();
+                new CircleEffect().execute(props);
             }
         };
         task.runTaskTimer(Nftilation.getInstance(), 0, 4L);
@@ -75,15 +79,6 @@ public class TrapCircle implements Listener {
             if(player.getUniqueId().equals(trapper.getUniqueId())) continue;
             double distance = this.center.distance(player.getLocation()) - DISTANCE;
             player.setVelocity(player.getLocation().clone().subtract(this.center).toVector().normalize().multiply(distance * 2D));
-        }
-    }
-
-    private void castEffect() {
-        Vector shift = new Vector(0, .1f, 0);
-        for(float rotation = 0; rotation < 360; rotation += 2) {
-            Vector rotationVector = MathUtils.getRotationVector(rotation);
-            Location pos = this.center.clone().add(rotationVector.multiply(DISTANCE).add(shift));
-            this.center.getWorld().spawnParticle(Particle.SPELL_MOB, pos, 0, red, green, blue);
         }
     }
 
@@ -106,7 +101,20 @@ public class TrapCircle implements Listener {
         if(mover.getUniqueId().equals(trappee.getUniqueId())) {
             trappee.getLocation().getWorld().playSound(trappee.getLocation(), Sound.ENTITY_GUARDIAN_AMBIENT, 1f, 1f);
             pushPlayerToCenter(mover);
-            castBlocker(mover);
+            SpherePlainProps props = SpherePlainProps.builder()
+                    .tense(50)
+                    .particle(Particle.SPELL_MOB)
+                    .world(trapper.getWorld())
+                    .shift(new Vector(0, .5F, 0))
+                    .localCenterPoint(mover.getLocation().toVector().clone().subtract(this.center.toVector().clone()))
+                    .planeRadius(1.5D)
+                    .sphereGlobalPoint(this.center.toVector().clone())
+                    .projectedSphereRadius(DISTANCE)
+                    .shift(new Vector(0, .5F, 0))
+                    .count(0)
+                    .build();
+            props.setCustomOffset(RGBConstants.purple);
+            new SpherePlainEffect().execute(props);
             EntityDamageByEntityEvent e = new EntityDamageByEntityEvent(trapper, trappee, EntityDamageEvent.DamageCause.MAGIC, 1F);
             getServer().getPluginManager().callEvent(e);
             if(e.isCancelled()) {
@@ -124,39 +132,5 @@ public class TrapCircle implements Listener {
     private void pushPlayerToCenter(Player mover) {
         double distance = mover.getLocation().distance(this.center) - DISTANCE;
         mover.setVelocity(this.center.clone().subtract(mover.getLocation()).toVector().normalize().multiply(distance * 1.2D));
-    }
-    
-    private void castBlocker(Player caster) {
-        Vector centerVector = this.center.toVector();
-        Vector shift = new Vector(0, .5F, 0);
-        List<Vector> points = getPointsWithinSphere(caster.getLocation().toVector().clone().subtract(centerVector), 50, DISTANCE, 3D);
-        for(Vector point : points) {
-            Vector pos = point.add(centerVector).add(shift);
-            caster.getWorld().spawnParticle(Particle.SPELL_MOB, pos.getX(), pos.getY(), pos.getZ(), 0, red, green, blue);
-        }
-    }
-    
-    private List<Vector> getPointsWithinSphere(Vector pos, int amount, double R, double radius) {
-        List<Vector> points = new ArrayList<>();
-        for (int i = 0; i < amount; i++) {
-            double dTheta = (RANDOM.nextDouble() - 0.5) * (radius / R) * 2;
-            double dPhi = (RANDOM.nextDouble() - 0.5) * (radius / R) * 2;
-
-            // Углы центральной точки
-            double theta = Math.acos(pos.getZ() / R);
-            double phi = Math.atan2(pos.getY(), pos.getX());
-
-            // Преобразование в декартовы координаты
-            double newTheta = theta + dTheta;
-            double newPhi = phi + dPhi;
-
-            // Преобразование в декартовы координаты
-            double x = R * Math.sin(newTheta) * Math.cos(newPhi);
-            double y = R * Math.sin(newTheta) * Math.sin(newPhi);
-            double z = R * Math.cos(newTheta);
-
-            points.add(new Vector(x,y,z));
-        }
-        return points;
     }
 }
