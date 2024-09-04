@@ -5,24 +5,22 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
-import remonone.nftilation.Store;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.effects.LineEffect;
 import remonone.nftilation.effects.props.LineProps;
-import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.objects.TrapCircle;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.*;
@@ -53,12 +51,16 @@ public class CyberExpert extends Role {
             nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "jail");
         });
         ItemStack pistol = new ItemStack(Material.TRIPWIRE_HOOK);
-        ItemMeta teleportMeta = pistol.getItemMeta();
-        teleportMeta.setDisplayName(ChatColor.DARK_PURPLE + "Пушка");
-        pistol.setItemMeta(teleportMeta);
+        ItemMeta pistolMeta = pistol.getItemMeta();
+        pistolMeta.setDisplayName(ChatColor.DARK_PURPLE + "Пистолет Макарова");
+        pistol.setItemMeta(pistolMeta);
         NBT.modify(pistol, (nbt) -> {nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "shot");});
-
-        return Arrays.asList(jail, pistol);
+        ItemStack teleport = new ItemStack(Material.EYE_OF_ENDER);
+        NBT.modify(teleport, (nbt) -> {nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "teleport");});
+        ItemMeta teleportMeta = teleport.getItemMeta();
+        teleportMeta.setDisplayName(ChatColor.GOLD + "Скачок");
+        teleport.setItemMeta(teleportMeta);
+        return Arrays.asList(jail, pistol, teleport);
     }
 
     @EventHandler
@@ -72,22 +74,24 @@ public class CyberExpert extends Role {
         ItemStack stack = event.getItem();
         if(stack == null || stack.getType() == Material.AIR || stack.getAmount() < 1) return;
         String usedItem = NBT.get(stack, (nbt) -> (String)nbt.getString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER));
-        if(usedItem == null) return;
+        Logger.debug(usedItem);
+        if(StringUtils.isBlank(usedItem)) return;
         event.setCancelled(true);
+        int upgradeLevel = (int)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         if(usedItem.equals("jail")) {
-            jailTarget(stack, player);
+            jailTarget(stack, player, upgradeLevel);
             return;
         }
         if(usedItem.equals("shot")) {
-            shotArrow(stack, player);
+            shotArrow(stack, player, upgradeLevel);
             return;
         }
         if(usedItem.equals("teleport")) {
-            teleportWithin(stack, player);
+            teleportWithin(stack, player, upgradeLevel);
         }
     }
 
-    private void teleportWithin(ItemStack stack, Player player) {
+    private void teleportWithin(ItemStack stack, Player player, int level) {
         if(InventoryUtils.isCooldownRemain(stack)) {
             InventoryUtils.notifyAboutCooldown(player, stack);
             return;
@@ -97,7 +101,8 @@ public class CyberExpert extends Role {
                 .world(player.getWorld())
                 .from(player.getEyeLocation().toVector())
                 .to(positionToTeleport.toVector())
-                .step(.3D)
+                .particle(Particle.REDSTONE)
+                .step(.1D)
                 .count(0)
                 .build();
         props.setCustomOffset(RGBConstants.purple);
@@ -108,7 +113,7 @@ public class CyberExpert extends Role {
         InventoryUtils.setCooldownForItem(model, stack, 30);
     }
 
-    private void jailTarget(ItemStack stack, Player player) {
+    private void jailTarget(ItemStack stack, Player player, int level) {
         if(InventoryUtils.isCooldownRemain(stack)) {
             InventoryUtils.notifyAboutCooldown(player, stack);
             return;
@@ -129,7 +134,7 @@ public class CyberExpert extends Role {
         InventoryUtils.setCooldownForItem(model, stack, 120);
     }
 
-    private void shotArrow(ItemStack stack, Player user) {
+    private void shotArrow(ItemStack stack, Player user, int level) {
         if(InventoryUtils.isCooldownRemain(stack)) {
             InventoryUtils.notifyAboutCooldown(user, stack);
             return;

@@ -12,13 +12,13 @@ public class LineEffect implements IEffect<LineProps> {
         World world = props.getWorld();
         Vector from = props.getFrom().clone();
         Vector to = props.getTo().clone();
-        Vector difference = to.subtract(from);
-        double distance = difference.length();
-        difference.multiply(props.getStep());
+        Vector direction = to.subtract(from).normalize();
+        double distance = to.distance(from);
+        direction.multiply(props.getStep());
         Location stepper = new Location(world, from.getX(), from.getY(), from.getZ());
         for(double i = 0.0; i < distance; i += step) {
             world.spawnParticle(props.getParticle(), stepper, props.getCount(), props.getOffsetX(), props.getOffsetY(), props.getOffsetZ());
-            stepper.add(difference);
+            stepper.add(direction);
         }
     }
 }

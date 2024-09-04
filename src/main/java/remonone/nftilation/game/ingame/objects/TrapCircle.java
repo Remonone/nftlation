@@ -55,7 +55,7 @@ public class TrapCircle implements Listener {
         knockbackRedundantPlayers();
         CircleProps props = CircleProps.builder()
                 .world(this.center.getWorld())
-                .particle(Particle.SPELL_MOB)
+                .particle(Particle.REDSTONE)
                 .radius(DISTANCE)
                 .center(this.center.toVector().clone())
                 .minAngle(0).maxAngle(360).step(2)
@@ -103,7 +103,7 @@ public class TrapCircle implements Listener {
             pushPlayerToCenter(mover);
             SpherePlainProps props = SpherePlainProps.builder()
                     .tense(50)
-                    .particle(Particle.SPELL_MOB)
+                    .particle(Particle.REDSTONE)
                     .world(trapper.getWorld())
                     .shift(new Vector(0, .5F, 0))
                     .localCenterPoint(mover.getLocation().toVector().clone().subtract(this.center.toVector().clone()))

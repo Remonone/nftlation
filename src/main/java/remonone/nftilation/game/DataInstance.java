@@ -41,6 +41,8 @@ public class DataInstance {
 
     @Getter
     private final List<PlayerInfo> players = new ArrayList<>();
+    
+    private final Map<UUID, PlayerInfo> infos = new HashMap<>();
     @Getter
     private final List<TeamData> teamData = new ArrayList<>();
     
@@ -49,7 +51,7 @@ public class DataInstance {
     
     public LoginState TryAddPlayerToGame(PlayerData playerData, Player player) {
         if(playerData.getRole().equals(PlayerRole.PLAYER) && playerData.getTeam().getTeamName().isEmpty()) return LoginState.EMPTY_TEAM;
-        if(players.stream().anyMatch(playerData1 -> playerData1.getPlayerId().equals(player.getUniqueId()))) {
+        if(FindPlayerByName(player.getUniqueId()) != null) {
             return LoginState.ALREADY_LOGGED_IN;
         }
         
@@ -107,8 +109,12 @@ public class DataInstance {
     }
 
     public PlayerInfo FindPlayerByName(final UUID playerId) {
+        if(infos.containsKey(playerId)) {
+            return infos.get(playerId);
+        }
         for(PlayerInfo player : players) {
             if(player.getPlayerId().equals(playerId)) {
+                infos.put(playerId, player);
                 return player;
             }
         }

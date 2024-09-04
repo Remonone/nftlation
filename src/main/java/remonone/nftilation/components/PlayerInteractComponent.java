@@ -102,8 +102,7 @@ public class PlayerInteractComponent implements IComponent {
 
     public void upgradePlayer(Player player, int level) {
         if(isPlayerNotAbleToUpgrade(player, level)) return;
-        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
-        PlayerModel model = instance.getPlayerModelFromTeam(teamName, player);
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
         Map<String, Object> params = model.getParameters();
         
         player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, .5f, 1f);
