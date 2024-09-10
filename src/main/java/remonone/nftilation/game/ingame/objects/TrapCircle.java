@@ -1,5 +1,6 @@
 package remonone.nftilation.game.ingame.objects;
 
+import lombok.Builder;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -25,38 +26,28 @@ import java.util.List;
 
 import static org.bukkit.Bukkit.getServer;
 
-
+@Builder
 public class TrapCircle implements Listener {
-    private final double DISTANCE = 5D;
+    private Player trappee;
+    private Player trapper;
     
-    private final Player trappee;
-    private final Player trapper;
+    private Location center;
+    private double range;
+    private double knockback;
+    private double damage;
+    private double duration;
+    private World world;
     
-    private final Location center;
-    
-    private int taskCastId = -1;
-    
-    public TrapCircle(Player trappee, Player trapper, int duration, World w) {
-        this.trappee = trappee;
-        this.trapper = trapper;
-        Vector rawCenter = this.trappee.getLocation().toVector();
-        this.center = new Location(w, rawCenter.getX(), rawCenter.getY(), rawCenter.getZ());
-        registerTrap();
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                unregisterTrap();
-            }
-        }.runTaskLater(Nftilation.getInstance(), duration);
-    }
+    private int taskCastId;
 
-    private void registerTrap() {
+    public void initTrap() {
         getServer().getPluginManager().registerEvents(this, Nftilation.getInstance());
+        this.center = new Location(world, trappee.getLocation().getX(), trappee.getLocation().getY(), trappee.getLocation().getZ());
         knockbackRedundantPlayers();
         CircleProps props = CircleProps.builder()
                 .world(this.center.getWorld())
                 .particle(Particle.REDSTONE)
-                .radius(DISTANCE)
+                .radius(range)
                 .center(this.center.toVector().clone())
                 .minAngle(0).maxAngle(360).step(2)
                 .count(0).offset(new Vector(0, .5F, 0))
@@ -70,15 +61,21 @@ public class TrapCircle implements Listener {
         };
         task.runTaskTimer(Nftilation.getInstance(), 0, 4L);
         this.taskCastId = task.getTaskId();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                unregisterTrap();
+            }
+        }.runTaskLater(Nftilation.getInstance(), (long)duration);
     }
 
     private void knockbackRedundantPlayers() {
-        List<Entity> players = trappee.getNearbyEntities(5, 5, 5);
+        List<Entity> players = trappee.getNearbyEntities(range, range, range);
         for(Entity player : players) {
             if(!(player instanceof Player)) continue;
             if(player.getUniqueId().equals(trapper.getUniqueId())) continue;
-            double distance = this.center.distance(player.getLocation()) - DISTANCE;
-            player.setVelocity(player.getLocation().clone().subtract(this.center).toVector().normalize().multiply(distance * 2D));
+            double distance = this.center.distance(player.getLocation()) - range;
+            player.setVelocity(player.getLocation().clone().subtract(this.center).toVector().normalize().multiply(distance));
         }
     }
 
@@ -88,11 +85,12 @@ public class TrapCircle implements Listener {
     }
 
 
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player mover = event.getPlayer();
         
-        if(mover.getLocation().distance(this.center) <= DISTANCE) return;
+        if(mover.getLocation().distance(this.center) <= range) return;
         
         if(mover.getUniqueId().equals(trapper.getUniqueId())) {
             unregisterTrap();
@@ -109,13 +107,13 @@ public class TrapCircle implements Listener {
                     .localCenterPoint(mover.getLocation().toVector().clone().subtract(this.center.toVector().clone()))
                     .planeRadius(1.5D)
                     .sphereGlobalPoint(this.center.toVector().clone())
-                    .projectedSphereRadius(DISTANCE)
+                    .projectedSphereRadius(range)
                     .shift(new Vector(0, .5F, 0))
                     .count(0)
                     .build();
             props.setCustomOffset(RGBConstants.purple);
             new SpherePlainEffect().execute(props);
-            EntityDamageByEntityEvent e = new EntityDamageByEntityEvent(trapper, trappee, EntityDamageEvent.DamageCause.MAGIC, 1F);
+            EntityDamageByEntityEvent e = new EntityDamageByEntityEvent(trapper, trappee, EntityDamageEvent.DamageCause.MAGIC, damage);
             getServer().getPluginManager().callEvent(e);
             if(e.isCancelled()) {
                 PlayerModel model = PlayerUtils.getModelFromPlayer(mover);
@@ -130,7 +128,7 @@ public class TrapCircle implements Listener {
     }
 
     private void pushPlayerToCenter(Player mover) {
-        double distance = mover.getLocation().distance(this.center) - DISTANCE;
-        mover.setVelocity(this.center.clone().subtract(mover.getLocation()).toVector().normalize().multiply(distance * 1.2D));
+        double distance = mover.getLocation().distance(this.center) - range;
+        mover.setVelocity(this.center.clone().subtract(mover.getLocation()).toVector().normalize().multiply(distance * knockback));
     }
 }

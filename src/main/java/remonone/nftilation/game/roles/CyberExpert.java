@@ -17,6 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.effects.LineEffect;
@@ -25,13 +26,12 @@ import remonone.nftilation.game.ingame.objects.TrapCircle;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.*;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class CyberExpert extends Role {
-
-
+    
     @Override
     public String getRoleID() {
         return "CE";
@@ -43,24 +43,30 @@ public class CyberExpert extends Role {
 
     @Override
     public List<ItemStack> getAbilityItems(Map<String, Object> playerParams) {
-        ItemStack jail = new ItemStack(Material.IRON_FENCE);
-        ItemMeta meta = jail.getItemMeta();
-        meta.setDisplayName("Jail");
-        jail.setItemMeta(meta);
-        NBT.modify(jail, (nbt) -> {
-            nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "jail");
-        });
+        ArrayList<ItemStack> items = new ArrayList<>();
+        if((Integer)playerParams.getOrDefault(PropertyConstant.PLAYER_LEVEL_PARAM, 1) != 1) {
+            ItemStack jail = new ItemStack(Material.IRON_FENCE);
+            ItemMeta meta = jail.getItemMeta();
+            meta.setDisplayName("Кибер-СИЗО");
+            jail.setItemMeta(meta);
+            NBT.modify(jail, (nbt) -> {
+                nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "jail");
+            });
+            items.add(jail);
+        }
         ItemStack pistol = new ItemStack(Material.TRIPWIRE_HOOK);
         ItemMeta pistolMeta = pistol.getItemMeta();
         pistolMeta.setDisplayName(ChatColor.DARK_PURPLE + "Пистолет Макарова");
         pistol.setItemMeta(pistolMeta);
         NBT.modify(pistol, (nbt) -> {nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "shot");});
+        items.add(pistol);
         ItemStack teleport = new ItemStack(Material.EYE_OF_ENDER);
         NBT.modify(teleport, (nbt) -> {nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "teleport");});
         ItemMeta teleportMeta = teleport.getItemMeta();
-        teleportMeta.setDisplayName(ChatColor.GOLD + "Скачок");
+        teleportMeta.setDisplayName(ChatColor.GOLD + "Забекдорить");
         teleport.setItemMeta(teleportMeta);
-        return Arrays.asList(jail, pistol, teleport);
+        items.add(teleport);
+        return items;
     }
 
     @EventHandler
@@ -78,16 +84,16 @@ public class CyberExpert extends Role {
         if(StringUtils.isBlank(usedItem)) return;
         event.setCancelled(true);
         int upgradeLevel = (int)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        if(usedItem.equals("jail")) {
-            jailTarget(stack, player, upgradeLevel);
-            return;
-        }
-        if(usedItem.equals("shot")) {
-            shotArrow(stack, player, upgradeLevel);
-            return;
-        }
-        if(usedItem.equals("teleport")) {
-            teleportWithin(stack, player, upgradeLevel);
+        switch (usedItem) {
+            case "jail":
+                jailTarget(stack, player, upgradeLevel);
+                return;
+            case "shot":
+                shotArrow(stack, player, upgradeLevel);
+                return;
+            case "teleport":
+                teleportWithin(stack, player, upgradeLevel);
+                break;
         }
     }
 
@@ -96,7 +102,10 @@ public class CyberExpert extends Role {
             InventoryUtils.notifyAboutCooldown(player, stack);
             return;
         }
-        Location positionToTeleport = getBlockLookedAt(player, 10).add(new Vector(.5F, 0, .5F));
+        Integer range = (Integer)getMetaInfo(MetaConstants.META_CE_TELEPORT_RANGE, level);
+        Location positionToTeleport = getBlockLookedAt(player, range).add(new Vector(.5F, 0, .5F));
+        positionToTeleport.setPitch(player.getLocation().getPitch());
+        positionToTeleport.setYaw(player.getLocation().getYaw());
         LineProps props = LineProps.builder()
                 .world(player.getWorld())
                 .from(player.getEyeLocation().toVector())
@@ -110,7 +119,8 @@ public class CyberExpert extends Role {
         player.teleport(positionToTeleport);
         PlayerModel model = PlayerUtils.getModelFromPlayer(player);
         if(!PlayerUtils.validateParams(model.getParameters())) return;
-        InventoryUtils.setCooldownForItem(model, stack, 30);
+        Double cooldown = (Double)getMetaInfo(MetaConstants.META_CE_TELEPORT_COOLDOWN, level);
+        InventoryUtils.setCooldownForItem(model, stack, cooldown.floatValue());
     }
 
     private void jailTarget(ItemStack stack, Player player, int level) {
@@ -118,7 +128,9 @@ public class CyberExpert extends Role {
             InventoryUtils.notifyAboutCooldown(player, stack);
             return;
         }
-        Entity selectedEntity = getEntityLookedAt(player);
+        double range = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_RANGE, level);
+        
+        Entity selectedEntity = getEntityLookedAt(player, range);
         if(selectedEntity == null) {
             player.sendMessage("Entity has not been found!");
             return;
@@ -128,10 +140,11 @@ public class CyberExpert extends Role {
             return;
         }
         Player target = (Player)selectedEntity;
-        new TrapCircle(target, player, 10 * DataConstants.TICKS_IN_SECOND, player.getWorld());
+        createTrap(target, player, level);
         PlayerModel model = PlayerUtils.getModelFromPlayer(player);
         if(!PlayerUtils.validateParams(model.getParameters())) return;
-        InventoryUtils.setCooldownForItem(model, stack, 120);
+        Double cooldown = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_COOLDOWN, level);
+        InventoryUtils.setCooldownForItem(model, stack, cooldown.floatValue());
     }
 
     private void shotArrow(ItemStack stack, Player user, int level) {
@@ -140,22 +153,22 @@ public class CyberExpert extends Role {
             return;
         }
         Arrow arrow = user.launchProjectile(Arrow.class);
-        arrow.setVelocity(arrow.getVelocity().multiply(1.3D));
+        Double strength = (Double)getMetaInfo(MetaConstants.META_CE_SHOT_STRENGTH, level);
+        arrow.setVelocity(arrow.getVelocity().multiply(strength));
         PlayerModel model = PlayerUtils.getModelFromPlayer(user);
         if(!PlayerUtils.validateParams(model.getParameters())) return;
-        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        long cooldown = 10 - upgradeLevel * 2L;
-        InventoryUtils.setCooldownForItem(model, stack, cooldown);
+        Double cooldown = (Double)getMetaInfo(MetaConstants.META_CE_SHOT_COOLDOWN, level);
+        InventoryUtils.setCooldownForItem(model, stack, cooldown.floatValue());
     }
 
 
-    private Entity getEntityLookedAt(Player player) {
-        List<Entity> entities = player.getNearbyEntities(5, 5, 5);
+    private Entity getEntityLookedAt(Player player, double range) {
+        List<Entity> entities = player.getNearbyEntities(range, range, range);
         
         RayTrace ray = new RayTrace(player.getEyeLocation().toVector(), player.getEyeLocation().getDirection());
         for(Entity entity : entities) {
             BoundingBox box = new BoundingBox(entity);
-            if(ray.intersects(box, 6, .1D)) return entity;
+            if(ray.intersects(box, range + 1, .1D)) return entity;
         }
         return null;
     }
@@ -171,5 +184,22 @@ public class CyberExpert extends Role {
             lastAirBlock = block;
         }
         return lastAirBlock.getLocation();
+    }
+
+    private void createTrap(Player target, Player performer, int level) {
+        double duration = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_DURATION, level);
+        double radius = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_RADIUS, level);
+        double knockback = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_KNOCKBACK, level);
+        double damage = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_DAMAGE, level);
+        TrapCircle.builder()
+                .trappee(target)
+                .trapper(performer)
+                .duration(duration * DataConstants.TICKS_IN_SECOND)
+                .range(radius)
+                .knockback(knockback)
+                .damage(damage)
+                .world(performer.getWorld())
+                .build()
+                .initTrap();
     }
 }

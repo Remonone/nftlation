@@ -56,4 +56,18 @@ public class MetaConstants {
     public static final String META_SA_ABILITY_NAME = "ability.name";
     public static final String META_SA_ABILITY_AMOUNT = "ability.amount";
 
+    public static final String META_CE_TELEPORT_RANGE = "ability.teleport.range";
+    public static final String META_CE_TELEPORT_COOLDOWN = "ability.teleport.cooldown";
+    public static final String META_CE_SHOT_COOLDOWN = "ability.shot.cooldown";
+    public static final String META_CE_SHOT_STRENGTH = "ability.shot.strength"; // 1.3
+    public static final String META_CE_JAIL_COOLDOWN = "ability.jail.cooldown";
+    public static final String META_CE_JAIL_DURATION = "ability.jail.duration"; // 10
+    public static final String META_CE_JAIL_RANGE = "ability.jail.range"; // 5
+    public static final String META_CE_JAIL_RADIUS = "ability.jail.radius";
+    public static final String META_CE_JAIL_KNOCKBACK = "ability.jail.knockback"; // 1.2
+    public static final String META_CE_JAIL_DAMAGE = "ability.jail.damage";
+    
+    
+    
+
 }
