@@ -27,7 +27,12 @@ public class MetaConstants {
     public static final String META_MONKEY_JUMP_ACCELERATION = "jump.acceleration";
     public static final String META_MONKEY_JUMP_TOSSING = "jump.tossing";
     public static final String META_MONKEY_JUMP_COOLDOWN = "jump.cooldown";
-    
+    public static final String META_MONKEY_THROWER_COOLDOWN = "thrower.cooldown";
+    public static final String META_MONKEY_WAND_EFFECTS = "wand.effects";
+    public static final String META_MONKEY_WAND_DISORIENTATION_LEVEL = "wand.disorientation.level";
+    public static final String META_MONKEY_WAND_DISORIENTATION_DURATION = "wand.disorientation.duration";
+    public static final String META_MONKEY_WAND_DISORIENTATION_COOLDOWN = "wand.disorientation.cooldown";
+
     public static final String META_RUNE_TIME_FROST = "frost";
     public static final String META_RUNE_TIME_CHANCE = "chance";
     

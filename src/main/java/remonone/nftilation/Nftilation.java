@@ -190,6 +190,7 @@ public final class Nftilation extends JavaPlugin {
     
     
     public void ReloadProperties() {
+        Role.getRoles().forEach(Role::resetListeners);
         Role.getRoles().clear();
         Rune.getRunes().clear();
         ShopItemRegistry.clearRegister();

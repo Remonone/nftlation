@@ -30,10 +30,13 @@ public class RoleConstant {
     public static final String INDIAN_NBT_RECALL = "recall_to_base";
 
     public static final String MONKEY_ABILITY_ITEM = "Стиль макаки";
+    public static final String MONKEY_ABILITY_THROWER_ITEM = "Кинуть мину";
     public static final String MONKEY_NBT_CONTAINER = "monkey_items";
     public static final String MONKEY_NBT_WAND = "wand";
     public static final String MONKEY_NBT_INVISIBILITY = "invisibility";
+    public static final String MONKEY_NBT_THROWER = "thrower";
     public static final String MONKEY_JUMP_COUNT = "jumpCount";
+    public static final String MONKEY_DISORIENTATION_COOLDOWN = "disorientation_cooldown";
 
     public static final String WATCHER_NBT_CONTAINER = "watcher_items";
     

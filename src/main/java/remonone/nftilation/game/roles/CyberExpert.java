@@ -1,7 +1,6 @@
 package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -10,8 +9,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.BlockIterator;
@@ -27,6 +24,7 @@ import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +37,34 @@ public class CyberExpert extends Role {
 
     public CyberExpert() {
         super("CE");
+        super.registerHandlers(new HashMap<String, IAbilityHandler>() {
+            {
+                put("jail", new IAbilityHandler() {
+                    @Override
+                    public boolean executeHandle(PlayerModel model) { return jailTarget(model); }
+                    @Override
+                    public float getCooldown(PlayerModel model) {
+                        return ((Double)getMetaByName(model, MetaConstants.META_CE_JAIL_COOLDOWN)).floatValue();
+                    }
+                });
+                put("shot", new IAbilityHandler() {
+                    @Override
+                    public boolean executeHandle(PlayerModel model) { return shotArrow(model); }
+                    @Override
+                    public float getCooldown(PlayerModel model) {
+                        return ((Double)getMetaByName(model, MetaConstants.META_CE_SHOT_COOLDOWN)).floatValue();
+                    }
+                });
+                put("teleport", new IAbilityHandler() {
+                    @Override
+                    public boolean executeHandle(PlayerModel model) { return teleportWithin(model); }
+                    @Override
+                    public float getCooldown(PlayerModel model) {
+                        return ((Double)getMetaByName(model, MetaConstants.META_CE_TELEPORT_COOLDOWN)).floatValue();
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -69,39 +95,9 @@ public class CyberExpert extends Role {
         return items;
     }
 
-    @EventHandler
-    public void onItemInteraction(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
-        if(model == null) return;
-        if(!PlayerUtils.validateParams(model.getParameters())) return;
-        Role role = getRoleByID((String)model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID));
-        if(!(role instanceof CyberExpert)) return;
-        ItemStack stack = event.getItem();
-        if(stack == null || stack.getType() == Material.AIR || stack.getAmount() < 1) return;
-        String usedItem = NBT.get(stack, (nbt) -> (String)nbt.getString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER));
-        Logger.debug(usedItem);
-        if(StringUtils.isBlank(usedItem)) return;
-        event.setCancelled(true);
-        int upgradeLevel = (int)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        switch (usedItem) {
-            case "jail":
-                jailTarget(stack, player, upgradeLevel);
-                return;
-            case "shot":
-                shotArrow(stack, player, upgradeLevel);
-                return;
-            case "teleport":
-                teleportWithin(stack, player, upgradeLevel);
-                break;
-        }
-    }
-
-    private void teleportWithin(ItemStack stack, Player player, int level) {
-        if(InventoryUtils.isCooldownRemain(stack)) {
-            InventoryUtils.notifyAboutCooldown(player, stack);
-            return;
-        }
+    private boolean teleportWithin(PlayerModel model) {
+        Player player = model.getReference();
+        int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         Integer range = (Integer)getMetaInfo(MetaConstants.META_CE_TELEPORT_RANGE, level);
         Location positionToTeleport = getBlockLookedAt(player, range).add(new Vector(.5F, 0, .5F));
         positionToTeleport.setPitch(player.getLocation().getPitch());
@@ -117,48 +113,34 @@ public class CyberExpert extends Role {
         props.setCustomOffset(RGBConstants.purple);
         new LineEffect().execute(props);
         player.teleport(positionToTeleport);
-        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
-        if(!PlayerUtils.validateParams(model.getParameters())) return;
-        Double cooldown = (Double)getMetaInfo(MetaConstants.META_CE_TELEPORT_COOLDOWN, level);
-        InventoryUtils.setCooldownForItem(model, stack, cooldown.floatValue());
+        return true;
     }
 
-    private void jailTarget(ItemStack stack, Player player, int level) {
-        if(InventoryUtils.isCooldownRemain(stack)) {
-            InventoryUtils.notifyAboutCooldown(player, stack);
-            return;
-        }
+    private boolean jailTarget(PlayerModel model) {
+        int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         double range = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_RANGE, level);
-        
+        Player player = model.getReference();
         Entity selectedEntity = getEntityLookedAt(player, range);
         if(selectedEntity == null) {
             player.sendMessage("Entity has not been found!");
-            return;
+            return false;
         }
         if(!(selectedEntity instanceof Player)) {
             player.sendMessage("Player was not been found!");
-            return;
+            return false;
         }
         Player target = (Player)selectedEntity;
         createTrap(target, player, level);
-        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
-        if(!PlayerUtils.validateParams(model.getParameters())) return;
-        Double cooldown = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_COOLDOWN, level);
-        InventoryUtils.setCooldownForItem(model, stack, cooldown.floatValue());
+        return true;
     }
 
-    private void shotArrow(ItemStack stack, Player user, int level) {
-        if(InventoryUtils.isCooldownRemain(stack)) {
-            InventoryUtils.notifyAboutCooldown(user, stack);
-            return;
-        }
-        Arrow arrow = user.launchProjectile(Arrow.class);
+    private boolean shotArrow(PlayerModel user) {
+        Player player = user.getReference();
+        int level = (Integer)user.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        Arrow arrow = player.launchProjectile(Arrow.class);
         Double strength = (Double)getMetaInfo(MetaConstants.META_CE_SHOT_STRENGTH, level);
         arrow.setVelocity(arrow.getVelocity().multiply(strength));
-        PlayerModel model = PlayerUtils.getModelFromPlayer(user);
-        if(!PlayerUtils.validateParams(model.getParameters())) return;
-        Double cooldown = (Double)getMetaInfo(MetaConstants.META_CE_SHOT_COOLDOWN, level);
-        InventoryUtils.setCooldownForItem(model, stack, cooldown.floatValue());
+        return true;
     }
 
 

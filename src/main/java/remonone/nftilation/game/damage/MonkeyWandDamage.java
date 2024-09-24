@@ -9,14 +9,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import remonone.nftilation.Store;
-import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.EffectPotion;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Monkey;
+import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.utils.PlayerUtils;
+
+import java.util.List;
 
 public class MonkeyWandDamage extends BaseDamageInvoker {
     @Override
@@ -24,6 +28,7 @@ public class MonkeyWandDamage extends BaseDamageInvoker {
         return 1;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void OnEntityDamageDealing(EntityDamageByEntityEvent e, PlayerUtils.AttackerInfo info) {
         if(!(e.getEntity() instanceof Player)) return;
@@ -41,11 +46,19 @@ public class MonkeyWandDamage extends BaseDamageInvoker {
         if(model == null) return;
         if(!PlayerUtils.validateParams(model.getParameters())) return;
         int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        if(level == 2) {
-            victim.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10* DataConstants.TICKS_IN_SECOND, 1, false, true));
-        } else if(level == 3) {
-            victim.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10*DataConstants.TICKS_IN_SECOND, 2, false, true));
-            victim.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5*DataConstants.TICKS_IN_SECOND, 1, false, true));
+        Role role = Role.getRoleByID((String)model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID));
+        if(role == null) return;
+        List<EffectPotion> effects = (List<EffectPotion>) role.getMetaInfo(MetaConstants.META_MONKEY_WAND_EFFECTS, level);
+        for(EffectPotion potion : effects) {
+            victim.addPotionEffect(new PotionEffect(PotionEffectType.getByName(potion.getEffect()), potion.getDuration(), potion.getStrength(), true, true));
+        }
+        if(level > (int)role.getMetaInfo(MetaConstants.META_MONKEY_WAND_DISORIENTATION_LEVEL, level)) {
+            long cooldown = NBT.get(weapon, nbt -> (Long) nbt.getLong(RoleConstant.MONKEY_DISORIENTATION_COOLDOWN));
+            if(cooldown < System.currentTimeMillis()) return;
+            float duration = ((Double)role.getMetaInfo(MetaConstants.META_MONKEY_WAND_DISORIENTATION_DURATION, level)).floatValue();
+            PlayerModel victimModel = PlayerUtils.getModelFromPlayer(victim);
+            victimModel.getParameters().put(PropertyConstant.PLAYER_DISORIENTATION_DURATION, System.currentTimeMillis() + duration);
+
         }
     }
 }

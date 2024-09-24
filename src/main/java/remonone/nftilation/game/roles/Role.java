@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -40,6 +41,8 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
     
     @Getter
     private final static List<Role> roles = new ArrayList<>();
+
+    private AbilityItemsHandler handler;
     
     public abstract String getRoleID();
 
@@ -267,6 +270,15 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
         return Collections.emptyList();
     }
 
+    protected void registerHandlers(Map<String, IAbilityHandler> handlerMap) {
+        AbilityItemsHandler handlers = AbilityItemsHandler.builder()
+                .handlerMap(handlerMap)
+                .maintainRole(this)
+                .build();
+        this.handler = handlers;
+        getServer().getPluginManager().registerEvents(handlers, Nftilation.getInstance());
+    }
+
     @Override
     public Role clone() {
         try {
@@ -276,7 +288,17 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
         }
     }
     
-    protected Object getMetaInfo(String path, int level) {
+    public Object getMetaInfo(String path, int level) {
         return NestedObjectFetcher.getNestedObject(path, this.getMeta(), level);
+    }
+
+    public void resetListeners() {
+        PlayerInteractEvent.getHandlerList().unregister(this.handler);
+        PlayerInteractEvent.getHandlerList().unregister(this);
+    }
+
+    public Object getMetaByName(PlayerModel model, String key) {
+        int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        return getMetaInfo(key, level);
     }
 }
