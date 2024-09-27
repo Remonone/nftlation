@@ -32,6 +32,8 @@ public class MetaConstants {
     public static final String META_MONKEY_WAND_DISORIENTATION_LEVEL = "wand.disorientation.level";
     public static final String META_MONKEY_WAND_DISORIENTATION_DURATION = "wand.disorientation.duration";
     public static final String META_MONKEY_WAND_DISORIENTATION_COOLDOWN = "wand.disorientation.cooldown";
+    public static final String META_MONKEY_WAND_NAME_DEFAULT = "wand.name.default";
+    public static final String META_MONKEY_WAND_NAME_CHARGED = "wand.name.charged";
 
     public static final String META_RUNE_TIME_FROST = "frost";
     public static final String META_RUNE_TIME_CHANCE = "chance";

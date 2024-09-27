@@ -1,8 +1,12 @@
 package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
+import net.minecraft.server.v1_12_R1.EntitySnowball;
 import org.bukkit.*;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftSnowball;
+import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
@@ -160,7 +164,13 @@ public class Monkey extends Role {
         return true;
     }
 
+    // STUPIDLY DANGEROUS CODE ONWARDS!!! TEST!!
     public boolean onThrowItemUsed(PlayerModel model) {
+        Snowball snowball = model.getReference().launchProjectile(Snowball.class);
+        EntitySnowball entity = ((CraftSnowball)snowball).getHandle();
+        ItemStack stack = new ItemStack(Material.BROWN_MUSHROOM);
+        net.minecraft.server.v1_12_R1.ItemStack item = CraftItemStack.asNMSCopy(stack);
+        entity.a(item, 1f);
         return true;
     }
 
