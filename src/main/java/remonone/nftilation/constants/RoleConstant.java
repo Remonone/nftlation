@@ -36,7 +36,8 @@ public class RoleConstant {
     public static final String MONKEY_NBT_INVISIBILITY = "invisibility";
     public static final String MONKEY_NBT_THROWER = "thrower";
     public static final String MONKEY_JUMP_COUNT = "jumpCount";
-    public static final String MONKEY_DISORIENTATION_COOLDOWN = "disorientation_cooldown";
+    public static final String MONKEY_GRENADE = "grenade";
+    public static final String MONKEY_GRENADE_ENTITY_NAME = "grenade_entity";
 
     public static final String WATCHER_NBT_CONTAINER = "watcher_items";
     
@@ -47,5 +48,5 @@ public class RoleConstant {
     public static final String DEFAULT_AXE_NAME = "Треснувший топор";
     public static final String DEFAULT_SHOVEL_NAME = "Ветхая лопата";
 
-    
+    private RoleConstant() {}
 }

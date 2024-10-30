@@ -1,20 +1,21 @@
 package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
-import net.minecraft.server.v1_12_R1.EntitySnowball;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftSnowball;
-import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MetaConstants;
@@ -22,7 +23,9 @@ import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
+import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.damage.MonkeyWandDamage;
+import remonone.nftilation.game.models.EffectPotion;
 import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.PlayerUtils;
@@ -68,7 +71,7 @@ public class Monkey extends Role {
 
     @Override
     protected List<ItemStack> getAbilityItems(Map<String, Object> params){
-        List<ItemStack> items = new ArrayList<ItemStack>();
+        List<ItemStack> items = new ArrayList<>();
         ItemStack itemStack = new ItemStack(Material.INK_SACK);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setUnbreakable(true);
@@ -164,31 +167,34 @@ public class Monkey extends Role {
         return true;
     }
 
-    // STUPIDLY DANGEROUS CODE ONWARDS!!! TEST!!
     public boolean onThrowItemUsed(PlayerModel model) {
         Snowball snowball = model.getReference().launchProjectile(Snowball.class);
-        EntitySnowball entity = ((CraftSnowball)snowball).getHandle();
-        ItemStack stack = new ItemStack(Material.BROWN_MUSHROOM);
-        net.minecraft.server.v1_12_R1.ItemStack item = CraftItemStack.asNMSCopy(stack);
-        entity.a(item, 1f);
+        snowball.setMetadata(RoleConstant.MONKEY_GRENADE, new FixedMetadataValue(Nftilation.getInstance(), model));
+        snowball.setCustomName(RoleConstant.MONKEY_GRENADE_ENTITY_NAME);
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    @EventHandler
+    public void onSnowballHit(final ProjectileHitEvent e) {
+        if(!(e.getEntity() instanceof Snowball)) return;
+        Snowball snowball = (Snowball) e.getEntity();
+        if(!snowball.hasMetadata(RoleConstant.MONKEY_GRENADE)) return;
+        Entity entity = e.getHitEntity();
+        if(entity == null) return;
+        if(!(entity instanceof Player)) return;
+        Player player = (Player) entity;
+        PlayerModel model = (PlayerModel) snowball.getMetadata(RoleConstant.MONKEY_GRENADE);
+        if(!GameInstance.getInstance().checkIfPlayersInSameTeam(player, model.getReference())) return;
+        List<EffectPotion> effects = (List<EffectPotion>) getMetaByName(model, MetaConstants.META_MONKEY_THROWER_EFFECTS);
+        for(EffectPotion effect : effects) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(effect.getEffect()), effect.getDuration(), effect.getStrength(), true, true));
+        }
+
     }
 
     @Override
     public List<IDamageInvoker> getDamageInvokers() {
         return Collections.singletonList(new MonkeyWandDamage());
-    }
-
-    @EventHandler
-    public void onPlayerDisoriented(PlayerMoveEvent event) {
-        PlayerModel target = PlayerUtils.getModelFromPlayer(event.getPlayer());
-        if((long)target.getParameters().getOrDefault(PropertyConstant.PLAYER_DISORIENTATION_DURATION, 0L) > System.currentTimeMillis()) {
-            float yawDiff = event.getTo().getYaw() - event.getFrom().getYaw();
-            float pitchDiff = event.getTo().getPitch() - event.getFrom().getPitch();
-            Location copy = event.getFrom().clone();
-            copy.setYaw(copy.getYaw() - yawDiff);
-            copy.setPitch(copy.getPitch() - pitchDiff);
-            event.setTo(copy);
-        }
     }
 }

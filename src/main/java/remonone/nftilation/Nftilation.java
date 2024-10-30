@@ -38,7 +38,6 @@ public final class Nftilation extends JavaPlugin {
     
     @Override
     public void onEnable() {
-        // Plugin startup logic
         Logger.log("Starting...");
         CustomEntities.registerEntities();
         SerializeProperties();

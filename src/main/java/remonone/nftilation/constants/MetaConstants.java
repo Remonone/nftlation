@@ -1,7 +1,6 @@
 package remonone.nftilation.constants;
 
 public class MetaConstants {
-    
     public static final String META_ROLES = "meta.roles";
     public static final String META_RUNES = "meta.runes";
 
@@ -29,11 +28,7 @@ public class MetaConstants {
     public static final String META_MONKEY_JUMP_COOLDOWN = "jump.cooldown";
     public static final String META_MONKEY_THROWER_COOLDOWN = "thrower.cooldown";
     public static final String META_MONKEY_WAND_EFFECTS = "wand.effects";
-    public static final String META_MONKEY_WAND_DISORIENTATION_LEVEL = "wand.disorientation.level";
-    public static final String META_MONKEY_WAND_DISORIENTATION_DURATION = "wand.disorientation.duration";
-    public static final String META_MONKEY_WAND_DISORIENTATION_COOLDOWN = "wand.disorientation.cooldown";
-    public static final String META_MONKEY_WAND_NAME_DEFAULT = "wand.name.default";
-    public static final String META_MONKEY_WAND_NAME_CHARGED = "wand.name.charged";
+    public static final String META_MONKEY_THROWER_EFFECTS = "thrower.effects";
 
     public static final String META_RUNE_TIME_FROST = "frost";
     public static final String META_RUNE_TIME_CHANCE = "chance";
@@ -73,8 +68,6 @@ public class MetaConstants {
     public static final String META_CE_JAIL_RADIUS = "ability.jail.radius";
     public static final String META_CE_JAIL_KNOCKBACK = "ability.jail.knockback"; // 1.2
     public static final String META_CE_JAIL_DAMAGE = "ability.jail.damage";
-    
-    
-    
 
+    private MetaConstants() {}
 }

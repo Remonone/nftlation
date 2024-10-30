@@ -56,14 +56,13 @@ public class DumpCollector {
         time = time.substring(0, index).replaceAll(":", ".");
         String fileName = "data_dump" + time + ".yml";
         File file = new File(Nftilation.getInstance().getDataFolder(), fileName);
-        if(!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                Logger.error("Cannot create dump file! " + e.getMessage());
+        try {
+            if(!file.exists()) {
+                    file.createNewFile();
             }
+        } catch (IOException e) {
+            Logger.error("Cannot create dump file! " + e.getMessage());
         }
-        Nftilation.getInstance().saveResource(fileName, false);
         return file;
     }
 
