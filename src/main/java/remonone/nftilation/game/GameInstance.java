@@ -274,4 +274,8 @@ public class GameInstance {
         }
         return false;
     }
+
+    public void addNewTeam(Collection<Player> players) {
+//        team
+    }
 }

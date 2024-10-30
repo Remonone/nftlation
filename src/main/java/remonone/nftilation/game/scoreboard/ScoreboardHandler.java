@@ -1,5 +1,6 @@
 package remonone.nftilation.game.scoreboard;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -17,10 +18,8 @@ import remonone.nftilation.game.runes.Rune;
 import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.PlayerUtils;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ScoreboardHandler {
     
@@ -59,26 +58,11 @@ public class ScoreboardHandler {
         Iterator<ITeam> it = instance.getTeamIterator();
         while(it.hasNext()) {
             ITeam t = it.next();
-            String scoreName = t.getTeamName() + "[";
-            if(t.isCoreAlive()) {
-                scoreName += ChatColor.GREEN + "" + ChatColor.BOLD + "✓";
-            } else if(!t.isTeamActive()) {
-                scoreName += ChatColor.DARK_RED + "" + ChatColor.BOLD +  "x";
-            } else {
-                scoreName += ChatColor.DARK_RED + "" + ChatColor.BOLD + getTeamMembersAlive(t.getTeamName());
-            }
-            scoreName += ChatColor.RESET + "]";
-            objective.getScore(scoreName).setScore(++counter);
+            String teamInfo = t.getTeamInfo();
+            if(StringUtils.isBlank(teamInfo)) continue;
+            objective.getScore(teamInfo).setScore(++counter);
         }
         objective.getScore(ChatColor.GOLD + "= Teams =").setScore(++counter);
-    }
-    
-    private static int getTeamMembersAlive(String teamName) {
-        ITeam team = GameInstance.getInstance().getTeam(teamName);
-        if(team == null) return 0;
-        if(team.isCoreAlive()) return team.getPlayers().size();
-        Collection<PlayerModel> alivePlayers = team.getPlayers().stream().filter(playerModel -> (Boolean)playerModel.getParameters().getOrDefault(PropertyConstant.PLAYER_IS_ALIVE_PARAM, false)).collect(Collectors.toList());
-        return alivePlayers.size();
     }
 
     public static void updateScoreboard(PlayerModel model) {

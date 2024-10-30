@@ -17,4 +17,5 @@ public interface ITeam {
     String getTeamName();
     char getTeamColor();
     Map<String, Object> getParameters();
+    String getTeamInfo();
 }
