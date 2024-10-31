@@ -270,10 +270,11 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
         return Collections.emptyList();
     }
 
-    protected void registerHandlers(Map<String, IAbilityHandler> handlerMap) {
+    protected void registerHandlers(Map<String, IAbilityHandler> handlerMap, String container) {
         AbilityItemsHandler handlers = AbilityItemsHandler.builder()
                 .handlerMap(handlerMap)
                 .maintainRole(this)
+                .container(container)
                 .build();
         this.handler = handlers;
         getServer().getPluginManager().registerEvents(handlers, Nftilation.getInstance());

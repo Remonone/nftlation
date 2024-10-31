@@ -23,7 +23,6 @@ import remonone.nftilation.game.ingame.actions.IAction;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.BlockUtils;
-import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.VectorUtils;
 
@@ -120,29 +119,38 @@ public class MassiveDelirium implements IAction {
             this.duplicates = teams;
         }
         
+        // TODO: CANCEL TASKS IF QUEUE IS FULL
         public void summonDelirious() {
+            if(duplicates.
+                    isEmpty()) return;
             if(playerClones.size() > 2) {
                 EntityPlayer player = playerClones.poll();
                 player.die();
             }
-            Logger.debug(this.duplicates.size() + "");
             MinecraftServer server = ((CraftServer) getServer()).getHandle().getServer();
             WorldServer worldServer = ((CraftWorld)this.player.getWorld()).getHandle();
             EntityPlayer newPlayer = createPlayer(server, worldServer);
-            Location clonePos = getEmptyBlockLocation();
-            newPlayer.setPosition(clonePos.getX(), clonePos.getY(), clonePos.getZ());
-            newPlayer.playerConnection = new PlayerConnection(server,
-                    new NetworkManager(EnumProtocolDirection.CLIENTBOUND), newPlayer);
-            worldServer.addEntity(newPlayer, CreatureSpawnEvent.SpawnReason.CUSTOM);
-            for(Player playerToHide : Bukkit.getOnlinePlayers()) {
-                playerToHide.hidePlayer(Nftilation.getInstance(), newPlayer.getBukkitEntity());
-            }
-            this.player.showPlayer(Nftilation.getInstance(), newPlayer.getBukkitEntity());
-            server.getPlayerList().players.remove(newPlayer);
-            playerClones.add(newPlayer);
+            if(newPlayer == null) return;
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Location clonePos = getEmptyBlockLocation();
+                    newPlayer.setPosition(clonePos.getX(), clonePos.getY(), clonePos.getZ());
+                    newPlayer.playerConnection = new PlayerConnection(server,
+                            new NetworkManager(EnumProtocolDirection.CLIENTBOUND), newPlayer);
+                    worldServer.addEntity(newPlayer, CreatureSpawnEvent.SpawnReason.CUSTOM);
+                    for(Player playerToHide : Bukkit.getOnlinePlayers()) {
+                        playerToHide.hidePlayer(Nftilation.getInstance(), newPlayer.getBukkitEntity());
+                    }
+                    player.showPlayer(Nftilation.getInstance(), newPlayer.getBukkitEntity());
+                    server.getPlayerList().players.remove(newPlayer);
+                    playerClones.add(newPlayer);
+                }
+            }.runTask(Nftilation.getInstance());
         }
 
         private EntityPlayer createPlayer(MinecraftServer server, WorldServer worldServer) {
+            if(this.duplicates.isEmpty()) return null;
             PlayerModel model = this.duplicates.get(random.nextInt(this.duplicates.size()));
             EntityPlayer playerToCopy = ((CraftPlayer)model.getReference()).getHandle();
             GameProfile profileToCopy = playerToCopy.getProfile();

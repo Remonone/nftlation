@@ -2,6 +2,7 @@ package remonone.nftilation.game.meta;
 
 import lombok.Data;
 import lombok.Getter;
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -11,6 +12,7 @@ import remonone.nftilation.utils.Logger;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MetaConfig {
 
@@ -31,6 +33,9 @@ public class MetaConfig {
 
     @Getter
     private Map<String, Object> events;
+    
+    @Getter
+    private Map<Integer, List<GlobalEvent>> globalEvents = new HashMap<>();
     
     public MetaConfig() {}
     
@@ -66,6 +71,11 @@ public class MetaConfig {
         this.upgrades = upgradeList.content;
         ContentInfo eventList = (ContentInfo) configuration.get(MetaConstants.META_EVENTS);
         this.events = eventList.content;
+        Map<String, Object> events = ((MemorySection)configuration.get(MetaConstants.META_GLOBAL)).getValues(true);
+        this.globalEvents = events.entrySet().stream().collect(
+                Collectors.toMap(value -> Integer.parseInt(value.getKey()),
+                        e -> (List<GlobalEvent>) e.getValue()));
+        Logger.log(this.globalEvents.toString());
     }
     
     public Object getValue(String key) {
@@ -91,6 +101,35 @@ public class MetaConfig {
                 info.content = (Map<String, Object>) map.get("info");
             }
             return info;
+        }
+    }
+    
+    @Data
+    @SerializableAs("GlobalEvent")
+    public static class GlobalEvent implements ConfigurationSerializable {
+        private int delay;
+        private String name;
+        private Map<String, Object> additionalParams;
+        
+        @Override
+        public Map<String, Object> serialize() {
+            return Collections.emptyMap();
+        }
+        
+        public static GlobalEvent deserialize(Map<String, Object> map) {
+            GlobalEvent event = new GlobalEvent();
+            if(map.containsKey("delay")) {
+                event.setDelay(Integer.parseInt(map.get("delay").toString()));
+            }
+            if(map.containsKey("name")) {
+                event.setName(map.get("name").toString());
+            }
+            if(map.containsKey("params")) {
+                event.setAdditionalParams((Map<String, Object>) map.get("params"));
+            } else {
+                event.setAdditionalParams(new HashMap<>());
+            }
+            return event;
         }
     }
 }

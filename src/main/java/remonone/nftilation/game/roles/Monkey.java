@@ -61,7 +61,7 @@ public class Monkey extends Role {
                     }
                 });
             }
-        });
+        }, RoleConstant.MONKEY_NBT_CONTAINER);
     }
     
     @Override
@@ -86,7 +86,7 @@ public class Monkey extends Role {
             ItemMeta throwerMeta = thrower.getItemMeta();
             throwerMeta.setUnbreakable(true);
             throwerMeta.setDisplayName(RoleConstant.MONKEY_ABILITY_THROWER_ITEM);
-            itemStack.setItemMeta(throwerMeta);
+            thrower.setItemMeta(throwerMeta);
             NBT.modify(thrower, nbt -> {nbt.setString(RoleConstant.MONKEY_NBT_CONTAINER, RoleConstant.MONKEY_NBT_THROWER);});
             items.add(thrower);
         }
@@ -114,22 +114,18 @@ public class Monkey extends Role {
         Map<String, Object> params = model.getParameters();
         int level = (int)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         int jumpAmount = (Integer)getMetaInfo(MetaConstants.META_MONKEY_JUMP_COUNT, level);
-        if(params.containsKey(RoleConstant.MONKEY_JUMP_COUNT)) {
-            int jumpCount = (Integer)params.get(RoleConstant.MONKEY_JUMP_COUNT);
-            if(jumpCount >= jumpAmount) {
-                accessor.setAllowFlight(false);
-            }
-        }
         int count = (int)params.getOrDefault(RoleConstant.MONKEY_JUMP_COUNT, 0);
+        if(count >= jumpAmount) {
+            accessor.setAllowFlight(false);
+        }
         params.put(RoleConstant.MONKEY_JUMP_COUNT, count + 1);
         e.setCancelled(true);
         accessor.setFlying(false);
         double acceleration = (double)getMetaInfo(MetaConstants.META_MONKEY_JUMP_TOSSING, level);
         double velocityUp = (double)getMetaInfo(MetaConstants.META_MONKEY_JUMP_ACCELERATION, level);
         double cooldown = (double)getMetaInfo(MetaConstants.META_MONKEY_JUMP_COOLDOWN, level);
-        accessor.sendMessage(acceleration + " " + velocityUp);
-        accessor.setVelocity(accessor.getVelocity().multiply(acceleration).setY(velocityUp).add(accessor.getLocation().getDirection().normalize()));
         params.put("cooldown", System.currentTimeMillis() + (long)(cooldown * DataConstants.ONE_SECOND));
+        accessor.setVelocity(accessor.getVelocity().multiply(acceleration).setY(velocityUp).add(accessor.getLocation().getDirection().normalize()));
     }
 
     @EventHandler
@@ -147,11 +143,12 @@ public class Monkey extends Role {
     private void CheckOnGround(Player accessor, Location from, Location to) {
         PlayerModel model = PlayerUtils.getModelFromPlayer(accessor);
         Map<String, Object> params = model.getParameters();
+        if(!(params.containsKey("cooldown") && ((long)params.get("cooldown") < System.currentTimeMillis()))) return;
         if((from.getBlockY()>to.getBlockY())
                 && !(accessor.getLocation().add(0, -2, 0)
                 .getBlock()
                 .getType()
-                .equals(Material.AIR)) && (params.containsKey("cooldown") && (((long)params.get("cooldown")) < System.currentTimeMillis()))) {
+                .equals(Material.AIR))) {
             accessor.setAllowFlight(true);
             params.remove(RoleConstant.MONKEY_JUMP_COUNT);
         }

@@ -100,6 +100,7 @@ public final class Nftilation extends JavaPlugin {
         ConfigurationSerialization.registerClass(RequisiteContainer.class);
         ConfigurationSerialization.registerClass(Requisite.class);
         ConfigurationSerialization.registerClass(MetaConfig.ContentInfo.class);
+        ConfigurationSerialization.registerClass(MetaConfig.GlobalEvent.class);
     }
 
     private void RegisterRoles() {

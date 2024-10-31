@@ -69,5 +69,7 @@ public class MetaConstants {
     public static final String META_CE_JAIL_KNOCKBACK = "ability.jail.knockback"; // 1.2
     public static final String META_CE_JAIL_DAMAGE = "ability.jail.damage";
 
+    public static final String META_GLOBAL = "meta.global";
+    
     private MetaConstants() {}
 }

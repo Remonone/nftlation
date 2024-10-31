@@ -64,7 +64,7 @@ public class CyberExpert extends Role {
                     }
                 });
             }
-        });
+        }, RoleConstant.CYBER_EXPERT_NBT_CONTAINER);
     }
 
     @Override

@@ -4,6 +4,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
+import org.bukkit.util.BlockIterator;
 
 public class BlockUtils {
 
@@ -27,5 +29,18 @@ public class BlockUtils {
             }
         }
         return null;
+    }
+
+    public static Location getBlockLookedAt(Player player, int range) {
+        BlockIterator iterator = new BlockIterator(player.getWorld(), player.getEyeLocation().toVector(), player.getEyeLocation().getDirection(), 0, range);
+        Block lastAirBlock = player.getEyeLocation().getBlock();
+        while(iterator.hasNext()) {
+            Block block = iterator.next();
+            if(!block.getType().equals(Material.AIR)) {
+                break;
+            }
+            lastAirBlock = block;
+        }
+        return lastAirBlock.getLocation();
     }
 }

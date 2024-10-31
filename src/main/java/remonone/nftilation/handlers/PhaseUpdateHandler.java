@@ -19,14 +19,17 @@ import remonone.nftilation.events.OnPhaseUpdateEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
+import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.rules.RuleManager;
+import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.tasks.TaskCache;
 import remonone.nftilation.utils.tasks.TaskContainer;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static org.bukkit.Bukkit.getServer;
 
@@ -40,11 +43,9 @@ public class PhaseUpdateHandler implements Listener {
     public void onPhaseUpdate(final OnPhaseUpdateEvent event) {
         int stage = event.getPhaseStage();
         cache.clear();
+        initiateStageActions(stage);
         switch (stage) {
             case 1: {
-                int checkerDelay = 10 * DataConstants.TICKS_IN_MINUTE;
-                BukkitRunnable task = getInitiatedAction(ActionType.CHECKER, checkerDelay);
-                cache.add(new TaskContainer(task, System.currentTimeMillis(), checkerDelay, 0));
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.FIRST_PHASE_TITLE, MessageConstant.FIRST_PHASE_SUBTITLE, 10, 80, 10);
                     sendMessagesToPlayer(player,
@@ -56,15 +57,6 @@ public class PhaseUpdateHandler implements Listener {
             case 2: {
                 RuleManager.getInstance().setRule(RuleConstants.RULE_AVAILABLE_TIER, 2);
                 SummonDiamonds();
-                int deliriumDelay = 10 * DataConstants.TICKS_IN_SECOND;
-                BukkitRunnable delirium = getInitiatedAction(ActionType.MASSIVE_DELIRIUM, deliriumDelay);
-                cache.add(new TaskContainer(delirium, System.currentTimeMillis(), deliriumDelay, 0));
-                int delay = 10 * DataConstants.TICKS_IN_MINUTE;
-                BukkitRunnable runnable = getInitiatedAction(ActionType.MONEY_RAIN, delay);
-                cache.add(new TaskContainer(runnable, System.currentTimeMillis(), delay, 0));
-                int summerDelay = 5 * DataConstants.TICKS_IN_MINUTE;
-                BukkitRunnable summer = getInitiatedAction(ActionType.HOT_SUMMER, summerDelay);
-                cache.add(new TaskContainer(summer, System.currentTimeMillis(), summerDelay, 0));
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendTitle(MessageConstant.SECOND_PHASE_TITLE, MessageConstant.SECOND_PHASE_SUBTITLE, 10, 80, 10);
                     sendMessagesToPlayer(player,
@@ -83,10 +75,6 @@ public class PhaseUpdateHandler implements Listener {
                             MessageConstant.THIRD_PHASE_DESCRIPTION_1,
                             MessageConstant.THIRD_PHASE_DESCRIPTION_2);
                 }
-                getInitiatedAction(ActionType.ROBOSYBIL_ATTACK, 105);
-                int delay = 15 * DataConstants.TICKS_IN_MINUTE;
-                BukkitRunnable runnable = getInitiatedAction(ActionType.TOTAL_SALE, delay);
-                cache.add(new TaskContainer(runnable, System.currentTimeMillis(), delay, 0));
                 break;
             }
             case 4: {
@@ -98,18 +86,6 @@ public class PhaseUpdateHandler implements Listener {
                             MessageConstant.FOURTH_PHASE_DESCRIPTION_1,
                             MessageConstant.FOURTH_PHASE_DESCRIPTION_2);
                 }
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        ActionContainer.InitAction(ActionType.HAMSTER, new HashMap<>());
-                    }
-                }.runTaskLater(Nftilation.getInstance(), 105);
-                int cryptDropDelay = 10 * DataConstants.TICKS_IN_MINUTE;
-                BukkitRunnable cryptDrop = getInitiatedAction(ActionType.CRYPT_DROP, cryptDropDelay);
-                cache.add(new TaskContainer(cryptDrop, System.currentTimeMillis(), cryptDropDelay, 0));
-                int deliriumDelay = 20 * DataConstants.TICKS_IN_MINUTE;
-                BukkitRunnable massiveDelirium = getInitiatedAction(ActionType.MASSIVE_DELIRIUM, deliriumDelay);
-                cache.add(new TaskContainer(massiveDelirium, System.currentTimeMillis(), deliriumDelay, 0));
                 break;
             }
             case 5: {
@@ -173,6 +149,22 @@ public class PhaseUpdateHandler implements Listener {
         }
     }
 
+    private void initiateStageActions(int stage) {
+        Logger.debug(String.valueOf(stage));
+        List<MetaConfig.GlobalEvent> eventsToInitiate = MetaConfig.getInstance().getGlobalEvents().get(stage);
+        if(eventsToInitiate == null) return;
+        for(MetaConfig.GlobalEvent event : eventsToInitiate) {
+            try {
+                ActionType type = ActionType.valueOf(event.getName());
+                int delay = event.getDelay() * DataConstants.TICKS_IN_SECOND;
+                BukkitRunnable runnable = getInitiatedAction(type, event.getAdditionalParams(), delay);
+                cache.add(new TaskContainer(runnable, System.currentTimeMillis(), delay, 0));
+            } catch(IllegalArgumentException ex) {
+                Logger.error("Event name is not defined! Skipping...");
+            }
+        }
+    }
+
     private void SummonDiamonds() {
         List<Location> spawnPositions = ConfigManager.getInstance().getDiamondSpawnList();
         spawnPositions.forEach(position -> position.getBlock().setType(Material.DIAMOND_ORE));
@@ -212,11 +204,11 @@ public class PhaseUpdateHandler implements Listener {
         }
     }
     
-    private BukkitRunnable getInitiatedAction(ActionType type, long delay) {
+    private BukkitRunnable getInitiatedAction(ActionType type, Map<String, Object> params, long delay) {
         BukkitRunnable runnable =  new BukkitRunnable() {
             @Override
             public void run() {
-                ActionContainer.InitAction(type, new HashMap<>());
+                ActionContainer.InitAction(type, params);
             }
         };
         runnable.runTaskLater(Nftilation.getInstance(), delay);

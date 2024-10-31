@@ -111,7 +111,7 @@ public class TrapCircle implements Listener {
                     .shift(new Vector(0, .5F, 0))
                     .count(0)
                     .build();
-            props.setCustomOffset(RGBConstants.purple);
+            props.setCustomOffset(RGBConstants.blue);
             new SpherePlainEffect().execute(props);
             EntityDamageByEntityEvent e = new EntityDamageByEntityEvent(trapper, trappee, EntityDamageEvent.DamageCause.MAGIC, damage);
             getServer().getPluginManager().callEvent(e);
