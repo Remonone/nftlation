@@ -4,9 +4,12 @@ import de.tr7zw.nbtapi.NBT;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.RoleConstant;
+import remonone.nftilation.game.models.PlayerModel;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +21,32 @@ public class Watcher extends Role{
 
     public Watcher() {
         super("WA");
+        super.registerHandlers(new HashMap<String, IAbilityHandler>() {
+            {
+                put(RoleConstant.WATCHER_WIND_GUST, new IAbilityHandler() {
+                    @Override
+                    public boolean executeHandle(PlayerModel model) {
+                        return useGustItem(model);
+                    }
+
+                    @Override
+                    public float getCooldown(PlayerModel model) {
+                        return ((Double)getMetaByName(model, MetaConstants.META_MONKEY_INVISIBILITY_COOLDOWN)).floatValue();
+                    }
+                });
+                put(RoleConstant.WATCHER_SUPPRESSION, new IAbilityHandler() {
+                    @Override
+                    public boolean executeHandle(PlayerModel model) {
+                        return onSoulSuppression(model);
+                    }
+
+                    @Override
+                    public float getCooldown(PlayerModel model) {
+                        return ((Double)getMetaByName(model, MetaConstants.META_MONKEY_THROWER_COOLDOWN)).floatValue();
+                    }
+                });
+            }
+        }, RoleConstant.WATCHER_NBT_CONTAINER);
     }
 
     @Override
@@ -43,5 +72,16 @@ public class Watcher extends Role{
         return Arrays.asList(teleport, soulSuppression, windGust);
     }
 
+    private boolean useGustItem(PlayerModel model) {
+        return true;
+    }
+
+    private boolean onSoulSuppression(PlayerModel model) {
+        return true;
+    }
+
+    private boolean onWormholeUsed(PlayerModel model) {
+        return true;
+    }
 
 }

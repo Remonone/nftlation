@@ -40,6 +40,9 @@ public class RoleConstant {
     public static final String MONKEY_GRENADE_ENTITY_NAME = "grenade_entity";
 
     public static final String WATCHER_NBT_CONTAINER = "watcher_items";
+    public static final String WATCHER_WIND_GUST = "wind_gust";
+    public static final String WATCHER_WORMHOLE = "wormhole";
+    public static final String WATCHER_SUPPRESSION = "suppression";
     
     public static final String CYBER_EXPERT_NBT_CONTAINER = "cyber_expert_items";
 
