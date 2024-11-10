@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.DataInstance;
-import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.PlayerUtils;
 
@@ -38,7 +37,7 @@ public class ActionContainer {
         List<Player> players;
         if(parameters.containsKey(PropertyConstant.ACTION_TEAM)) {
             String teamName = (String)parameters.get(PropertyConstant.ACTION_TEAM);
-            players = PlayerUtils.getPlayersFromTeam(GameInstance.getInstance().getTeam(teamName));
+            players = PlayerUtils.getPlayersFromTeam(teamName);
 
         } else if(parameters.containsKey(PropertyConstant.ACTION_PLAYER)) {
             String playerName = (String)parameters.get(PropertyConstant.ACTION_PLAYER);

@@ -1,8 +1,9 @@
 package remonone.nftilation.effects;
 
-import org.bukkit.Particle;
 import org.bukkit.util.Vector;
 import remonone.nftilation.effects.props.SpherePlainProps;
+import remonone.nftilation.effects.strategies.IParticleStrategy;
+import remonone.nftilation.effects.strategies.ParticleStrategyOutput;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +17,12 @@ public class SpherePlainEffect implements IEffect<SpherePlainProps> {
     public void execute(SpherePlainProps props) {
         Vector centerVector = props.getSphereGlobalPoint();
         List<Vector> points = getPointsWithinSphere(props.getLocalCenterPoint(), props.getTense(), props.getProjectedSphereRadius(), props.getPlaneRadius());
+        IParticleStrategy strategy = props.getParticleStrategy();
         for(Vector point : points) {
             Vector pos = point.add(centerVector).add(props.getShift());
-            props.getWorld().spawnParticle(props.getParticle(), pos.getX(), pos.getY(), pos.getZ(), props.getCount(), props.getOffsetX(), props.getOffsetY(), props.getOffsetZ());
+            ParticleStrategyOutput output = strategy.calculateStrategy(pos);
+            Vector offset = output.getOffset();
+            props.getWorld().spawnParticle(props.getParticle(), pos.getX(), pos.getY(), pos.getZ(), output.getCount(), offset.getX(), offset.getY(), offset.getZ(), output.getExtra());
         }
     }
 

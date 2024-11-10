@@ -19,7 +19,6 @@ public class MetaConfig {
     @Getter
     private final static MetaConfig instance = new MetaConfig();
 
-    private File file;
     private YamlConfiguration configuration;
     
     @Getter
@@ -41,7 +40,7 @@ public class MetaConfig {
     
     public void Load() {
         Logger.log("Loading meta...");
-        file = new File(Nftilation.getInstance().getDataFolder(), "meta.yml");
+        File file = new File(Nftilation.getInstance().getDataFolder(), "meta.yml");
         if(!file.exists()) {
             Nftilation.getInstance().saveResource("meta.yml", false);
         }
@@ -95,6 +94,7 @@ public class MetaConfig {
             return Collections.emptyMap();
         }
         
+        @SuppressWarnings("unchecked")
         public static ContentInfo deserialize(Map<String, Object> map) {
             ContentInfo info = new ContentInfo();
             if(map.containsKey("info")) {
@@ -116,6 +116,7 @@ public class MetaConfig {
             return Collections.emptyMap();
         }
         
+        @SuppressWarnings("unchecked")
         public static GlobalEvent deserialize(Map<String, Object> map) {
             GlobalEvent event = new GlobalEvent();
             if(map.containsKey("delay")) {

@@ -1,17 +1,12 @@
 package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.block.Block;
+import org.bukkit.*;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MetaConstants;
@@ -19,6 +14,7 @@ import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.effects.LineEffect;
 import remonone.nftilation.effects.props.LineProps;
+import remonone.nftilation.effects.strategies.ParticleColorStrategy;
 import remonone.nftilation.game.ingame.objects.TrapCircle;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.*;
@@ -99,7 +95,7 @@ public class CyberExpert extends Role {
         Player player = model.getReference();
         int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         Integer range = (Integer)getMetaInfo(MetaConstants.META_CE_TELEPORT_RANGE, level);
-        Location positionToTeleport = getBlockLookedAt(player, range).add(new Vector(.5F, 0, .5F));
+        Location positionToTeleport = BlockUtils.getBlockLookedAt(player, range).add(new Vector(.5F, 0, .5F));
         positionToTeleport.setPitch(player.getLocation().getPitch());
         positionToTeleport.setYaw(player.getLocation().getYaw());
         LineProps props = LineProps.builder()
@@ -108,29 +104,27 @@ public class CyberExpert extends Role {
                 .to(positionToTeleport.toVector())
                 .particle(Particle.REDSTONE)
                 .step(.1D)
-                .count(0)
+                .particleStrategy(new ParticleColorStrategy(RGBConstants.blue))
                 .build();
-        props.setCustomOffset(RGBConstants.purple);
         new LineEffect().execute(props);
         player.teleport(positionToTeleport);
         return true;
     }
 
     private boolean jailTarget(PlayerModel model) {
-        int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        double range = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_RANGE, level);
+        double range = (Double)getMetaByName(model, MetaConstants.META_CE_JAIL_RANGE);
         Player player = model.getReference();
-        Entity selectedEntity = getEntityLookedAt(player, range);
+        Entity selectedEntity = PlayerUtils.getEntityLookedAt(player, range);
         if(selectedEntity == null) {
-            player.sendMessage("Entity has not been found!");
+            player.playSound(player.getLocation(), Sound.ENTITY_CAT_HISS, .5f, 1f);
             return false;
         }
         if(!(selectedEntity instanceof Player)) {
-            player.sendMessage("Player was not been found!");
+            player.playSound(player.getLocation(), Sound.ENTITY_CAT_HISS, .5f, 1f);
             return false;
         }
         Player target = (Player)selectedEntity;
-        createTrap(target, player, level);
+        createTrap(target, model);
         return true;
     }
 
@@ -143,44 +137,19 @@ public class CyberExpert extends Role {
         return true;
     }
 
-
-    private Entity getEntityLookedAt(Player player, double range) {
-        List<Entity> entities = player.getNearbyEntities(range, range, range);
-        
-        RayTrace ray = new RayTrace(player.getEyeLocation().toVector(), player.getEyeLocation().getDirection());
-        for(Entity entity : entities) {
-            BoundingBox box = new BoundingBox(entity);
-            if(ray.intersects(box, range + 1, .1D)) return entity;
-        }
-        return null;
-    }
-
-    private Location getBlockLookedAt(Player player, int range) {
-        BlockIterator iterator = new BlockIterator(player.getWorld(), player.getEyeLocation().toVector(), player.getEyeLocation().getDirection(), 0, range);
-        Block lastAirBlock = player.getEyeLocation().getBlock();
-        while(iterator.hasNext()) {
-            Block block = iterator.next();
-            if(!block.getType().equals(Material.AIR)) {
-                break;
-            }
-            lastAirBlock = block;
-        }
-        return lastAirBlock.getLocation();
-    }
-
-    private void createTrap(Player target, Player performer, int level) {
-        double duration = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_DURATION, level);
-        double radius = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_RADIUS, level);
-        double knockback = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_KNOCKBACK, level);
-        double damage = (Double)getMetaInfo(MetaConstants.META_CE_JAIL_DAMAGE, level);
+    private void createTrap(Player target, PlayerModel performer) {
+        double duration = (Double)getMetaByName(performer, MetaConstants.META_CE_JAIL_DURATION);
+        double radius = (Double)getMetaByName(performer, MetaConstants.META_CE_JAIL_RADIUS);
+        double knockback = (Double)getMetaByName(performer, MetaConstants.META_CE_JAIL_KNOCKBACK);
+        double damage = (Double)getMetaByName(performer, MetaConstants.META_CE_JAIL_DAMAGE);
         TrapCircle.builder()
                 .trappee(target)
-                .trapper(performer)
+                .trapper(performer.getReference())
                 .duration(duration * DataConstants.TICKS_IN_SECOND)
                 .range(radius)
                 .knockback(knockback)
                 .damage(damage)
-                .world(performer.getWorld())
+                .world(performer.getReference().getWorld())
                 .build()
                 .initTrap();
     }

@@ -1,7 +1,5 @@
 package remonone.nftilation.utils;
 
-import org.bukkit.Effect;
-import org.bukkit.World;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -87,9 +85,6 @@ public class RayTrace {
             return false;
         } else if (position.getY() < min.getY() || position.getY() > max.getY()) {
             return false;
-        } else if (position.getZ() < min.getZ() || position.getZ() > max.getZ()) {
-            return false;
-        }
-        return true;
+        } else return !(position.getZ() < min.getZ()) && !(position.getZ() > max.getZ());
     }
 }

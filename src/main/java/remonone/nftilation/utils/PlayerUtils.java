@@ -159,6 +159,17 @@ public class PlayerUtils {
         }
         return false;
     }
+
+    public static Entity getEntityLookedAt(Player player, double range) {
+        List<Entity> entities = player.getNearbyEntities(range, range, range);
+
+        RayTrace ray = new RayTrace(player.getEyeLocation().toVector(), player.getEyeLocation().getDirection());
+        for(Entity entity : entities) {
+            BoundingBox box = new BoundingBox(entity);
+            if(ray.intersects(box, range + 1, .1D)) return entity;
+        }
+        return null;
+    }
     
     @AllArgsConstructor
     public static class AttackerInfo {

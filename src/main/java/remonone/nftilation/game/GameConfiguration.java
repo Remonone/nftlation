@@ -9,6 +9,7 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftIronGolem;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -173,6 +174,7 @@ public class GameConfiguration {
         }
         return teamData;
     }
+    
 
     private static Map<String, Object> composeParams() {
         Map<String, Object> params = new HashMap<>();
@@ -232,10 +234,12 @@ public class GameConfiguration {
         parameters.put(PropertyConstant.PLAYER_LEVEL_PARAM, 1);
         parameters.put(PropertyConstant.PLAYER_DEATH_COUNT, 0);
         parameters.put(PropertyConstant.PLAYER_KILL_COUNT, 0);
-        parameters.put(PropertyConstant.PLAYER_ROLE_ID, info.getRole().getRoleID());
         parameters.put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, true);
         parameters.put(PropertyConstant.PLAYER_TEAM_NAME, teamName);
-        parameters.put(PropertyConstant.PLAYER_RUNE_ID, info.getRune().getRuneID());
+        if(info != null) {
+            parameters.put(PropertyConstant.PLAYER_ROLE_ID, info.getRole().getRoleID());
+            parameters.put(PropertyConstant.PLAYER_RUNE_ID, info.getRune().getRuneID());
+        }
         return parameters;
     }
 
@@ -262,5 +266,23 @@ public class GameConfiguration {
         };
         runnable.runTaskTimer(Nftilation.getInstance(), 10L, 10L);
         return runnable.getTaskId();
+    }
+    
+    public static TruncatedTeam createShallowTeam(Collection<Player> players, String teamName) {
+        List<PlayerModel> playerModels = composeModels(players, teamName);
+        return TruncatedTeam.builder()
+                .players(playerModels)
+                .build();
+    }
+
+    private static List<PlayerModel> composeModels(Collection<Player> players, String teamName) {
+        List<PlayerModel> models = new ArrayList<>();
+        for (Player player : players) {
+            Map<String, Object> params = getParametersObject(null, teamName);
+            params.put(PropertyConstant.PLAYER_ROLE_ID, Role.getRoleByID("WA"));
+            PlayerModel model = new PlayerModel(player, 0, params);
+            models.add(model);
+        }
+        return models;
     }
 }

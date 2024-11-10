@@ -17,6 +17,7 @@ import remonone.nftilation.effects.CircleEffect;
 import remonone.nftilation.effects.SpherePlainEffect;
 import remonone.nftilation.effects.props.CircleProps;
 import remonone.nftilation.effects.props.SpherePlainProps;
+import remonone.nftilation.effects.strategies.ParticleColorStrategy;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.EntityDamageByPlayerLog;
 import remonone.nftilation.utils.PlayerUtils;
@@ -50,9 +51,9 @@ public class TrapCircle implements Listener {
                 .radius(range)
                 .center(this.center.toVector().clone())
                 .minAngle(0).maxAngle(360).step(2)
-                .count(0).offset(new Vector(0, .5F, 0))
+                .particleStrategy(new ParticleColorStrategy(RGBConstants.blue))
+                .offset(new Vector(0, .5F, 0))
                 .build();
-        props.setCustomOffset(RGBConstants.purple);
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
@@ -103,15 +104,13 @@ public class TrapCircle implements Listener {
                     .tense(50)
                     .particle(Particle.REDSTONE)
                     .world(trapper.getWorld())
-                    .shift(new Vector(0, .5F, 0))
                     .localCenterPoint(mover.getLocation().toVector().clone().subtract(this.center.toVector().clone()))
                     .planeRadius(1.5D)
                     .sphereGlobalPoint(this.center.toVector().clone())
                     .projectedSphereRadius(range)
                     .shift(new Vector(0, .5F, 0))
-                    .count(0)
+                    .particleStrategy(new ParticleColorStrategy(RGBConstants.blue))
                     .build();
-            props.setCustomOffset(RGBConstants.blue);
             new SpherePlainEffect().execute(props);
             EntityDamageByEntityEvent e = new EntityDamageByEntityEvent(trapper, trappee, EntityDamageEvent.DamageCause.MAGIC, damage);
             getServer().getPluginManager().callEvent(e);

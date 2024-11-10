@@ -22,13 +22,6 @@ public class TaskCache {
         containers.clear();
     }
 
-    public TaskContainer getTaskById(int id) {
-        for (TaskContainer tc : containers) {
-            if(tc.getRunnable().getTaskId() == id) return tc;
-        }
-        return null;
-    }
-
     public void removeTask(TaskContainer tc) {
         if(tc == null) return;
         containers.remove(tc);

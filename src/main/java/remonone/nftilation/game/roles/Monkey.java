@@ -181,8 +181,8 @@ public class Monkey extends Role {
         if(entity == null) return;
         if(!(entity instanceof Player)) return;
         Player player = (Player) entity;
-        PlayerModel model = (PlayerModel) snowball.getMetadata(RoleConstant.MONKEY_GRENADE);
-        if(!GameInstance.getInstance().checkIfPlayersInSameTeam(player, model.getReference())) return;
+        PlayerModel model = (PlayerModel) snowball.getMetadata(RoleConstant.MONKEY_GRENADE).get(0).value();
+        if(GameInstance.getInstance().checkIfPlayersInSameTeam(player, model.getReference())) return;
         List<EffectPotion> effects = (List<EffectPotion>) getMetaByName(model, MetaConstants.META_MONKEY_THROWER_EFFECTS);
         for(EffectPotion effect : effects) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(effect.getEffect()), effect.getDuration(), effect.getStrength(), true, true));

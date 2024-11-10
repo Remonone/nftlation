@@ -73,6 +73,7 @@ public class TeamCollection implements ConfigurationSerializable, Cloneable {
         return info;
     }
 
+    @SuppressWarnings("unchecked")
     public static TeamCollection deserialize(Map<String, Object> map) {
         UUID id;
         String name = "";

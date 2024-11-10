@@ -67,18 +67,18 @@ public class GameInstance {
 
     private void initComponents() {
         components = new HashMap<>();
-        IComponent playerInteract = instantiateComponent(PlayerInteractComponent.class);
+        IComponent playerInteract = instantiateComponent();
         components.put(playerInteract.getName(), playerInteract);
     }
 
-    private IComponent instantiateComponent(Class<? extends IComponent> componentClass) {
+    private IComponent instantiateComponent() {
         try {
-            IComponent comp = componentClass.newInstance();
+            IComponent comp = ((Class<? extends IComponent>) PlayerInteractComponent.class).newInstance();
             comp.initComponent();
             return comp;
         } catch(Exception ex) {
-            Logger.error("Cannot instantiate component " + componentClass.getName());
-            throw new RuntimeException("Cannot instantiate component " + componentClass.getName(), ex);
+            Logger.error("Cannot instantiate component " + PlayerInteractComponent.class.getName());
+            throw new RuntimeException("Cannot instantiate component " + PlayerInteractComponent.class.getName(), ex);
         }
     }
 
@@ -205,6 +205,7 @@ public class GameInstance {
             }
         };
         task.runTaskTimer(Nftilation.getInstance(), 0L, 40L);
+        Bukkit.getScheduler().cancelTask(repeatedTask);
     }
 
     private void notifyDestruction(ITeam team) {
@@ -276,6 +277,8 @@ public class GameInstance {
     }
 
     public void addNewTeam(Collection<Player> players) {
-//        team
+       IModifiableTeam team = GameConfiguration.createShallowTeam(players, "BOSS");
+       teamRaw.add(team);
+       teamData.put(team.getTeamName(), team);
     }
 }

@@ -114,6 +114,7 @@ public class RuslanBlaze extends EntityBlaze implements EntityOwnable {
             --this.c;
             EntityLiving var1 = this.a.getGoalTarget();
             double var2 = this.a.h(var1);
+            if(var1 == null) return;
             if (var2 < 4.0) {
                 if (this.c <= 0) {
                     this.c = 20;

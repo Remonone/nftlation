@@ -6,11 +6,8 @@ import org.bukkit.util.Vector;
 
 @SuperBuilder
 @Getter
-public class CircleProps extends BaseProps {
-    private double minAngle;
-    private double maxAngle;
-    private double radius;
-    private double step;
+public class SphereProps extends BaseProps{
     private Vector center;
-    private Vector offset;
+    private double radius;
+    private int density;
 }

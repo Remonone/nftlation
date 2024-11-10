@@ -69,6 +69,15 @@ public class MetaConstants {
     public static final String META_CE_JAIL_KNOCKBACK = "ability.jail.knockback"; // 1.2
     public static final String META_CE_JAIL_DAMAGE = "ability.jail.damage";
 
+    public static final String META_WA_WORMHOLE_COOLDOWN = "ability.wormhole.cooldown";
+    public static final String META_WA_WORMHOLE_DISTANCE = "ability.wormhole.distance";
+    public static final String META_WA_GUST_COOLDOWN = "ability.gust.cooldown";
+    public static final String META_WA_GUST_RANGE = "ability.gust.range";
+    public static final String META_WA_GUST_SCALE = "ability.gust.scale";
+    public static final String META_WA_SUPPRESSION_COOLDOWN = "ability.suppression.cooldown";
+    public static final String META_WA_SUPPRESSION_DURATION = "ability.suppression.duration";
+    public static final String META_WA_SUPPRESSION_RANGE = "ability.suppression.range";
+    
     public static final String META_GLOBAL = "meta.global";
     
     private MetaConstants() {}

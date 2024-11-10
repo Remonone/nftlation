@@ -58,7 +58,9 @@ public class DumpCollector {
         File file = new File(Nftilation.getInstance().getDataFolder(), fileName);
         try {
             if(!file.exists()) {
-                    file.createNewFile();
+                    if(!file.createNewFile()) {
+                        Logger.error("Cannot create dump file! " + fileName);
+                    }
             }
         } catch (IOException e) {
             Logger.error("Cannot create dump file! " + e.getMessage());
