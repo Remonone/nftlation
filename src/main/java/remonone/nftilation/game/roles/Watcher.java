@@ -23,20 +23,26 @@ import remonone.nftilation.effects.props.SphereProps;
 import remonone.nftilation.effects.strategies.ParticleColorStrategy;
 import remonone.nftilation.effects.strategies.ParticleDirectionalStrategy;
 import remonone.nftilation.effects.props.LineProps;
+import remonone.nftilation.effects.strategies.ParticleRepulsionStrategy;
+import remonone.nftilation.game.damage.WatcherOnKillHandler;
+import remonone.nftilation.game.models.IDamageHandler;
 import remonone.nftilation.game.models.PlayerModel;
+import remonone.nftilation.utils.AttackPresets;
 import remonone.nftilation.utils.BlockUtils;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.RGBConstants;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class Watcher extends Role{
+public class Watcher extends Role {
     @Override
     public String getRoleID() {
         return "WA";
+    }
+    
+    @Override
+    public boolean checkForRoleAccess(Role role) {
+        return true;
     }
 
     public Watcher() {
@@ -82,15 +88,13 @@ public class Watcher extends Role{
 
     @Override
     public List<ItemStack> getAbilityItems(Map<String, Object> playerParams) {
-        // Teleport
-        // Soul suppression
-        // Wind gust
         ItemStack teleport = new ItemStack(Material.BLAZE_ROD);
         ItemMeta meta = teleport.getItemMeta();
         meta.setDisplayName("Teleport");
         teleport.setItemMeta(meta);
         NBT.modify(teleport, (nbt) -> {
             nbt.setString(RoleConstant.WATCHER_NBT_CONTAINER, RoleConstant.WATCHER_WORMHOLE);
+            nbt.setString(RoleConstant.ROLE, getRoleID());
         });
         ItemStack soulSuppression = new ItemStack(Material.STRING);
         ItemMeta soulSuppressionMeta = soulSuppression.getItemMeta();
@@ -98,6 +102,7 @@ public class Watcher extends Role{
         soulSuppression.setItemMeta(soulSuppressionMeta);
         NBT.modify(soulSuppression, (nbt) -> {
             nbt.setString(RoleConstant.WATCHER_NBT_CONTAINER, RoleConstant.WATCHER_SUPPRESSION);
+            nbt.setString(RoleConstant.ROLE, getRoleID());
         });
         ItemStack windGust = new ItemStack(Material.FEATHER);
         ItemMeta windGustMeta = windGust.getItemMeta();
@@ -105,11 +110,36 @@ public class Watcher extends Role{
         windGust.setItemMeta(windGustMeta);
         NBT.modify(windGust, (nbt) -> {
             nbt.setString(RoleConstant.WATCHER_NBT_CONTAINER, RoleConstant.WATCHER_WIND_GUST);
+            nbt.setString(RoleConstant.ROLE, getRoleID());
         });
         return Arrays.asList(teleport, soulSuppression, windGust);
     }
 
     private boolean useGustItem(PlayerModel model) {
+        Player performer = model.getReference();
+        Location loc = performer.getLocation();
+        Vector direction = loc.getDirection();
+        double range = (Double)getMetaByName(model, MetaConstants.META_WA_GUST_RANGE);
+        double scale = (Double)getMetaByName(model, MetaConstants.META_WA_GUST_SCALE);
+        Vector size = new Vector(range / direction.getX(), range, range / direction.getZ());
+        Collection<Entity> entities = performer.getWorld().getNearbyEntities(loc, size.getX(), size.getY(), size.getZ());
+        performer.getWorld().playSound(performer.getLocation(), Sound.ITEM_ELYTRA_FLYING, 1f, .8f);
+        SphereProps props = SphereProps.builder()
+                .density(300)
+                .particle(Particle.CLOUD)
+                .world(performer.getWorld())
+                .particleStrategy(new ParticleRepulsionStrategy(model.getReference().getLocation().toVector(), 2d))
+                .radius(2D)
+                .center(performer.getLocation().toVector())
+                .build();
+        new SphereEffect().execute(props);
+        for(Entity entity : entities) {
+            if(entity.equals(performer)) continue;
+            Vector entityPosition = entity.getLocation().toVector().subtract(loc.toVector()).normalize();
+            Vector entityVelocity = entity.getVelocity();
+            entityVelocity.add(entityPosition).multiply(scale).add(new Vector(0, .5F, 0));
+            entity.setVelocity(entityVelocity);
+        }
         return true;
     }
 
@@ -130,7 +160,16 @@ public class Watcher extends Role{
         long formattedStun = (long) stun * DataConstants.ONE_SECOND + System.currentTimeMillis();
         targetModel.getParameters().put(PropertyConstant.PLAYER_STUN_DURATION, formattedStun);
         target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, (int)stun * DataConstants.TICKS_IN_SECOND, 5, false, false));
-        target.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, .5f);
+        target.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, .3f);
+        SphereProps props = SphereProps.builder()
+                .density(200)
+                .particleStrategy(new ParticleRepulsionStrategy(target.getLocation().toVector().add(new Vector(0, .5D, 0)), .7f))
+                .world(target.getWorld())
+                .radius(3)
+                .center(target.getLocation().toVector().add(new Vector(0, 0.5, 0)))
+                .particle(Particle.DRAGON_BREATH)
+                .build();
+        SphereEffect effect = new SphereEffect();
         int taskId = new BukkitRunnable() {
             @SuppressWarnings("deprecation")
             @Override
@@ -141,6 +180,7 @@ public class Watcher extends Role{
                 }
                 target.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, .5f);
                 target.damage(event.getFinalDamage());
+                effect.execute(props);
             }
         }.runTaskTimer(Nftilation.getInstance(), 0, 20).getTaskId();
         new BukkitRunnable() {
@@ -178,23 +218,27 @@ public class Watcher extends Role{
         Player player = model.getReference();
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_AMBIENT, 2f, .4f);
         SphereProps props = SphereProps.builder()
-                .density(300)
+                .density(400)
                 .particle(Particle.FLAME)
                 .world(player.getWorld())
                 .particleStrategy(new ParticleDirectionalStrategy(model.getReference().getLocation().toVector(), .4d))
                 .radius(8)
                 .center(player.getLocation().toVector())
                 .build();
-        new SphereEffect().execute(props);
+        SphereEffect effect = new SphereEffect();
+        effect.execute(props);
         Location loc = player.getLocation();
         new BukkitRunnable() {
             @Override
             public void run() {
-                loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1f, .4f);
-                player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 5, 100, false, false));
-                loc.getWorld().createExplosion(loc, 5, false);
+                AttackPresets.summonExplosion(loc, player, 8, 10);
             }
         }.runTaskLater(Nftilation.getInstance(), 40);
     }
-
+    
+    
+    @Override
+    public List<IDamageHandler> getDamageHandlers() {
+        return Collections.singletonList(new WatcherOnKillHandler());
+    }
 }

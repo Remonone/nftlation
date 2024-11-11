@@ -76,3 +76,4 @@ commands:
     usage: /transfer [recipientName] [amount]
   move:
     usage: /move [player]
+  rbfbsafa:

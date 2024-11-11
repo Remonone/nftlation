@@ -44,7 +44,7 @@ public class Indian extends Role {
     }
     
     @Override
-    protected List<ItemStack> getAbilityItems(Map<String, Object> params) {
+    public List<ItemStack> getAbilityItems(Map<String, Object> params) {
         int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         ItemStack blocks = new ItemStack(Material.STONE);
         switch (upgradeLevel) {

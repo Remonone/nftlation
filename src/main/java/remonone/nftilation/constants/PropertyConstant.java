@@ -32,9 +32,12 @@ public class PropertyConstant {
     public static final String PLAYER_TEAM_NAME = "teamName";
     public static final String PLAYER_RUNE_ID = "rune_id";
     public static final String PLAYER_STUN_DURATION = "stunDuration";
+    public static final String PLAYER_CUSTOM_ABILITY_ITEMS = "customItems";
     
     public static final String TEAM_RESOURCE_INCOME = "resourceIncome";
     public static final String TEAM_PASSIVE_INCOME = "passiveIncome";
     public static final String TEAM_UTILITY_ITEM_LEVEL = "utilityItemLevel";
     public static final String TEAM_CORE_BLOCK = "coreBlock";
+    
+    public static final String TEAM_BOSS = "BOSS";
 }

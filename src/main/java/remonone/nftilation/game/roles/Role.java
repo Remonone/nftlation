@@ -39,11 +39,17 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
     private final int index;
     protected final Map<String, Object> meta;
     
+    private static AbilityItemsContainer HANDLER = new AbilityItemsContainer();
+    
     @Getter
     private final static List<Role> roles = new ArrayList<>();
 
     private AbilityItemsHandler handler;
-    
+
+    public boolean checkForRoleAccess(Role role) {
+        return role.equals(this);
+    }
+
     public abstract String getRoleID();
 
     @SuppressWarnings("unchecked")
@@ -128,7 +134,7 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
         updatePlayerAbilities(model);
     }
     
-    protected List<ItemStack> getAbilityItems(Map<String, Object> params) {
+    public List<ItemStack> getAbilityItems(Map<String, Object> params) {
         return Collections.emptyList();
     }
     
@@ -174,7 +180,9 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
     }
     
     private void giveAbilityItems(Player player, Map<String, Object> params) {
-        ItemStack[] abilityItems = getAbilityItems(params).toArray(new ItemStack[0]);
+        List<ItemStack> abilities = getAbilityItems(params);
+        abilities.addAll(RoleItemDispenser.getCustomAbilityItems(player));
+        ItemStack[] abilityItems = abilities.toArray(new ItemStack[0]);
         setOwner(player, abilityItems);
         for(int i = 0; i < abilityItems.length; i++) {
             ItemStack stack = abilityItems[i];
@@ -277,7 +285,7 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
                 .container(container)
                 .build();
         this.handler = handlers;
-        getServer().getPluginManager().registerEvents(handlers, Nftilation.getInstance());
+        HANDLER.registerAbilityHandler(this, handlers);
     }
 
     @Override
@@ -294,12 +302,15 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
     }
 
     public void resetListeners() {
-        PlayerInteractEvent.getHandlerList().unregister(this.handler);
+        PlayerInteractEvent.getHandlerList().unregister(HANDLER);
         PlayerInteractEvent.getHandlerList().unregister(this);
+        HANDLER = new AbilityItemsContainer();
     }
 
     public Object getMetaByName(PlayerModel model, String key) {
         int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
         return getMetaInfo(key, level);
     }
+
+    
 }

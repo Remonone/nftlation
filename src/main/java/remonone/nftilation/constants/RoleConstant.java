@@ -1,10 +1,16 @@
 package remonone.nftilation.constants;
 
 public class RoleConstant {
+    
+    public static final String ROLE = "role";
+    
     public static final String CRYPTAN_NBT_CONTAINER = "cryptan_items";
     public static final String CRYPTAN_NBT_HOOK = "hook";
     
     public static final int SYBIL_EXPLOSION_ARROW_STRENGTH = 3;
+    public static final String SYBIL_ATTACKER_NBT_CONTAINER = "sybilattacker_items";
+    public static final String SYBIL_ATTACKER_PISTOL = "pistol";
+    public static final String SYBIL_ATTACKER_EXPLOSIVE = "explosive";
     
     public static final String CTYPTOMARINE_SHIELD = "Щит императора";
     public static final int CRYPTOMARINE_EXPLOSION_STRENGTH = 4;
@@ -45,7 +51,7 @@ public class RoleConstant {
     public static final String WATCHER_SUPPRESSION = "suppression";
     
     public static final String CYBER_EXPERT_NBT_CONTAINER = "cyber_expert_items";
-
+    
     public static final String DEFAULT_SWORD_NAME = "Тупой меч";
     public static final String DEFAULT_PICKAXE_NAME = "Хрупкая кирка";
     public static final String DEFAULT_AXE_NAME = "Треснувший топор";

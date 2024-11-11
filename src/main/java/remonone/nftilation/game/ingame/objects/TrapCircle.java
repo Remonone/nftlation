@@ -104,7 +104,7 @@ public class TrapCircle implements Listener {
                     .tense(50)
                     .particle(Particle.REDSTONE)
                     .world(trapper.getWorld())
-                    .localCenterPoint(mover.getLocation().toVector().clone().subtract(this.center.toVector().clone()))
+                    .localCenterPoint(mover.getLocation().toVector().subtract(this.center.toVector()))
                     .planeRadius(1.5D)
                     .sphereGlobalPoint(this.center.toVector().clone())
                     .projectedSphereRadius(range)

@@ -61,7 +61,12 @@ public class TeamImpl implements IModifiableTeam {
     public TeamSpawnPoint getTeamSpawnPoint() {
         return spawnPoint;
     }
-    
+
+    @Override
+    public boolean isUILayoutExists() {
+        return true;
+    }
+
     @Override
     public char getTeamColor() {
         return teamColor.getChar();

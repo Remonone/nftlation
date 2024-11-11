@@ -1,5 +1,6 @@
 package remonone.nftilation.handlers;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,6 +12,6 @@ public class OnChatEvent implements Listener {
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         String message = event.getMessage();
-        event.setFormat(player.getDisplayName() + ": " + message);
+        event.setFormat(player.getName() + ": " + ChatColor.WHITE + message);
     }
 }

@@ -236,6 +236,7 @@ public class GameConfiguration {
         parameters.put(PropertyConstant.PLAYER_KILL_COUNT, 0);
         parameters.put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, true);
         parameters.put(PropertyConstant.PLAYER_TEAM_NAME, teamName);
+        parameters.put(PropertyConstant.PLAYER_CUSTOM_ABILITY_ITEMS, new ArrayList<>());
         if(info != null) {
             parameters.put(PropertyConstant.PLAYER_ROLE_ID, info.getRole().getRoleID());
             parameters.put(PropertyConstant.PLAYER_RUNE_ID, info.getRune().getRuneID());
@@ -271,6 +272,7 @@ public class GameConfiguration {
     public static TruncatedTeam createShallowTeam(Collection<Player> players, String teamName) {
         List<PlayerModel> playerModels = composeModels(players, teamName);
         return TruncatedTeam.builder()
+                .teamName(teamName)
                 .players(playerModels)
                 .build();
     }
@@ -279,8 +281,11 @@ public class GameConfiguration {
         List<PlayerModel> models = new ArrayList<>();
         for (Player player : players) {
             Map<String, Object> params = getParametersObject(null, teamName);
-            params.put(PropertyConstant.PLAYER_ROLE_ID, Role.getRoleByID("WA"));
+            Role role = Role.getRoleByID("WA");
+            params.put(PropertyConstant.PLAYER_ROLE_ID, "WA");
             PlayerModel model = new PlayerModel(player, 0, params);
+            model.getDamageHandlers().addAll(role.getDamageHandlers());
+            model.getDamageInvokers().addAll(role.getDamageInvokers());
             models.add(model);
         }
         return models;

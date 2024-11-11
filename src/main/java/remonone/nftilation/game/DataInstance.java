@@ -92,6 +92,7 @@ public class DataInstance {
             return;
         }
         players.remove(info);
+        infos.remove(playerId);
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) {
             if (info.data.getRole().equals(PlayerRole.PLAYER)) {
                 teams.get(info.data.getTeam().getTeamName()).removeIf(playerInfo -> playerInfo.data.getLogin().equals(info.data.getLogin()));

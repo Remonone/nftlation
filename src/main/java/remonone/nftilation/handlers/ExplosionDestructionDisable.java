@@ -25,6 +25,11 @@ public class ExplosionDestructionDisable implements Listener {
         
         Vector explosionPoint = e.getLocation().toVector();
         List<Vector> cores = ConfigManager.getInstance().getTeamSpawnList().stream().map(TeamSpawnPoint::getCoreCenter).collect(Collectors.toList());
+        Vector center = ConfigManager.getInstance().getCenterLocation().toVector();
+        if(explosionPoint.isInSphere(center, 20)) {
+            e.setCancelled(true);
+            return;
+        }
         for(Vector core : cores) {
             if (explosionPoint.isInSphere(core, DataConstants.INVULNERABILITY_RANGE)) {
                 e.setCancelled(true);

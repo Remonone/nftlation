@@ -11,6 +11,7 @@ public enum ActionType {
     MONEY_RAIN(""),
     TOTAL_SALE(""),
     HOT_SUMMER(""),
+    WATCHER_BOSS(""),
     MASSIVE_DELIRIUM(""),
     GOLDEN_APPLE("Золотое яблоко"),
     INSPIRATION("Вдохновение"),

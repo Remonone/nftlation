@@ -17,7 +17,7 @@ import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.IInventoryHelder;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
-import remonone.nftilation.game.roles.Guts;
+import remonone.nftilation.game.roles.Berserk;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.runes.Rune;
@@ -30,6 +30,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class InventoryBuilder {
+    
+    private static final int ROW_SHIFT = 9;
 
     public static Inventory getRoleSelectionInventory(Player player, String teamName) {
         Inventory inventory = Bukkit.createInventory(player, 54, NameConstants.ROLE_SELECTION_TAB);
@@ -43,7 +45,7 @@ public class InventoryBuilder {
                 .collect(Collectors.toList());
         List<Role> registeredRoles = Role.getRoles();
         for(Role role : registeredRoles) {
-            if(role instanceof Guts) {
+            if(role instanceof Berserk) {
                 if(!player.getDisplayName().contains("Jinrui_Saikyo")) {
                     continue;
                 }
@@ -151,7 +153,7 @@ public class InventoryBuilder {
         int offset = (slots - finalReservation) / 2;
 
         for(int i = 0; i < count; i++) {
-            availableItems.put(offset + i * spacing, filteredIds.get(i));
+            availableItems.put(offset + i * spacing + ROW_SHIFT, filteredIds.get(i));
         }
 
         return availableItems;

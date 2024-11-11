@@ -25,7 +25,9 @@ public class ActionContainer {
     public static void InitAction(ActionType type, Map<String, Object> parameters) {
         if(!actions.containsKey(type)) return;
         IAction action = actions.get(type);
+        
         action.Init(parameters);
+        
         
         if(!parameters.containsKey(PropertyConstant.ACTION_SILENT) || parameters.get(PropertyConstant.ACTION_SILENT).equals(false)) {
             NotifyActionStart(action, type, parameters);

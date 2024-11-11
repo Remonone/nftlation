@@ -46,7 +46,6 @@ public class PlayerNMSUtil {
         for(Player pl : Bukkit.getOnlinePlayers()) {
             if (pl == p) continue;
             //CHANGES THE PLAYER'S GAME PROFILE
-            
             pl.hidePlayer(p);
             pl.showPlayer(p);
             

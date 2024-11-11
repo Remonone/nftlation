@@ -3,6 +3,7 @@ package remonone.nftilation.handlers;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -114,12 +115,9 @@ public class OnEntityDieHandler implements Listener {
         }
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return;
         Player target = (Player) event.getEntity();
-        if(target.getHealth() - event.getFinalDamage() <= 0) {
-            event.setCancelled(true);
-            OnDeath(target);
-        }
         PlayerUtils.AttackerInfo attackerData = PlayerUtils.getAttackerPlayer(event.getDamager());
         if(attackerData == null) return;
+        // VERIFY ALL DEATH SOURCES
         PlayerModel targetModel = PlayerUtils.getModelFromPlayer(target);
         PlayerModel attackerModel = PlayerUtils.getModelFromPlayer(attackerData.attacker);
         if(targetModel == null || attackerModel == null) return;
@@ -140,6 +138,8 @@ public class OnEntityDieHandler implements Listener {
             EntityDamageByPlayerLog.removeLogEvent(target.getUniqueId());
             OnPlayerKillPlayerEvent e = new OnPlayerKillPlayerEvent(attackerModel, targetModel);
             getServer().getPluginManager().callEvent(e);
+            attackerModel.getReference().playSound(attackerModel.getReference().getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 2f);
+            OnDeath(target);
         }
         
         if(target.getHealth() - event.getFinalDamage() > 0) {

@@ -14,6 +14,7 @@ public interface ITeam {
     TeamSpawnPoint getTeamSpawnPoint();
     boolean isCoreAlive();
     boolean isTeamActive();
+    boolean isUILayoutExists();
     String getTeamName();
     char getTeamColor();
     Map<String, Object> getParameters();

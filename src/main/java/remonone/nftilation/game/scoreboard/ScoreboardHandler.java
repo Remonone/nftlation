@@ -26,7 +26,7 @@ public class ScoreboardHandler {
     public static void buildScoreboard(Player player) {
         ScoreboardManager manager = Bukkit.getScoreboardManager();
         Scoreboard scoreboard = manager.getNewScoreboard();
-        Objective objective = scoreboard.registerNewObjective("Nftlation", "dummy");
+        Objective objective = scoreboard.registerNewObjective("Nftilation", "dummy");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
@@ -42,12 +42,13 @@ public class ScoreboardHandler {
             Logger.error("Params for player: " + model.getReference().getDisplayName() + " were not set properly! Skipping...");
             return;
         }
+        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(model.getReference().getUniqueId());
+        ITeam team = GameInstance.getInstance().getTeam(teamName);
+        if(!team.isUILayoutExists()) return;
         objective.getScore("Level: " + playerParams.get(PropertyConstant.PLAYER_LEVEL_PARAM)).setScore(++counter);
         objective.getScore("Tokens: " + model.getTokens()).setScore(++counter);
         objective.getScore("Rune: " + Rune.getRuneByID((String)playerParams.get(PropertyConstant.PLAYER_RUNE_ID)).getName()).setScore(++counter);
         objective.getScore("Role: " + Role.getRoleByID((String)playerParams.get(PropertyConstant.PLAYER_ROLE_ID)).getName()).setScore(++counter);
-        String teamName = Store.getInstance().getDataInstance().getPlayerTeam(model.getReference().getUniqueId());
-        ITeam team = GameInstance.getInstance().getTeam(teamName);
         objective.getScore("Core Health: " + team.getCoreData().getHealth()).setScore(++counter);
         objective.getScore(ChatColor.RED + "" + ChatColor.BOLD + "= Info =").setScore(++counter);
         objective.getScore(ChatColor.RED + "").setScore(++counter);
@@ -67,10 +68,10 @@ public class ScoreboardHandler {
 
     public static void updateScoreboard(PlayerModel model) {
         Scoreboard scoreboard = model.getReference().getScoreboard();
-        if(scoreboard.getObjective("Nftlation") != null) {
-            scoreboard.getObjective("Nftlation").unregister(); 
+        if(scoreboard.getObjective("Nftilation") != null) {
+            scoreboard.getObjective("Nftilation").unregister(); 
         }
-        Objective newObjective = scoreboard.registerNewObjective("Nftlation", "dummy");
+        Objective newObjective = scoreboard.registerNewObjective("Nftilation", "dummy");
         newObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
         fillObjective(model, newObjective);
     }

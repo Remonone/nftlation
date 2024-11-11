@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -19,12 +20,13 @@ import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.models.ITeam;
+import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.ColorUtils;
+import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.NestedObjectFetcher;
+import remonone.nftilation.utils.PlayerUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class RoleItemDispenser {
@@ -103,7 +105,19 @@ public class RoleItemDispenser {
     private static Object getMetaInfo(String path, Map<String, Object> meta, int level) {
         return NestedObjectFetcher.getNestedObject(path, meta, level);
     }
-    
+
+    public static Collection<? extends ItemStack> getCustomAbilityItems(Player player) {
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        List<ItemStack> stacks = (List<ItemStack>) model.getParameters().get(PropertyConstant.PLAYER_CUSTOM_ABILITY_ITEMS);
+        if(stacks == null) return Collections.emptyList();
+        Logger.debug(stacks.toString());
+        List<ItemStack> list = new ArrayList<>();
+        for(ItemStack stack: stacks) {
+            list.add(stack.clone());
+        }
+        return list;
+    }
+
     @Getter
     public enum ItemType {
         SWORD("sword", false),

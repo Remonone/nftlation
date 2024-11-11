@@ -2,20 +2,22 @@ package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
 import org.bukkit.*;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
-import remonone.nftilation.effects.LineEffect;
-import remonone.nftilation.effects.props.LineProps;
-import remonone.nftilation.effects.strategies.ParticleColorStrategy;
+import remonone.nftilation.effects.CircleEffect;
+import remonone.nftilation.effects.props.CircleProps;
+import remonone.nftilation.effects.strategies.ParticleRepulsionStrategy;
 import remonone.nftilation.game.ingame.objects.TrapCircle;
+import remonone.nftilation.game.models.EffectPotion;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.*;
 
@@ -43,20 +45,12 @@ public class CyberExpert extends Role {
                         return ((Double)getMetaByName(model, MetaConstants.META_CE_JAIL_COOLDOWN)).floatValue();
                     }
                 });
-                put("shot", new IAbilityHandler() {
+                put("feather", new IAbilityHandler() {
                     @Override
-                    public boolean executeHandle(PlayerModel model) { return shotArrow(model); }
-                    @Override
-                    public float getCooldown(PlayerModel model) {
-                        return ((Double)getMetaByName(model, MetaConstants.META_CE_SHOT_COOLDOWN)).floatValue();
-                    }
-                });
-                put("teleport", new IAbilityHandler() {
-                    @Override
-                    public boolean executeHandle(PlayerModel model) { return teleportWithin(model); }
+                    public boolean executeHandle(PlayerModel model) { return increaseMoveSpeed(model); }
                     @Override
                     public float getCooldown(PlayerModel model) {
-                        return ((Double)getMetaByName(model, MetaConstants.META_CE_TELEPORT_COOLDOWN)).floatValue();
+                        return ((Double)getMetaByName(model, MetaConstants.META_CE_FLOW_COOLDOWN)).floatValue();
                     }
                 });
             }
@@ -73,41 +67,40 @@ public class CyberExpert extends Role {
             jail.setItemMeta(meta);
             NBT.modify(jail, (nbt) -> {
                 nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "jail");
+                nbt.setString(RoleConstant.ROLE, getRoleID());
             });
             items.add(jail);
         }
-        ItemStack pistol = new ItemStack(Material.TRIPWIRE_HOOK);
-        ItemMeta pistolMeta = pistol.getItemMeta();
-        pistolMeta.setDisplayName(ChatColor.DARK_PURPLE + "Пистолет Макарова");
-        pistol.setItemMeta(pistolMeta);
-        NBT.modify(pistol, (nbt) -> {nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "shot");});
-        items.add(pistol);
-        ItemStack teleport = new ItemStack(Material.EYE_OF_ENDER);
-        NBT.modify(teleport, (nbt) -> {nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "teleport");});
-        ItemMeta teleportMeta = teleport.getItemMeta();
-        teleportMeta.setDisplayName(ChatColor.GOLD + "Забекдорить");
-        teleport.setItemMeta(teleportMeta);
-        items.add(teleport);
+        ItemStack flow = new ItemStack(Material.FEATHER);
+        NBT.modify(flow, (nbt) -> {
+            nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "feather");
+            nbt.setString(RoleConstant.ROLE, getRoleID());
+        });
+        ItemMeta flowMeta = flow.getItemMeta();
+        flowMeta.setDisplayName(ChatColor.GRAY + "Режим погони");
+        flow.setItemMeta(flowMeta);
+        items.add(flow);
         return items;
     }
 
-    private boolean teleportWithin(PlayerModel model) {
+    @SuppressWarnings("unchecked")
+    private boolean increaseMoveSpeed(PlayerModel model) {
         Player player = model.getReference();
-        int level = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        Integer range = (Integer)getMetaInfo(MetaConstants.META_CE_TELEPORT_RANGE, level);
-        Location positionToTeleport = BlockUtils.getBlockLookedAt(player, range).add(new Vector(.5F, 0, .5F));
-        positionToTeleport.setPitch(player.getLocation().getPitch());
-        positionToTeleport.setYaw(player.getLocation().getYaw());
-        LineProps props = LineProps.builder()
+        CircleProps props = CircleProps.builder()
+                .step(5D)
+                .particleStrategy(new ParticleRepulsionStrategy(player.getLocation().toVector().add(new Vector(0, 2F, 0)), 1F))
+                .particle(Particle.CLOUD)
+                .center(player.getLocation().toVector().add(new Vector(0, 1F, 0)))
+                .minAngle(0)
+                .maxAngle(360)
                 .world(player.getWorld())
-                .from(player.getEyeLocation().toVector())
-                .to(positionToTeleport.toVector())
-                .particle(Particle.REDSTONE)
-                .step(.1D)
-                .particleStrategy(new ParticleColorStrategy(RGBConstants.blue))
+                .radius(.9D)
                 .build();
-        new LineEffect().execute(props);
-        player.teleport(positionToTeleport);
+        new CircleEffect().execute(props);
+        List<EffectPotion> effects = (List<EffectPotion>) getMetaByName(model, MetaConstants.META_CE_FLOW_EFFECTS);
+        for(EffectPotion effectPotion : effects) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(effectPotion.getEffect()), effectPotion.getDuration(), effectPotion.getStrength(), false, false));
+        }
         return true;
     }
 
@@ -125,15 +118,6 @@ public class CyberExpert extends Role {
         }
         Player target = (Player)selectedEntity;
         createTrap(target, model);
-        return true;
-    }
-
-    private boolean shotArrow(PlayerModel user) {
-        Player player = user.getReference();
-        int level = (Integer)user.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        Arrow arrow = player.launchProjectile(Arrow.class);
-        Double strength = (Double)getMetaInfo(MetaConstants.META_CE_SHOT_STRENGTH, level);
-        arrow.setVelocity(arrow.getVelocity().multiply(strength));
         return true;
     }
 

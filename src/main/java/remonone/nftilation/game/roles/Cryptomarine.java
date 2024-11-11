@@ -24,7 +24,7 @@ public class Cryptomarine extends Role {
     }
     
     @Override
-    protected List<ItemStack> getAbilityItems(Map<String, Object> params){
+    public List<ItemStack> getAbilityItems(Map<String, Object> params){
         ItemStack itemStack = new ItemStack(Material.SHIELD);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setUnbreakable(true);

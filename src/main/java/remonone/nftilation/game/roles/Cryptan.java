@@ -18,6 +18,9 @@ import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
+import remonone.nftilation.effects.SphereEffect;
+import remonone.nftilation.effects.props.SphereProps;
+import remonone.nftilation.effects.strategies.ParticleColorStrategy;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.damage.CryptanLowDamage;
 import remonone.nftilation.game.models.EffectPotion;
@@ -25,6 +28,7 @@ import remonone.nftilation.game.models.IDamageHandler;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.InventoryUtils;
 import remonone.nftilation.utils.PlayerUtils;
+import remonone.nftilation.utils.RGBConstants;
 
 import java.util.*;
 
@@ -42,7 +46,7 @@ public class Cryptan extends Role {
     }
     
     @Override
-    protected List<ItemStack> getAbilityItems(Map<String, Object> params) {
+    public List<ItemStack> getAbilityItems(Map<String, Object> params) {
         int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         int hookAvailability = (int) Optional.of(getMetaInfo(MetaConstants.META_HOOK_AVAILABILITY, upgradeLevel)).orElse(1);
         if(upgradeLevel < hookAvailability) return Collections.emptyList();
@@ -109,6 +113,15 @@ public class Cryptan extends Role {
             World world = caught.getWorld();
             world.playSound(caught.getLocation(), Sound.ENTITY_SLIME_ATTACK, 3f, .3f);
             world.playSound(caught.getLocation(), Sound.ENTITY_WITHER_SKELETON_HURT, .1f, .5f);
+            Vector dir = player.getLocation().toVector().subtract(caught.getLocation().toVector()).normalize();
+            SphereProps props = SphereProps.builder()
+                    .particle(Particle.REDSTONE)
+                    .density(5)
+                    .particleStrategy(new ParticleColorStrategy(RGBConstants.red))
+                    .center(caught.getLocation().toVector().add(dir))
+                    .radius(.3D)
+                    .build();
+            new SphereEffect().execute(props);
             double damage = (Double) Optional.of(getMetaInfo(MetaConstants.META_CRYPTAN_ABILITY_DAMAGE, level)).orElse(2D);
             EntityDamageByEntityEvent e = new EntityDamageByEntityEvent(player, caught, EntityDamageEvent.DamageCause.CRAMMING, damage);
             getServer().getPluginManager().callEvent(e);

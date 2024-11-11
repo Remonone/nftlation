@@ -70,7 +70,7 @@ public class Monkey extends Role {
     }
 
     @Override
-    protected List<ItemStack> getAbilityItems(Map<String, Object> params){
+    public List<ItemStack> getAbilityItems(Map<String, Object> params){
         List<ItemStack> items = new ArrayList<>();
         ItemStack itemStack = new ItemStack(Material.INK_SACK);
         ItemMeta meta = itemStack.getItemMeta();
@@ -78,7 +78,10 @@ public class Monkey extends Role {
         meta.setDisplayName(RoleConstant.MONKEY_ABILITY_ITEM);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
-        NBT.modify(itemStack, nbt -> {nbt.setString(RoleConstant.MONKEY_NBT_CONTAINER, RoleConstant.MONKEY_NBT_INVISIBILITY);});
+        NBT.modify(itemStack, nbt -> {
+            nbt.setString(RoleConstant.MONKEY_NBT_CONTAINER, RoleConstant.MONKEY_NBT_INVISIBILITY);
+            nbt.setString(RoleConstant.ROLE, getRoleID());
+        });
         items.add(itemStack);
         int level = (int)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         if(level > 1) {
@@ -87,7 +90,10 @@ public class Monkey extends Role {
             throwerMeta.setUnbreakable(true);
             throwerMeta.setDisplayName(RoleConstant.MONKEY_ABILITY_THROWER_ITEM);
             thrower.setItemMeta(throwerMeta);
-            NBT.modify(thrower, nbt -> {nbt.setString(RoleConstant.MONKEY_NBT_CONTAINER, RoleConstant.MONKEY_NBT_THROWER);});
+            NBT.modify(thrower, nbt -> {
+                nbt.setString(RoleConstant.MONKEY_NBT_CONTAINER, RoleConstant.MONKEY_NBT_THROWER);
+                nbt.setString(RoleConstant.ROLE, getRoleID());
+            });
             items.add(thrower);
         }
         return items;
@@ -184,6 +190,8 @@ public class Monkey extends Role {
         PlayerModel model = (PlayerModel) snowball.getMetadata(RoleConstant.MONKEY_GRENADE).get(0).value();
         if(GameInstance.getInstance().checkIfPlayersInSameTeam(player, model.getReference())) return;
         List<EffectPotion> effects = (List<EffectPotion>) getMetaByName(model, MetaConstants.META_MONKEY_THROWER_EFFECTS);
+        player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1f, .7f);
+        model.getReference().playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 2f);
         for(EffectPotion effect : effects) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(effect.getEffect()), effect.getDuration(), effect.getStrength(), true, true));
         }

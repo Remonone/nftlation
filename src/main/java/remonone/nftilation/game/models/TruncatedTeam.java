@@ -17,7 +17,10 @@ public class TruncatedTeam implements IModifiableTeam {
 
     private final UUID uuid = new UUID(50, 10);
     
+    @Getter
     private List<PlayerModel> players;
+    @Getter
+    private String teamName;
     
     @Override
     public void setTeamActive(boolean value) {
@@ -37,11 +40,6 @@ public class TruncatedTeam implements IModifiableTeam {
     @Override
     public UUID getTeamID() {
         return null;
-    }
-
-    @Override
-    public List<PlayerModel> getPlayers() {
-        return Collections.emptyList();
     }
 
     @Override
@@ -67,8 +65,8 @@ public class TruncatedTeam implements IModifiableTeam {
     }
 
     @Override
-    public String getTeamName() {
-        return "";
+    public boolean isUILayoutExists() {
+        return false;
     }
 
     @Override

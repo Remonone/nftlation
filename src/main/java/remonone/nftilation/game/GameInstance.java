@@ -28,6 +28,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.bukkit.Bukkit.getServer;
+
 public class GameInstance {
 
     @Getter
@@ -39,6 +41,7 @@ public class GameInstance {
 
     private static Map<String, IComponent> components;
     private int repeatedTask;
+    private BossReservation reservation;
 
     @Getter
     private boolean isFinished;
@@ -46,7 +49,7 @@ public class GameInstance {
     public void startGame() {
         Map<String, List<DataInstance.PlayerInfo>> teams = Store.getInstance().getDataInstance().getTeams();
         teamData = GameConfiguration.constructTeamData(teams, destroyTeam);
-
+        
         teamRaw.addAll(teamData.values());
         GameConfiguration.disposePlayers(teamRaw);
         GameConfiguration.initServices();
@@ -63,6 +66,7 @@ public class GameInstance {
         }
         initComponents();
         this.repeatedTask = GameConfiguration.startRepeatedTask();
+        this.reservation = new BossReservation();
     }
 
     private void initComponents() {
@@ -276,9 +280,34 @@ public class GameInstance {
         return false;
     }
 
-    public void addNewTeam(Collection<Player> players) {
-       IModifiableTeam team = GameConfiguration.createShallowTeam(players, "BOSS");
-       teamRaw.add(team);
-       teamData.put(team.getTeamName(), team);
+    public boolean addBossTeam() {
+        if(reservation.reservationID == null) return false;
+        Player player = getServer().getPlayer(reservation.reservationID);
+        IModifiableTeam team = GameConfiguration.createShallowTeam(Collections.singletonList(player), PropertyConstant.TEAM_BOSS);
+        teamRaw.add(team);
+        teamData.put(team.getTeamName(), team);
+        return true;
+    }
+    
+    public boolean setReservation(UUID player) {
+        if(reservation.reservationID != null) return false;
+        reservation.reservationID = player;
+        return true;
+    }
+    
+    public void removeTeam(String teamName) {
+        ITeam team = teamData.get(teamName);
+        if(team == null) return;
+        teamData.remove(teamName);
+        teamRaw.remove(team);
+    }
+    
+    @Getter
+    @Setter
+    private static class BossReservation {
+        private UUID reservationID;
+        public BossReservation() {
+            reservationID = null;
+        }
     }
 }

@@ -31,9 +31,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class Guts extends Role {
+public class Berserk extends Role {
     
-    public Guts() {
+    public Berserk() {
         super("GT");
     }
     
@@ -69,7 +69,7 @@ public class Guts extends Role {
 //    }
     
     @Override
-    protected List<ItemStack> getAbilityItems(Map<String, Object> params) {
+    public List<ItemStack> getAbilityItems(Map<String, Object> params) {
         ItemStack pistol = new ItemStack(Material.TRIPWIRE_HOOK);
         ItemMeta teleportMeta = pistol.getItemMeta();
         teleportMeta.setDisplayName(ChatColor.DARK_PURPLE + "Пушка");
@@ -89,7 +89,7 @@ public class Guts extends Role {
         if(!(damager instanceof Player)) return;
         Player attacker = (Player) damager;
         Role role = Store.getInstance().getDataInstance().getPlayerRole(attacker.getUniqueId());
-        if(!(role instanceof Guts)) return;
+        if(!(role instanceof Berserk)) return;
         if(!(e.getEntity() instanceof LivingEntity)) return;
         ItemStack stack = attacker.getInventory().getItemInMainHand();
         if(stack == null || stack.getAmount() < 1 || stack.getType().equals(Material.AIR)) return;
@@ -111,7 +111,7 @@ public class Guts extends Role {
     public void onItemUse(final PlayerInteractEvent e) {
         Player user = e.getPlayer();
         Role role = Store.getInstance().getDataInstance().getPlayerRole(user.getUniqueId());
-        if(!(role instanceof Guts)) return;
+        if(!(role instanceof Berserk)) return;
         ItemStack stack = e.getItem();
         if(stack == null || stack.getAmount() < 1 || stack.getType().equals(Material.AIR)) return;
         String gutsShot = NBT.get(stack, (nbt) -> (String)nbt.getString("gutsShot"));

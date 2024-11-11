@@ -76,6 +76,7 @@ public final class Nftilation extends JavaPlugin {
         ActionContainer.registerAction(ActionType.TOTAL_SALE, new TotalSale());
         ActionContainer.registerAction(ActionType.HOT_SUMMER, new HotSummer());
         ActionContainer.registerAction(ActionType.MASSIVE_DELIRIUM, new MassiveDelirium());
+        ActionContainer.registerAction(ActionType.WATCHER_BOSS, new WatcherBoss());
         
         ActionContainer.registerAction(ActionType.INSPIRATION, new Inspiration());
         ActionContainer.registerAction(ActionType.AIRSTRIKE, new AirStrike());
@@ -111,9 +112,9 @@ public final class Nftilation extends JavaPlugin {
         Role.registerRole(RuslanEth.class);
         Role.registerRole(Indian.class);
         Role.registerRole(Monkey.class);
-        Role.registerRole(Guts.class);
         Role.registerRole(CyberExpert.class);
         Role.registerRole(Watcher.class);
+        Role.registerRole(Berserk.class);
     }
 
     private void InitHandlers() {
@@ -166,6 +167,7 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("reloadProperties").setExecutor(new ReloadConfigCommand());
         this.getCommand("transfer").setExecutor(new TokenTransferCommand());
         this.getCommand("move").setExecutor(new MoveToPlayer());
+        this.getCommand("rbfbsafa").setExecutor(new BossReservationCommand());
     }
     
     public static Nftilation getInstance() {
