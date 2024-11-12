@@ -45,11 +45,12 @@ public class TrapCircle implements Listener {
         getServer().getPluginManager().registerEvents(this, Nftilation.getInstance());
         this.center = new Location(world, trappee.getLocation().getX(), trappee.getLocation().getY(), trappee.getLocation().getZ());
         knockbackRedundantPlayers();
+        CircleEffect effect = new CircleEffect();
         CircleProps props = CircleProps.builder()
                 .world(this.center.getWorld())
                 .particle(Particle.REDSTONE)
                 .radius(range)
-                .center(this.center.toVector().clone())
+                .center(this.center.toVector())
                 .minAngle(0).maxAngle(360).step(2)
                 .particleStrategy(new ParticleColorStrategy(RGBConstants.blue))
                 .offset(new Vector(0, .5F, 0))
@@ -57,7 +58,7 @@ public class TrapCircle implements Listener {
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
-                new CircleEffect().execute(props);
+                effect.execute(props);
             }
         };
         task.runTaskTimer(Nftilation.getInstance(), 0, 4L);

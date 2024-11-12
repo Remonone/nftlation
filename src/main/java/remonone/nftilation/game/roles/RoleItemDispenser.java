@@ -17,6 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.models.ITeam;
@@ -55,6 +56,7 @@ public class RoleItemDispenser {
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setUnbreakable(true);
         itemMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+        itemMeta.setDisplayName(type.inGameName);
         itemStack.setItemMeta(itemMeta);
         if(type.isArmor) {
             LeatherArmorMeta meta = (LeatherArmorMeta) itemStack.getItemMeta();
@@ -120,20 +122,22 @@ public class RoleItemDispenser {
 
     @Getter
     public enum ItemType {
-        SWORD("sword", false),
-        PICKAXE("pickaxe", false),
-        AXE("axe", false),
-        SHOVEL("shovel", false),
-        HELMET("helmet", true),
-        CHESTPLATE("chestplate", true),
-        LEGGINGS("leggings", true),
-        BOOTS("boots", true);
+        SWORD("sword", RoleConstant.DEFAULT_SWORD_NAME, false),
+        PICKAXE("pickaxe", RoleConstant.DEFAULT_PICKAXE_NAME, false),
+        AXE("axe", RoleConstant.DEFAULT_AXE_NAME, false),
+        SHOVEL("shovel", RoleConstant.DEFAULT_SHOVEL_NAME, false),
+        HELMET("helmet", "-", true),
+        CHESTPLATE("chestplate", "-",true),
+        LEGGINGS("leggings", "-",true),
+        BOOTS("boots", "-",true);
         
         private final String name;
+        private final String inGameName;
         private final boolean isArmor;
         
-        ItemType(String name, boolean isArmor) {
+        ItemType(String name, String inGameName, boolean isArmor) {
             this.name = name;
+            this.inGameName = inGameName;
             this.isArmor = isArmor;
         }
     }

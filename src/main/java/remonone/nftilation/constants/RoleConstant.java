@@ -10,7 +10,8 @@ public class RoleConstant {
     public static final int SYBIL_EXPLOSION_ARROW_STRENGTH = 3;
     public static final String SYBIL_ATTACKER_NBT_CONTAINER = "sybilattacker_items";
     public static final String SYBIL_ATTACKER_PISTOL = "pistol";
-    public static final String SYBIL_ATTACKER_EXPLOSIVE = "explosive";
+    public static final String SYBIL_ATTACKER_EXPLOSION = "explosion";
+    public static final String SYBIL_ATTACKER_ARROW_EXPLOSIVE = "explosive";
     
     public static final String CTYPTOMARINE_SHIELD = "Щит императора";
     public static final int CRYPTOMARINE_EXPLOSION_STRENGTH = 4;

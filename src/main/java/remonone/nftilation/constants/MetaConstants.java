@@ -58,6 +58,15 @@ public class MetaConstants {
     public static final String META_SA_SHOT_EXPLOSIVE = "ability.shot.explosive.availability";
     public static final String META_SA_SHOT_EXPLOSIVE_POWER = "ability.shot.explosive.power";
     public static final String META_SA_SHOT_EXPLOSIVE_RANGE = "ability.shot.explosive.range";
+    public static final String META_SA_EXPLOSION_RANGE = "ability.explosion.range";
+    public static final String META_SA_EXPLOSION_AVAILABILITY = "ability.explosion.availability";
+    public static final String META_SA_EXPLOSION_SINGLE_RADIUS = "ability.explosion.single.radius";
+    public static final String META_SA_EXPLOSION_AREA = "ability.explosion.area";
+    public static final String META_SA_EXPLOSION_DELAY = "ability.explosion.delay";
+    public static final String META_SA_EXPLOSION_COOLDOWN = "ability.explosion.cooldown";
+    public static final String META_SA_EXPLOSION_SINGLE_DAMAGE = "ability.explosion.single.damage";
+    public static final String META_SA_EXPLOSION_AMOUNT = "ability.explosion.amount";
+    public static final String META_SA_EXPLOSION_NAME = "ability.explosion.name";
 
     public static final String META_CE_JAIL_COOLDOWN = "ability.jail.cooldown";
     public static final String META_CE_JAIL_DURATION = "ability.jail.duration"; // 10

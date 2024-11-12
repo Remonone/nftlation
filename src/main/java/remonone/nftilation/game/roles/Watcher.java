@@ -231,7 +231,7 @@ public class Watcher extends Role {
         new BukkitRunnable() {
             @Override
             public void run() {
-                AttackPresets.summonExplosion(loc, player, 8, 10);
+                AttackPresets.summonExplosion(loc, player, 8, 10, 2, 15, 100, 2);
             }
         }.runTaskLater(Nftilation.getInstance(), 40);
     }

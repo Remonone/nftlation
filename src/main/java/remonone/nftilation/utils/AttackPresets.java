@@ -19,18 +19,18 @@ import java.util.Collection;
 public class AttackPresets {
     
     @SuppressWarnings("deprecation")
-    public static void summonExplosion(Location loc, Player attacker, double range, double damage) {
+    public static void summonExplosion(Location loc, Player attacker, double range, double damage, int explosion_density, int explosion_quality, int dust_density, double radius) {
         SphereEffect effect = new SphereEffect();
         loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, .2f);
         Collection<Entity> entities = loc.getWorld().getNearbyEntities(loc, range, range, range);
         Vector center = loc.toVector();
         SphereProps mainExplosion = SphereProps.builder()
                 .particle(Particle.EXPLOSION_HUGE)
-                .particleStrategy(new ParticleStaticStrategy(15, new Vector(0, .5, 0)))
-                .radius(1)
+                .particleStrategy(new ParticleStaticStrategy(explosion_quality, new Vector(0, .5, 0)))
+                .radius(radius)
                 .center(loc.toVector())
                 .world(loc.getWorld())
-                .density(2)
+                .density(explosion_density)
                 .build();
         SphereProps dust = SphereProps.builder()
                 .particle(Particle.CLOUD)
@@ -38,7 +38,7 @@ public class AttackPresets {
                 .radius(range / 1.5D)
                 .center(loc.toVector())
                 .world(loc.getWorld())
-                .density(100)
+                .density(dust_density)
                 .build();
         effect.execute(mainExplosion);
         effect.execute(dust);
