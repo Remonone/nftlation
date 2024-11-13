@@ -1,4 +1,4 @@
-package remonone.nftilation.game.inventory;
+package remonone.nftilation.game.services;
 
 import de.tr7zw.nbtapi.NBT;
 import org.bukkit.Bukkit;
@@ -29,7 +29,7 @@ import remonone.nftilation.utils.PlayerUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class InventoryBuilder {
+public class InventoryService {
     
     private static final int ROW_SHIFT = 9;
 

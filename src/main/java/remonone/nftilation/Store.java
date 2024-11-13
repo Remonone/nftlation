@@ -2,7 +2,7 @@ package remonone.nftilation;
 
 import lombok.Getter;
 import remonone.nftilation.game.DataInstance;
-import remonone.nftilation.game.lobby.LobbyDisposer;
+import remonone.nftilation.game.services.LobbyService;
 import remonone.nftilation.game.stage.GameStage;
 import remonone.nftilation.game.transfer.GameTransfer;
 import remonone.nftilation.utils.Logger;
@@ -16,13 +16,13 @@ public class Store {
     private final GameStage gameStage;
     private final GameTransfer gameTransfer;
     private final DataInstance dataInstance;
-    private final LobbyDisposer lobbyDisposer;
+    private final LobbyService lobbyService;
     
     private Store() {
         Logger.log("Initializing components...");
         gameStage = new GameStage();
         gameTransfer = new GameTransfer();
-        lobbyDisposer = new LobbyDisposer();
+        lobbyService = new LobbyService();
         dataInstance = new DataInstance();
     }
     

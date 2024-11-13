@@ -17,6 +17,7 @@ public class RoleConstant {
     public static final int CRYPTOMARINE_EXPLOSION_STRENGTH = 4;
     public static final String CRYPTOMARINE_NBT_CONTAINER = "cryptomarine_items";
     public static final String CRYPTOMARINE_NBT_AXE = "axe";
+    public static final String CRYPTOMARINE_NBT_BARRIER = "barrier";
     
     public static final String RUSLAN_ABILITY = "ruslan002.eth";
     public static final int RUSLAN_NEGATIVE_AREA_RADIUS = 5;
@@ -57,6 +58,10 @@ public class RoleConstant {
     public static final String DEFAULT_PICKAXE_NAME = "Хрупкая кирка";
     public static final String DEFAULT_AXE_NAME = "Треснувший топор";
     public static final String DEFAULT_SHOVEL_NAME = "Ветхая лопата";
+
+    public static final String BERSERK_NBT_CONTAINER = "berserk_items";
+    public static final String BERSERK_NBT_RAGE = "rage";
+    public static final String BERSERK_NBT_FEAR = "fear";
 
     private RoleConstant() {}
 }

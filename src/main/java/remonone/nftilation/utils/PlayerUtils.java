@@ -17,7 +17,7 @@ import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
-import remonone.nftilation.game.inventory.InventoryBuilder;
+import remonone.nftilation.game.services.InventoryService;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.models.TransactionType;
@@ -139,7 +139,7 @@ public class PlayerUtils {
         IExpandable expandable = ShopItemRegistry.getExpandable(tabName);
         if(!(expandable instanceof CategoryElement)) return;
         CategoryElement element = (CategoryElement) expandable;
-        Inventory inventory = InventoryBuilder.buildShopKeeperInventory(player, element);
+        Inventory inventory = InventoryService.buildShopKeeperInventory(player, element);
         player.openInventory(inventory);
     }
 

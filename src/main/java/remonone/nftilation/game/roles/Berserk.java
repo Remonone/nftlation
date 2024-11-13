@@ -21,6 +21,7 @@ import remonone.nftilation.Store;
 import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.InventoryUtils;
@@ -28,6 +29,7 @@ import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.VectorUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,25 +37,24 @@ public class Berserk extends Role {
     
     public Berserk() {
         super("GT");
+        super.registerHandlers(new HashMap<String, IAbilityHandler>() {{
+            put(RoleConstant.BERSERK_NBT_RAGE, new IAbilityHandler() {
+                @Override
+                public boolean executeHandle(PlayerModel model) {
+                    return true;
+                }
+
+                @Override
+                public float getCooldown(PlayerModel model) {
+                    return 0;
+                }
+            });
+        }}, RoleConstant.BERSERK_NBT_CONTAINER);
     }
     
     @Override
     public String getRoleID() {
         return "GT";
-    }
-
-    @Override
-    protected void setPlayer(Player player, Map<String, Object> params) {
-        int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(.5F);
-        float genericArmor = 20 - (10 * (upgradeLevel - 1));
-        float genericArmorToughness = 20 - (10 * (upgradeLevel - 1));
-        float genericHealth = 60 - (upgradeLevel - 1) * 20;
-        player.getAttribute(Attribute.GENERIC_ARMOR).setBaseValue(genericArmor);
-        player.getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS).setBaseValue(genericArmorToughness);
-        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(genericHealth);
-        player.setHealth(genericHealth);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, Integer.MAX_VALUE, 1));
     }
     
 //    @Override
@@ -115,10 +116,6 @@ public class Berserk extends Role {
         ItemStack stack = e.getItem();
         if(stack == null || stack.getAmount() < 1 || stack.getType().equals(Material.AIR)) return;
         String gutsShot = NBT.get(stack, (nbt) -> (String)nbt.getString("gutsShot"));
-        if(!StringUtils.isEmpty(gutsShot)) {
-            shotArrow(stack, user);
-            return;
-        }
         String gunsCollapse = NBT.get(stack, (nbt) -> (String)nbt.getString("gunsCollapse"));
         if(!StringUtils.isEmpty(gunsCollapse)) {
             startBerserk(stack, user);
@@ -176,18 +173,4 @@ public class Berserk extends Role {
         InventoryUtils.setCooldownForItem(model, stack, cooldown);
     }
 
-    private void shotArrow(ItemStack stack, Player user) {
-        if(InventoryUtils.isCooldownRemain(stack)) {
-            InventoryUtils.notifyAboutCooldown(user, stack);
-            return;
-        }
-        Arrow arrow = user.launchProjectile(Arrow.class);
-        arrow.setVelocity(arrow.getVelocity().multiply(3.2));
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(user.getUniqueId());
-        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, user);
-        if(!PlayerUtils.validateParams(model.getParameters())) return;
-        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        long cooldown = 2 + upgradeLevel * 3L;
-        InventoryUtils.setCooldownForItem(model, stack, cooldown);
-    }
 }

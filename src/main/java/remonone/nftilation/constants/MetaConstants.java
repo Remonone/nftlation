@@ -19,6 +19,11 @@ public class MetaConstants {
     public static final String META_CRYPTOMARINE_STRIKE_LEVEL = "strike.requiredLevel";
     public static final String META_CRYPTOMARINE_STRIKE_DAMAGE = "strike.damage";
     public static final String META_CRYPTOMARINE_STRIKE_CHANCE = "strike.chance";
+    public static final String META_CRYPTOMARINE_BARRIER_COOLDOWN = "barrier.cooldown";
+    public static final String META_CRYPTOMARINE_BARRIER_RADIUS = "barrier.radius";
+    public static final String META_CRYPTOMARINE_BARRIER_EFFECTS = "barrier.effects";
+    public static final String META_CRYPTOMARINE_BARRIER_FORCE = "barrier.force";
+    public static final String META_CRYPTOMARINE_BARRIER_DURATION = "barrier.duration";
     
     public static final String META_MONKEY_INVISIBILITY_COOLDOWN = "invisibility.cooldown";
     public static final String META_MONKEY_INVISIBILITY_DURATION = "invisibility.duration";
@@ -85,6 +90,11 @@ public class MetaConstants {
     public static final String META_WA_SUPPRESSION_COOLDOWN = "ability.suppression.cooldown";
     public static final String META_WA_SUPPRESSION_DURATION = "ability.suppression.duration";
     public static final String META_WA_SUPPRESSION_RANGE = "ability.suppression.range";
+
+    public static final String META_BERSERK_RAGE_COOLDOWN = "ability.rage.cooldown";
+    public static final String META_BERSERK_RAGE_DURATION = "ability.rage.duration";
+    public static final String META_BERSERK_RAGE_EXPLOSION_RANGE = "ability.rage.explosive.range";
+    public static final String META_BERSERK_RAGE_EXPLOSION_DAMAGE = "ability.rage.explosive.damage";
     
     public static final String META_GLOBAL = "meta.global";
     

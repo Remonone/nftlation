@@ -13,7 +13,7 @@ import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
 import remonone.nftilation.game.ingame.actions.donate.*;
 import remonone.nftilation.game.ingame.actions.world.*;
-import remonone.nftilation.game.lobby.LobbyDisposer;
+import remonone.nftilation.game.services.LobbyService;
 import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.meta.RoleInfo;
 import remonone.nftilation.game.meta.RuneInfo;
@@ -123,7 +123,7 @@ public final class Nftilation extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new JoinPlayerHandler(), this);
         getServer().getPluginManager().registerEvents(new StageHandler(), this);
         getServer().getPluginManager().registerEvents(new OnChatEvent(), this);
-        getServer().getPluginManager().registerEvents(new LobbyDisposer(), this);
+        getServer().getPluginManager().registerEvents(new LobbyService(), this);
         getServer().getPluginManager().registerEvents(new RoleSelectHandler(), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveEvent(), this);
         getServer().getPluginManager().registerEvents(new PhaseUpdateHandler(), this);

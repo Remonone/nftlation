@@ -66,7 +66,7 @@ public class PlayerLoginHandler implements Listener {
         PlayerNMSUtil.changePlayerName(player, toDisplay);
         // Transferring the player
         if(stage.getStage() == Stage.LOBBY) {
-            instance.getLobbyDisposer().DisposePlayer(data, player);
+            instance.getLobbyService().DisposePlayer(data, player);
             player.setGameMode(GameMode.ADVENTURE);
         }
         

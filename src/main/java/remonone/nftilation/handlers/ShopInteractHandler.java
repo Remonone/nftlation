@@ -19,7 +19,7 @@ import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.services.IPurchasableService;
 import remonone.nftilation.game.ingame.services.ServiceContainer;
-import remonone.nftilation.game.inventory.InventoryBuilder;
+import remonone.nftilation.game.services.InventoryService;
 import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.shop.content.CategoryElement;
@@ -61,7 +61,7 @@ public class ShopInteractHandler implements Listener {
         }
         if(element instanceof CategoryElement) {
             CategoryElement el = (CategoryElement) element;
-            Inventory inventory = InventoryBuilder.buildShopKeeperInventory(player, el);
+            Inventory inventory = InventoryService.buildShopKeeperInventory(player, el);
             player.openInventory(inventory);
         }
     }
