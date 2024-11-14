@@ -20,6 +20,8 @@ public class MetaConstants {
     public static final String META_CRYPTOMARINE_STRIKE_DAMAGE = "strike.damage";
     public static final String META_CRYPTOMARINE_STRIKE_CHANCE = "strike.chance";
     public static final String META_CRYPTOMARINE_BARRIER_COOLDOWN = "barrier.cooldown";
+    public static final String META_CRYPTOMARINE_BARRIER_AVAILABILITY = "barrier.availability";
+    public static final String META_CRYPTOMARINE_BARRIER_NAME = "barrier.name";
     public static final String META_CRYPTOMARINE_BARRIER_RADIUS = "barrier.radius";
     public static final String META_CRYPTOMARINE_BARRIER_EFFECTS = "barrier.effects";
     public static final String META_CRYPTOMARINE_BARRIER_FORCE = "barrier.force";
@@ -92,9 +94,17 @@ public class MetaConstants {
     public static final String META_WA_SUPPRESSION_RANGE = "ability.suppression.range";
 
     public static final String META_BERSERK_RAGE_COOLDOWN = "ability.rage.cooldown";
+    public static final String META_BERSERK_RAGE_NAME = "ability.rage.name";
+    public static final String META_BERSERK_RAGE_AVAILABILITY = "ability.rage.availability";
+    public static final String META_BERSERK_RAGE_DESCRIPTION = "ability.rage.description";
     public static final String META_BERSERK_RAGE_DURATION = "ability.rage.duration";
     public static final String META_BERSERK_RAGE_EXPLOSION_RANGE = "ability.rage.explosive.range";
     public static final String META_BERSERK_RAGE_EXPLOSION_DAMAGE = "ability.rage.explosive.damage";
+    public static final String META_BERSERK_FEAR_COOLDOWN = "ability.fear.cooldown";
+    public static final String META_BERSERK_FEAR_RANGE = "ability.fear.range";
+    public static final String META_BERSERK_FEAR_DURATION = "ability.fear.duration";
+    public static final String META_BERSERK_FEAR_DESCRIPTION = "ability.fear.description";
+    public static final String META_BERSERK_FEAR_NAME = "ability.fear.name";
     
     public static final String META_GLOBAL = "meta.global";
     

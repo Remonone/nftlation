@@ -77,15 +77,15 @@ public class SybilAttacker extends Role {
             public void run() {
                 Vector vec = VectorUtils.getRandomPosInCircle(location.toVector(), area);
                 Location loc = new Location(location.getWorld(), vec.getX(), vec.getY(), vec.getZ());
-                AttackPresets.summonExplosion(loc, player, radius, damage, 2, 4, 50, radius);
+                AttackPresets.summonExplosion(loc, player, radius, damage, 2, 12, 50, radius, false);
             }
         }.runTaskTimer(Nftilation.getInstance(), 10, delay).getTaskId();
         CircleProps props = CircleProps.builder()
                 .world(location.getWorld())
                 .particle(Particle.REDSTONE)
-                .radius(range)
+                .radius(area)
                 .center(location.toVector())
-                .minAngle(0).maxAngle(360).step(2)
+                .minAngle(0).maxAngle(360).step(.5F)
                 .particleStrategy(new ParticleColorStrategy(RGBConstants.white))
                 .offset(new Vector(0, .5F, 0))
                 .build();
@@ -95,7 +95,7 @@ public class SybilAttacker extends Role {
             public void run() {
                 effect.execute(props);
             }
-        }.runTaskTimer(Nftilation.getInstance(), 0, 10).getTaskId();
+        }.runTaskTimer(Nftilation.getInstance(), 0, 4L).getTaskId();
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -183,7 +183,7 @@ public class SybilAttacker extends Role {
         if(location != null) {
             double power = (Double) getMetaByName(model, MetaConstants.META_SA_SHOT_EXPLOSIVE_POWER);
             double range = (Double) getMetaByName(model, MetaConstants.META_SA_SHOT_EXPLOSIVE_RANGE);
-            AttackPresets.summonExplosion(location, shooter, range, power, 1, 5, 60, 1);
+            AttackPresets.summonExplosion(location, shooter, range, power, 2, 10, 60, .3, true);
             SphereProps incarnation = SphereProps.builder()
                     .density(200)
                     .center(location.toVector())

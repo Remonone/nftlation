@@ -27,6 +27,7 @@ import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.utils.EntityDamageByPlayerLog;
+import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.ResetUtils;
 
@@ -35,6 +36,7 @@ import java.util.PriorityQueue;
 
 import static org.bukkit.Bukkit.getServer;
 
+//REQUIRE SYSTEM REFACTOR
 public class OnEntityDieHandler implements Listener {
     @EventHandler
     public void onPlayerTakeDamage(final EntityDamageEvent event) {
@@ -121,10 +123,22 @@ public class OnEntityDieHandler implements Listener {
         PlayerModel targetModel = PlayerUtils.getModelFromPlayer(target);
         PlayerModel attackerModel = PlayerUtils.getModelFromPlayer(attackerData.attacker);
         if(targetModel == null || attackerModel == null) return;
+        Logger.debug("Target model and attacker model is exists: " + targetModel.getReference().getCustomName() + " " + attackerModel.getReference().getCustomName());
+        //REWORK
+        if(targetModel.getParameters().containsKey(PropertyConstant.PLAYER_FRAGILITY_DURATION)) {
+            long duration = (long)targetModel.getParameters().get(PropertyConstant.PLAYER_FRAGILITY_DURATION);
+            if(duration - System.currentTimeMillis() < 0) {
+                targetModel.getParameters().remove(PropertyConstant.PLAYER_FRAGILITY_DURATION);
+            } else {
+                event.setDamage(ConfigManager.getInstance().getFragilityScale() * event.getFinalDamage());
+            }
+        }
+        //REWORK
         if(GameInstance.getInstance().checkIfPlayersInSameTeam(target, attackerData.attacker)) {
             event.setCancelled(true);
             return;
         }
+        Logger.debug("Not from the same team");
         PriorityQueue<IDamageHandler> targetQueue = new PriorityQueue<>(targetModel.getDamageHandlers());
         while(!targetQueue.isEmpty()) {
             targetQueue.poll().OnEntityDamageHandle(event);
@@ -134,6 +148,7 @@ public class OnEntityDieHandler implements Listener {
             queue.poll().OnEntityDamageDealing(event, attackerData);
         }
         if(event.isCancelled()) return;
+        Logger.debug("Event has not been canceled");
         if(target.getHealth() - event.getFinalDamage() <= 0) {
             EntityDamageByPlayerLog.removeLogEvent(target.getUniqueId());
             OnPlayerKillPlayerEvent e = new OnPlayerKillPlayerEvent(attackerModel, targetModel);
@@ -143,6 +158,7 @@ public class OnEntityDieHandler implements Listener {
         }
         
         if(target.getHealth() - event.getFinalDamage() > 0) {
+            Logger.debug("Inserting log event...");
             EntityDamageByPlayerLog.insertLogEvent(target, attackerData.attacker);
         }
     }

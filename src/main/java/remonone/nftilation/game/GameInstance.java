@@ -5,6 +5,8 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
@@ -255,7 +257,13 @@ public class GameInstance {
         ITeam team = teamData.get(teamName);
         if(team == null) return;
         if(team.isCoreAlive()) {
-            player.teleport(team.getTeamSpawnPoint().getPosition());
+            Vector vector = VectorUtils.getRandomPosInCircle(team.getTeamSpawnPoint().getPosition().toVector(), 5);
+            Location location = team.getTeamSpawnPoint().getPosition();
+            location.setX(vector.getX());
+            location.setY(vector.getY());
+            location.setZ(vector.getZ());
+            player.teleport(location);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 100, 100));
             PlayerModel model = getPlayerModelFromTeam(teamName, player);
             if(model == null) return;
             model.getParameters().put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, true);

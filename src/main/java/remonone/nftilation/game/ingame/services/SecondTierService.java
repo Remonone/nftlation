@@ -2,6 +2,7 @@ package remonone.nftilation.game.ingame.services;
 
 import org.bukkit.entity.Player;
 import remonone.nftilation.components.PlayerInteractComponent;
+import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.PlayerModel;
@@ -24,6 +25,8 @@ public class SecondTierService implements IPurchasableService {
         if(playerInteract.adjustPlayerTokens(model, -price, TransactionType.PURCHASE)) {
             playerInteract.upgradePlayer(buyer, 2);
             PlayerUtils.updateShopInventoryForPlayer(buyer);
+        } else {
+            buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
         }
     }
 }

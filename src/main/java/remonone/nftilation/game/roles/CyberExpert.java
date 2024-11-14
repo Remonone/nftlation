@@ -95,6 +95,7 @@ public class CyberExpert extends Role {
                 .maxAngle(360)
                 .world(player.getWorld())
                 .radius(.9D)
+                .offset(new Vector())
                 .build();
         new CircleEffect().execute(props);
         List<EffectPotion> effects = (List<EffectPotion>) getMetaByName(model, MetaConstants.META_CE_FLOW_EFFECTS);

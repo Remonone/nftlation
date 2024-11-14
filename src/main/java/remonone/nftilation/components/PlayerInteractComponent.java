@@ -12,7 +12,6 @@ import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.models.TransactionType;
-import remonone.nftilation.game.roles.Berserk;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.scoreboard.ScoreboardHandler;
@@ -111,14 +110,6 @@ public class PlayerInteractComponent implements IComponent {
         if(role == null) {
             Logger.error("Cannot upgrade level for player: " + player.getDisplayName());
             return;
-        }
-        if(role instanceof Berserk) {
-            if(level == 2) {
-                Logger.broadcast(ChatColor.RED + "Мишка потерял концентрацию и его внимание расплывчато!");
-            }
-            if(level == 3) {
-                Logger.broadcast(ChatColor.DARK_RED + "Мишка сильно ослаб и находится в предсмертном состоянии!");
-            }
         }
         Role.setInventoryItems(model);
         Role.updatePlayerAbilities(player);

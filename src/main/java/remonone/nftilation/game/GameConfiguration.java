@@ -94,13 +94,13 @@ public class GameConfiguration {
             }
             String roleId = params.get(PropertyConstant.PLAYER_ROLE_ID).toString();
             try {
+                Role.updatePlayerAbilities(model);
                 String texture = SkinCache.getInstance().getTexture(roleId);
                 String signature = SkinCache.getInstance().getSignature(roleId);
                 if(StringUtils.isBlank(texture) || StringUtils.isBlank(signature)) {
                     throw new Exception();
                 }
                 PlayerNMSUtil.changePlayerSkin(model.getReference(), texture, signature);
-                Role.updatePlayerAbilities(model);
             } catch(Exception ex) {
                 Logger.error("Unable load role: " + roleId + ". Player: " + model.getReference().getDisplayName());
             }

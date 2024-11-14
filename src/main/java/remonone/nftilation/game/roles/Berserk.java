@@ -1,15 +1,11 @@
 package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -17,21 +13,22 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
-import remonone.nftilation.Store;
-import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RoleConstant;
+import remonone.nftilation.effects.CircleEffect;
+import remonone.nftilation.effects.props.CircleProps;
+import remonone.nftilation.effects.strategies.ParticleRepulsionStrategy;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.PlayerModel;
-import remonone.nftilation.utils.InventoryUtils;
+import remonone.nftilation.utils.AttackPresets;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.VectorUtils;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static org.bukkit.Bukkit.getServer;
 
 public class Berserk extends Role {
     
@@ -41,136 +38,139 @@ public class Berserk extends Role {
             put(RoleConstant.BERSERK_NBT_RAGE, new IAbilityHandler() {
                 @Override
                 public boolean executeHandle(PlayerModel model) {
-                    return true;
+                    return startBerserk(model);
                 }
 
                 @Override
                 public float getCooldown(PlayerModel model) {
-                    return 0;
+                    return ((Double)getMetaByName(model, MetaConstants.META_BERSERK_RAGE_COOLDOWN)).floatValue();
+                }
+            });
+            put(RoleConstant.BERSERK_NBT_FEAR, new IAbilityHandler() {
+                @Override
+                public boolean executeHandle(PlayerModel model) {
+                    return fearEnemies(model);
+                }
+
+                @Override
+                public float getCooldown(PlayerModel model) {
+                    return ((Double)getMetaByName(model, MetaConstants.META_BERSERK_FEAR_COOLDOWN)).floatValue();
                 }
             });
         }}, RoleConstant.BERSERK_NBT_CONTAINER);
     }
-    
+
+    private boolean fearEnemies(PlayerModel model) {
+        Player player = model.getReference();
+        double range = (Double)getMetaByName(model, MetaConstants.META_BERSERK_FEAR_RANGE);
+        List<Entity> entities = player.getNearbyEntities(range, range, range);
+        double duration = (Double)getMetaByName(model, MetaConstants.META_BERSERK_FEAR_DURATION);
+        CircleEffect effect = new CircleEffect();
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMEN_SCREAM, 1f, .3F);
+        for(Entity entity: entities) {
+            if(!(entity instanceof Player)) continue;
+            if(GameInstance.getInstance().checkIfPlayersInSameTeam(player, (Player)entity)) continue;
+            PlayerModel target = PlayerUtils.getModelFromPlayer((Player) entity);
+            target.getParameters().put(PropertyConstant.PLAYER_FRAGILITY_DURATION, (long)(System.currentTimeMillis() + duration));
+            initFearEffect(target, effect, duration);
+        }
+        return true;
+    }
+
+    private void initFearEffect(PlayerModel target, CircleEffect effect, double duration) {
+        int fearTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                Player player = target.getReference();
+                CircleProps props = CircleProps.builder()
+                        .world(player.getWorld())
+                        .radius(.7F)
+                        .minAngle(0)
+                        .maxAngle(360)
+                        .center(player.getLocation().add(0, .5, 0).toVector())
+                        .step(36)
+                        .particle(Particle.DRIP_LAVA)
+                        .particleStrategy(new ParticleRepulsionStrategy(player.getLocation().toVector().add(new Vector(0, .5D, 0)), .1F))
+                        .build();
+                effect.execute(props);
+            }
+        }.runTaskTimer(Nftilation.getInstance(), 0, 5).getTaskId();
+        new BukkitRunnable(){
+            @Override
+            public void run() {
+                getServer().getScheduler().cancelTask(fearTask);
+            }
+        }.runTaskLater(Nftilation.getInstance(), (int)(duration * DataConstants.TICKS_IN_SECOND));
+    }
+
     @Override
     public String getRoleID() {
         return "GT";
     }
     
-//    @Override
-//    protected ItemStack getSword(Map<String, Object> params) {
-//        ItemStack weapon = new ItemStack(Material.DIAMOND_SWORD);
-//        weapon.addEnchantment(Enchantment.DAMAGE_ALL, 2);
-//        ItemMeta meta = weapon.getItemMeta();
-//        meta.setDisplayName(ChatColor.BOLD + "" + ChatColor.DARK_RED + "Меч Гатса");
-//        meta.setUnbreakable(true);
-//        weapon.setItemMeta(meta);
-//        NBT.modify(weapon, (nbt) -> {nbt.setString("gutsWeaponary", "weapon");});
-//        return weapon;
-//    }
-    
+    @SuppressWarnings("unchecked")
     @Override
     public List<ItemStack> getAbilityItems(Map<String, Object> params) {
-        ItemStack pistol = new ItemStack(Material.TRIPWIRE_HOOK);
-        ItemMeta teleportMeta = pistol.getItemMeta();
-        teleportMeta.setDisplayName(ChatColor.DARK_PURPLE + "Пушка");
-        pistol.setItemMeta(teleportMeta);
-        NBT.modify(pistol, (nbt) -> {nbt.setString("gutsShot", "shot");});
-        ItemStack collapser = new ItemStack(Material.FERMENTED_SPIDER_EYE);
-        ItemMeta meta = collapser.getItemMeta();
-        meta.setDisplayName("Берсерк");
-        collapser.setItemMeta(meta);
-        NBT.modify(collapser, (nbt) -> {nbt.setString("gunsCollapse", "weapon");});
-        return Arrays.asList(pistol, collapser);
-    }
-    
-    @EventHandler
-    public void onDamage(final EntityDamageByEntityEvent e) {
-        Entity damager = e.getDamager();
-        if(!(damager instanceof Player)) return;
-        Player attacker = (Player) damager;
-        Role role = Store.getInstance().getDataInstance().getPlayerRole(attacker.getUniqueId());
-        if(!(role instanceof Berserk)) return;
-        if(!(e.getEntity() instanceof LivingEntity)) return;
-        ItemStack stack = attacker.getInventory().getItemInMainHand();
-        if(stack == null || stack.getAmount() < 1 || stack.getType().equals(Material.AIR)) return;
-        String gutsWeapon = NBT.get(stack, (nbt) -> (String)nbt.getString("gutsWeaponary"));
-        if(StringUtils.isEmpty(gutsWeapon)) return;
-        LivingEntity damagee = (LivingEntity) e.getEntity();
-        Vector attackerPosition = attacker.getLocation().toVector().clone();
-        Vector targetPosition = damagee.getLocation().toVector().clone();
-        Vector direction = targetPosition.subtract(attackerPosition);
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(attacker.getUniqueId());
-        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, attacker);
-        if(!PlayerUtils.validateParams(model.getParameters())) return;
-        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        float knockbackScale = (upgradeLevel > 2) ? 1.5F : 3F;
-        damagee.setVelocity(damagee.getVelocity().add(direction.multiply(knockbackScale)));
-    }
-    
-    @EventHandler
-    public void onItemUse(final PlayerInteractEvent e) {
-        Player user = e.getPlayer();
-        Role role = Store.getInstance().getDataInstance().getPlayerRole(user.getUniqueId());
-        if(!(role instanceof Berserk)) return;
-        ItemStack stack = e.getItem();
-        if(stack == null || stack.getAmount() < 1 || stack.getType().equals(Material.AIR)) return;
-        String gutsShot = NBT.get(stack, (nbt) -> (String)nbt.getString("gutsShot"));
-        String gunsCollapse = NBT.get(stack, (nbt) -> (String)nbt.getString("gunsCollapse"));
-        if(!StringUtils.isEmpty(gunsCollapse)) {
-            startBerserk(stack, user);
+        List<ItemStack> items = new ArrayList<>();
+        int level = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        String fearName = (String)getMetaInfo(MetaConstants.META_BERSERK_FEAR_NAME, level);
+        ItemStack fear = new ItemStack(Material.GHAST_TEAR);
+        ItemMeta fearMeta = fear.getItemMeta();
+        fearMeta.setDisplayName(fearName);
+        List<String> fearDescr = (List<String>) getMetaInfo(MetaConstants.META_BERSERK_FEAR_DESCRIPTION, level);
+        fearMeta.setLore(fearDescr);
+        fear.setItemMeta(fearMeta);
+        items.add(fear);
+        
+        if((Boolean)getMetaInfo(MetaConstants.META_BERSERK_RAGE_AVAILABILITY, level)) {
+            ItemStack collapser = new ItemStack(Material.FERMENTED_SPIDER_EYE);
+            ItemMeta meta = collapser.getItemMeta();
+            String name = (String)getMetaInfo(MetaConstants.META_BERSERK_RAGE_NAME, level);
+            List<String> rageDescr = (List<String>) getMetaInfo(MetaConstants.META_BERSERK_RAGE_DESCRIPTION, level);
+            meta.setDisplayName(name);
+            fearMeta.setLore(rageDescr);
+            collapser.setItemMeta(meta);
+            NBT.modify(collapser, (nbt) -> {
+                nbt.setString(RoleConstant.BERSERK_NBT_CONTAINER, RoleConstant.BERSERK_NBT_RAGE);
+                nbt.setString(RoleConstant.ROLE, getRoleID());
+            });
         }
+        return items;
     }
 
-    private void startBerserk(ItemStack stack,  Player user) {
-        if(InventoryUtils.isCooldownRemain(stack)) {
-            InventoryUtils.notifyAboutCooldown(user, stack);
-            return;
+    private boolean startBerserk(PlayerModel model) {
+        Player player = model.getReference();
+        Vector destination = VectorUtils.getBlockPositionOnDirection(player.getWorld(), player.getEyeLocation().toVector(), player.getEyeLocation().getDirection(), 25F);
+        if (destination == null) {
+            player.sendMessage(ChatColor.RED + "Неправильно выбранная точка!");
+            return false;
         }
-        Vector destination = VectorUtils.getBlockPositionOnDirection(user.getWorld(), user.getEyeLocation().toVector(), user.getEyeLocation().getDirection(), 25F);
-        if(destination == null) {
-            user.sendMessage(ChatColor.RED + "Неправильно выбранная точка!");
-            return;
-        }
-        user.setVelocity(new Vector(0, 1, 0));
-        String team = Store.getInstance().getDataInstance().getPlayerTeam(user.getUniqueId());
-        PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, user);
-        if(!PlayerUtils.validateParams(model.getParameters())) return;
-        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        player.setVelocity(new Vector(0, 1, 0));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 60, 10));
         new BukkitRunnable() {
             @Override
             public void run() {
-                user.setVelocity(destination.add(user.getEyeLocation().getDirection()).subtract(user.getLocation().toVector().clone().subtract(new Vector(0, -3, 0))));
-                user.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(1);
-                user.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 100, 10));
+                Vector direction = destination.subtract(player.getLocation().toVector()).normalize().multiply(6);
+                player.setVelocity(direction);
             }
         }.runTaskLater(Nftilation.getInstance(), 10);
         new BukkitRunnable() {
             @Override
             public void run() {
-                if(upgradeLevel < 3) {
-                    TNTPrimed explode = user.getWorld().spawn(user.getLocation(), TNTPrimed.class);
-                    explode.setFuseTicks(0);
-                    EntityHandleComponent.setEntityOwner(explode, user);
-                }
+                AttackPresets.summonExplosion(player.getLocation(), player, 5, 10, 3, 10, 10, 1, true);
             }
         }.runTaskLater(Nftilation.getInstance(), 15);
         new BukkitRunnable() {
             @Override
             public void run() {
-                user.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
-                user.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(.5f);
-                user.getWorld().playSound(user.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 1f, .1f);
-                if(upgradeLevel < 3) {
-                    int amplifier = upgradeLevel < 2 ? 2 : 0;
-                    user.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, DataConstants.TICKS_IN_MINUTE, amplifier));
-                    user.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, DataConstants.TICKS_IN_MINUTE, amplifier));
-                }
-                
+                player.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 1f, .1f);
+
+                player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, DataConstants.TICKS_IN_MINUTE, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, DataConstants.TICKS_IN_MINUTE, 1));
             }
         }.runTaskLater(Nftilation.getInstance(), 25);
-        int cooldown =  upgradeLevel * 3;
-        InventoryUtils.setCooldownForItem(model, stack, cooldown);
+        return true;
     }
 
 }

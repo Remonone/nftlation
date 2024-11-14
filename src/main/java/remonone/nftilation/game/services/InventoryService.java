@@ -17,7 +17,6 @@ import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.IInventoryHelder;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
-import remonone.nftilation.game.roles.Berserk;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.runes.Rune;
@@ -45,11 +44,6 @@ public class InventoryService {
                 .collect(Collectors.toList());
         List<Role> registeredRoles = Role.getRoles();
         for(Role role : registeredRoles) {
-            if(role instanceof Berserk) {
-                if(!player.getDisplayName().contains("Jinrui_Saikyo")) {
-                    continue;
-                }
-            }
             ItemStack itemStack;
             Material mat = roles.contains(role) ?
                     Material.RED_GLAZED_TERRACOTTA

@@ -43,15 +43,14 @@ public class AbilityItemsContainer implements Listener {
         Role role = Role.getRoleByID((String)model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID));
         if(handler == null) return;
         if(!handler.getMaintainRole().checkForRoleAccess(role)) return;
+        event.setCancelled(true);
         ItemStack stack = event.getItem();
-        if(stack == null || stack.getType() == Material.AIR || stack.getAmount() < 1) return;
         if(InventoryUtils.isCooldownRemain(stack)) {
             InventoryUtils.notifyAboutCooldown(player, stack);
             return;
         }
         String usedItem = NBT.get(stack, (nbt) -> (String)nbt.getString(handler.getContainer()));
         if(!handler.getHandlerMap().containsKey(usedItem)) return;
-        event.setCancelled(true);
         IAbilityHandler abilityHandler = handler.getHandlerMap().get(usedItem);
         if(!abilityHandler.executeHandle(model)) return;
         InventoryUtils.setCooldownForItem(model, stack, abilityHandler.getCooldown(model));

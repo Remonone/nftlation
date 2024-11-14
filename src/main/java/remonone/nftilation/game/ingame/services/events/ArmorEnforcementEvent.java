@@ -25,7 +25,7 @@ import java.util.UUID;
 
 public class ArmorEnforcementEvent implements IPurchasableService {
 
-    private static final Map<UUID, ArmorEnforcementUnit> enforcementUnits = new HashMap<UUID, ArmorEnforcementUnit>();
+    private static final Map<UUID, ArmorEnforcementUnit> enforcementUnits = new HashMap<>();
 
     @Override
     public String getServiceName() {
@@ -38,6 +38,8 @@ public class ArmorEnforcementEvent implements IPurchasableService {
         if(!PlayerUtils.validateParams(model.getParameters())) return;
         if(PlayerUtils.tryWithdrawTokens(buyer, price, TransactionType.PURCHASE)) {
             adjustTeamToughnessForPlayer(model);
+        } else {
+            buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
         }
     }
 

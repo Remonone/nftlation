@@ -22,6 +22,7 @@ import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.RGBConstants;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -37,15 +38,18 @@ public class Barrier implements Listener {
     private final double throwbackScale;
     private List<EffectPotion> potions;
 
-    private final Set<Player> playerInRange;
+    private Set<Player> playerInRange;
 
     private int sphereTaskId;
     private int buffTaskId;
     private int unregisteringTaskId;
 
     public void initBarrier(int duration) {
+        getServer().getPluginManager().registerEvents(this, Nftilation.getInstance());
+        playerInRange = new HashSet<>();
+        playerInRange.add(owner);
         SphereProps props = SphereProps.builder()
-                .density(400)
+                .density((int)(radius * 100))
                 .particle(Particle.REDSTONE)
                 .particleStrategy(new ParticleColorStrategy(RGBConstants.amber))
                 .world(center.getWorld())
@@ -67,15 +71,17 @@ public class Barrier implements Listener {
                 for(EffectPotion potion : potions) {
                     PotionEffectType type = PotionEffectType.getByName(potion.getEffect());
                     PotionEffect effect = new PotionEffect(type, 25, potion.getStrength(), false, false);
+                    
                     for(Player player : playerInRange) {
                         player.removePotionEffect(type);
                         player.addPotionEffect(effect);
                         SphereProps prop = SphereProps.builder()
-                                .density(5)
+                                .density(15)
                                 .particleStrategy(new ParticleStaticStrategy(1, zero))
                                 .radius(.5)
                                 .center(player.getLocation().toVector().add(shift))
                                 .particle(Particle.TOTEM)
+                                .world(center.getWorld())
                                 .build();
                         sphereEffect.execute(prop);
                     }
@@ -104,11 +110,11 @@ public class Barrier implements Listener {
             return;
         }
         if(playerInRange.contains(mover)) return;
-        if(team.getTeamID().equals(teamOwner.getTeamID())) {
+        if(team.getTeamName().equals(teamOwner.getTeamName())) {
             playerInRange.add(mover);
             return;
         }
-        Vector dir = center.toVector().subtract(mover.getLocation().toVector());
+        Vector dir = mover.getLocation().toVector().subtract(center.toVector());
         double naturalScale = 1D / dir.length();
         dir.normalize().multiply(naturalScale * throwbackScale);
         mover.setVelocity(dir);
@@ -121,5 +127,6 @@ public class Barrier implements Listener {
         }
         scheduler.cancelTask(sphereTaskId);
         scheduler.cancelTask(buffTaskId);
+        PlayerMoveEvent.getHandlerList().unregister(this);
     }
 }

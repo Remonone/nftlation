@@ -19,7 +19,7 @@ public class SphereEffect implements IEffect<SphereProps>{
             l.add(props.getCenter());
             ParticleStrategyOutput output = strategy.calculateStrategy(l.toVector());
             Vector offset = output.getOffset();
-            props.getWorld().spawnParticle(props.getParticle(), l, output.getCount(), offset.getX(), offset.getY(), offset.getZ(), output.getExtra());
+            props.getWorld().spawnParticle(props.getParticle(), l, output.getCount(), offset.getX(), offset.getY(), offset.getZ());
         }
     }
     

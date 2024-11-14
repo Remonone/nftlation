@@ -16,16 +16,19 @@ import remonone.nftilation.effects.strategies.ParticleStaticStrategy;
 
 import java.util.Collection;
 
+import static org.bukkit.Bukkit.getServer;
+
 public class AttackPresets {
     
     @SuppressWarnings("deprecation")
-    public static void summonExplosion(Location loc, Player attacker, double range, double damage, int explosion_density, int explosion_quality, int dust_density, double radius) {
+    public static void summonExplosion(Location loc, Player attacker, double range, double damage, int explosion_density, int explosion_quality, int dust_density, double radius, boolean isHuge) {
         SphereEffect effect = new SphereEffect();
         loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, .2f);
         Collection<Entity> entities = loc.getWorld().getNearbyEntities(loc, range, range, range);
         Vector center = loc.toVector();
+        Particle explosion = isHuge ? Particle.EXPLOSION_HUGE : Particle.EXPLOSION_LARGE;
         SphereProps mainExplosion = SphereProps.builder()
-                .particle(Particle.EXPLOSION_HUGE)
+                .particle(explosion)
                 .particleStrategy(new ParticleStaticStrategy(explosion_quality, new Vector(0, .5, 0)))
                 .radius(radius)
                 .center(loc.toVector())
@@ -46,13 +49,19 @@ public class AttackPresets {
             if(!(entity instanceof LivingEntity)) {
                 continue;
             }
+            if(entity.equals(attacker)) continue;
             Vector position = entity.getLocation().toVector();
             Vector direction = position.subtract(center);
-            double scale = 1 / direction.length();
+            double scale = .1F;
+            if(direction.length() > .1) {
+                scale = 1 / direction.length();
+            }
             EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(attacker, entity, EntityDamageEvent.DamageCause.ENTITY_EXPLOSION, damage * scale);
+            getServer().getPluginManager().callEvent(event);
             if(event.isCancelled()) continue;
             Vector n_direction = direction.add(new Vector(0, 2, 0)).normalize();
-            ((LivingEntity) entity).damage(event.getFinalDamage());
+            LivingEntity target = (LivingEntity) entity;
+            target.setHealth(target.getHealth() - event.getFinalDamage());
             entity.setVelocity(n_direction.multiply(scale * 8));
         }
     }

@@ -32,6 +32,8 @@ public class ConfigManager {
     private List<TeamSpawnPoint> teamSpawnList;
     @Getter
     private Location centerLocation;
+    @Getter
+    private double fragilityScale;
     
     @Getter
     private List<Location> diamondSpawnList;
@@ -87,6 +89,7 @@ public class ConfigManager {
             ironGolemPos = new ArrayList<>();
         }
         ironGolemPositions = ironGolemPos;
+        fragilityScale = configuration.getDouble(PropertyConstant.FRAGILITY_SCALE);
     }
 
     public void Save() {

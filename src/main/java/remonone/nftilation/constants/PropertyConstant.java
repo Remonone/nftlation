@@ -10,6 +10,7 @@ public class PropertyConstant {
     public static final String DIAMOND_POSITION = "diamondsList";
     public static final String ROBO_SYBIL_SPAWN_POINTS = "roboSybilSpawnPoints";
     public static final String IRON_GOLEM_SPAWN_POINTS = "ironGolemSpawnPoints";
+    public static final String FRAGILITY_SCALE = "fragilityScale";
 
     public static final String NBT_ROLE = "role-name";
     public static final String NBT_RUNE = "rune-name";
@@ -31,7 +32,10 @@ public class PropertyConstant {
     public static final String PLAYER_ROLE_ID = "role_id";
     public static final String PLAYER_TEAM_NAME = "teamName";
     public static final String PLAYER_RUNE_ID = "rune_id";
+    // REWORK TO EFFECT SYSTEM
     public static final String PLAYER_STUN_DURATION = "stunDuration";
+    public static final String PLAYER_FRAGILITY_DURATION = "fragility_duration";
+    // REWORK TO EFFECT SYSTEM
     public static final String PLAYER_CUSTOM_ABILITY_ITEMS = "customItems";
     
     public static final String TEAM_RESOURCE_INCOME = "resourceIncome";

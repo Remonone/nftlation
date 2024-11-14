@@ -23,7 +23,6 @@ import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.ColorUtils;
-import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.NestedObjectFetcher;
 import remonone.nftilation.utils.PlayerUtils;
 
@@ -31,8 +30,6 @@ import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class RoleItemDispenser {
-    
-    //TODO: Replace for Team Upgrades
     
     public static ItemStack getItem(ItemType type, Map<String, Object> playerParams, Map<String, Object> roleMeta) {
         if(roleMeta.containsKey(type.name)) {
@@ -112,7 +109,6 @@ public class RoleItemDispenser {
         PlayerModel model = PlayerUtils.getModelFromPlayer(player);
         List<ItemStack> stacks = (List<ItemStack>) model.getParameters().get(PropertyConstant.PLAYER_CUSTOM_ABILITY_ITEMS);
         if(stacks == null) return Collections.emptyList();
-        Logger.debug(stacks.toString());
         List<ItemStack> list = new ArrayList<>();
         for(ItemStack stack: stacks) {
             list.add(stack.clone());
