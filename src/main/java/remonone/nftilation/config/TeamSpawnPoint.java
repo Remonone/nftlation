@@ -57,7 +57,7 @@ public class TeamSpawnPoint implements Cloneable, ConfigurationSerializable {
     public static TeamSpawnPoint deserialize(Map<String, Object> args) {
         String id = "";
         Location pos = new Location(null, 0, 0, 0);
-        Vector center = new Vector();
+        Vector center = VectorUtils.ZERO;
         Location shopKeeper = new Location(null, 0, 0, 0);
         Location checkerChest = new Location(null, 0, 0, 0);
         Location airDropPosition = new Location(null, 0, 0, 0);

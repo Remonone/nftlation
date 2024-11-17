@@ -33,6 +33,8 @@ import static org.bukkit.Bukkit.getServer;
 
 public class MassiveDelirium implements IAction {
     
+    private final static int MAX = 4;
+    
     private final static Random random = new Random();
     
     private final List<PlayerDelirium> deliriums = new ArrayList<>();
@@ -119,32 +121,35 @@ public class MassiveDelirium implements IAction {
             this.duplicates = teams;
         }
         
-        // TODO: CANCEL TASKS IF QUEUE IS FULL
         public void summonDelirious() {
+            MinecraftServer server = ((CraftServer) getServer()).getHandle().getServer();
+            WorldServer worldServer = ((CraftWorld)this.player.getWorld()).getHandle();
             if(duplicates.
                     isEmpty()) return;
             if(playerClones.size() > 2) {
                 EntityPlayer player = playerClones.poll();
                 player.die();
+                worldServer.removeEntity(player);
             }
-            MinecraftServer server = ((CraftServer) getServer()).getHandle().getServer();
-            WorldServer worldServer = ((CraftWorld)this.player.getWorld()).getHandle();
             EntityPlayer newPlayer = createPlayer(server, worldServer);
             if(newPlayer == null) return;
             new BukkitRunnable() {
                 @Override
                 public void run() {
                     Location clonePos = getEmptyBlockLocation();
+                    if(clonePos == null) return;
                     newPlayer.setPosition(clonePos.getX(), clonePos.getY(), clonePos.getZ());
                     newPlayer.playerConnection = new PlayerConnection(server,
                             new NetworkManager(EnumProtocolDirection.CLIENTBOUND), newPlayer);
                     worldServer.addEntity(newPlayer, CreatureSpawnEvent.SpawnReason.CUSTOM);
+                    
                     for(Player playerToHide : Bukkit.getOnlinePlayers()) {
                         playerToHide.hidePlayer(Nftilation.getInstance(), newPlayer.getBukkitEntity());
                     }
                     player.showPlayer(Nftilation.getInstance(), newPlayer.getBukkitEntity());
                     server.getPlayerList().players.remove(newPlayer);
                     playerClones.add(newPlayer);
+                    ((CraftPlayer)player).getHandle().playerConnection.sendPacket(new PacketPlayOutNamedEntitySpawn(newPlayer));
                 }
             }.runTask(Nftilation.getInstance());
         }
@@ -160,15 +165,22 @@ public class MassiveDelirium implements IAction {
         }
         
         private Location getEmptyBlockLocation() {
-            while(true) {
+            int it = 0;
+            while(it < MAX) {
                 Vector posToSpread = VectorUtils.getRandomPosInCircle(this.player.getLocation().toVector(), 10);
                 Block block = this.player.getWorld().getBlockAt(posToSpread.getBlockX(), posToSpread.getBlockY(), posToSpread.getBlockZ());
-                if(block.getRelative(BlockFace.DOWN).getType().equals(Material.AIR)) continue;
-                Location clonePos = BlockUtils.getNearestEmptySpace(block, 5);
+                Location clonePos = BlockUtils.getNearestEmptySpace(block, 2);
                 if(clonePos != null) {
+                    int localIt = 0;
+                    while(clonePos.getBlock().getRelative(BlockFace.DOWN).getType().equals(Material.AIR) && localIt < 3) {
+                        clonePos.add(VectorUtils.DOWN);
+                        localIt++;
+                    }
                     return clonePos;
                 }
+                it++;
             }
+            return null;
         }
         
         public void clearDelirious() {

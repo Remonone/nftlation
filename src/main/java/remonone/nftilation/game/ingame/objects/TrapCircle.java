@@ -22,6 +22,7 @@ import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.EntityDamageByPlayerLog;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.RGBConstants;
+import remonone.nftilation.utils.VectorUtils;
 
 import java.util.List;
 
@@ -40,11 +41,13 @@ public class TrapCircle implements Listener {
     private World world;
     
     private int taskCastId;
+    private Vector shift;
 
     public void initTrap() {
         getServer().getPluginManager().registerEvents(this, Nftilation.getInstance());
         this.center = new Location(world, trappee.getLocation().getX(), trappee.getLocation().getY(), trappee.getLocation().getZ());
         knockbackRedundantPlayers();
+        this.shift = VectorUtils.UP.clone().multiply(.5);
         CircleEffect effect = new CircleEffect();
         CircleProps props = CircleProps.builder()
                 .world(this.center.getWorld())
@@ -53,7 +56,7 @@ public class TrapCircle implements Listener {
                 .center(this.center.toVector())
                 .minAngle(0).maxAngle(360).step(2)
                 .particleStrategy(new ParticleColorStrategy(RGBConstants.blue))
-                .offset(new Vector(0, .5F, 0))
+                .offset(this.shift)
                 .build();
         BukkitRunnable task = new BukkitRunnable() {
             @Override
@@ -101,6 +104,7 @@ public class TrapCircle implements Listener {
         if(mover.getUniqueId().equals(trappee.getUniqueId())) {
             trappee.getLocation().getWorld().playSound(trappee.getLocation(), Sound.ENTITY_GUARDIAN_AMBIENT, 1f, 1f);
             pushPlayerToCenter(mover);
+            
             SpherePlainProps props = SpherePlainProps.builder()
                     .tense(50)
                     .particle(Particle.REDSTONE)
@@ -109,7 +113,7 @@ public class TrapCircle implements Listener {
                     .planeRadius(1.5D)
                     .sphereGlobalPoint(this.center.toVector().clone())
                     .projectedSphereRadius(range)
-                    .shift(new Vector(0, .5F, 0))
+                    .shift(this.shift)
                     .particleStrategy(new ParticleColorStrategy(RGBConstants.blue))
                     .build();
             new SpherePlainEffect().execute(props);

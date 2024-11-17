@@ -18,20 +18,23 @@ public class ItemElement implements IShopElement, IPurchasableItem, Configuratio
     private static final String ITEM_ID = "id";
     private static final String ITEM_STACK = "itemStack";
     private static final String ITEM_PRICE = "itemPrice";
+    private static final String ITEM_DESCRIPTION = "itemDescription";
     private static final String ITEM_REQUISITES = "requisites";
     
     private String id;
     private final ItemStack element;
     private final boolean shouldCopyMeta;
     private final int price;
+    private final List<String> description;
     @Getter
     private RequisiteContainer requisites;
     
-    public ItemElement(String id, ItemStack item, int price, RequisiteContainer container) {
+    public ItemElement(String id, ItemStack item, int price, List<String> description, RequisiteContainer container) {
         this.id = id;
         this.element = item;
         this.price = price;
         this.shouldCopyMeta = true;
+        this.description = description;
         this.requisites = container;
     }
 
@@ -57,7 +60,7 @@ public class ItemElement implements IShopElement, IPurchasableItem, Configuratio
 
     @Override
     public List<String> getDescription() {
-        return Collections.emptyList();
+        return description;
     }
 
     @Override
@@ -69,16 +72,21 @@ public class ItemElement implements IShopElement, IPurchasableItem, Configuratio
         return map;
     }
     
+    @SuppressWarnings("unchecked")
     public static ItemElement deserialize(Map<String, Object> map) {
         String id = "";
         ItemStack itemStack = new ItemStack(Material.AIR);
         int price = 0;
+        List<String> description = new ArrayList<>();
         RequisiteContainer container;
         if (map.containsKey(ITEM_ID)) {
             id = (String) map.get(ITEM_ID);
         }
         if (map.containsKey(ITEM_STACK)) {
             itemStack = (ItemStack) map.get(ITEM_STACK);
+        }
+        if(map.containsKey(ITEM_DESCRIPTION)) {
+            description = (List<String>) map.get(ITEM_DESCRIPTION);
         }
         if (map.containsKey(ITEM_PRICE)) {
             price = (int) map.get(ITEM_PRICE);
@@ -89,6 +97,6 @@ public class ItemElement implements IShopElement, IPurchasableItem, Configuratio
             container = new RequisiteContainer(new ArrayList<>());
         }
 
-        return new ItemElement(id, itemStack, price, container);
+        return new ItemElement(id, itemStack, price, description, container);
     }
 }

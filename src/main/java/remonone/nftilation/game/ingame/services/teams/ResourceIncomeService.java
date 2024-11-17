@@ -12,6 +12,7 @@ import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.utils.NestedObjectFetcher;
+import remonone.nftilation.utils.NotificationUtils;
 import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.Map;
@@ -31,7 +32,7 @@ public class ResourceIncomeService implements IPurchasableService {
             return;
         }
         if(!PlayerUtils.tryWithdrawTokens(buyer, price, TransactionType.PURCHASE)) {
-            buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
+            NotificationUtils.sendNotification(buyer, MessageConstant.NOT_ENOUGH_MONEY, NotificationUtils.NotificationType.FAIL, false);
             return;
         }
         Map<String, Object> params = team.getParameters();

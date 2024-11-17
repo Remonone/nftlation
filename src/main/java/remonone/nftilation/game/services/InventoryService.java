@@ -99,10 +99,10 @@ public class InventoryService {
             NBT.modify(stack, nbt -> {
                 nbt.setString("id", shopElement.getId());
             });
+            List<String> lore = new ArrayList<>(shopElement.getDescription());
             if(shopElement instanceof ItemElement) {
                 ItemElement itemElement = (ItemElement) shopElement;
                 ItemMeta itemMeta = stack.getItemMeta();
-                List<String> lore = new ArrayList<>();
                 if(discount != 1F) {
                     lore.add("Discount: " + (float)Math.round((1f - discount) * 1000) / 10 + "%");
                 }
@@ -113,7 +113,6 @@ public class InventoryService {
             if(shopElement instanceof ServiceElement) {
                 ServiceElement serviceElement = (ServiceElement) shopElement;
                 ItemMeta itemMeta = stack.getItemMeta();
-                List<String> lore = new ArrayList<>();
                 if(discount != 1F) {
                     lore.add("Discount: " + (float)Math.round((1f - discount) * 1000) / 10 + "%");
                 }

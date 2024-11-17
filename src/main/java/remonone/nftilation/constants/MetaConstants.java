@@ -97,7 +97,7 @@ public class MetaConstants {
     public static final String META_BERSERK_RAGE_NAME = "ability.rage.name";
     public static final String META_BERSERK_RAGE_AVAILABILITY = "ability.rage.availability";
     public static final String META_BERSERK_RAGE_DESCRIPTION = "ability.rage.description";
-    public static final String META_BERSERK_RAGE_DURATION = "ability.rage.duration";
+    public static final String META_BERSERK_RAGE_EFFECTS = "ability.rage.effects";
     public static final String META_BERSERK_RAGE_EXPLOSION_RANGE = "ability.rage.explosive.range";
     public static final String META_BERSERK_RAGE_EXPLOSION_DAMAGE = "ability.rage.explosive.damage";
     public static final String META_BERSERK_FEAR_COOLDOWN = "ability.fear.cooldown";

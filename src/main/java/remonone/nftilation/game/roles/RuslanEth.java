@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.ItemStatModifierComponent;
@@ -100,6 +101,12 @@ public class RuslanEth extends Role {
         Snowball snowball = player.launchProjectile(Snowball.class);
         String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         EntityHandleComponent.setEntityOwner(snowball, player);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                removeRuslanActionItems(player);
+            }
+        }.runTaskLater(Nftilation.getInstance(), RoleConstant.RUSLAN_SPAWN_CLONES_COOLDOWN);
         snowball.setMetadata("invokerTeam", new FixedMetadataValue(Nftilation.getInstance(), team));
         InventoryUtils.setCooldownForItem(PlayerUtils.getModelFromPlayer(player), interactee, RoleConstant.RUSLAN_SPAWN_CLONES_COOLDOWN);
     }
@@ -112,7 +119,7 @@ public class RuslanEth extends Role {
         Role role = Store.getInstance().getDataInstance().getPlayerRole(owner.getUniqueId());
         
         if(!(role instanceof RuslanEth)) return;
-        
+        removeRuslanActionItems(owner);
         if(entitiesList.containsKey(owner.getUniqueId()) || !entitiesList.get(owner.getUniqueId()).isEmpty()) {
             entitiesList.get(owner.getUniqueId()).forEach(EntityList::removeEntity);
             entitiesList.get(owner.getUniqueId()).clear();

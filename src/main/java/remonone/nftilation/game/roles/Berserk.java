@@ -21,6 +21,7 @@ import remonone.nftilation.effects.CircleEffect;
 import remonone.nftilation.effects.props.CircleProps;
 import remonone.nftilation.effects.strategies.ParticleRepulsionStrategy;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.EffectPotion;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.AttackPresets;
 import remonone.nftilation.utils.PlayerUtils;
@@ -89,8 +90,9 @@ public class Berserk extends Role {
                         .maxAngle(360)
                         .center(player.getLocation().add(0, .5, 0).toVector())
                         .step(36)
-                        .particle(Particle.DRIP_LAVA)
-                        .particleStrategy(new ParticleRepulsionStrategy(player.getLocation().toVector().add(new Vector(0, .5D, 0)), .1F))
+                        .offset(VectorUtils.ZERO)
+                        .particle(Particle.VILLAGER_ANGRY)
+                        .particleStrategy(new ParticleRepulsionStrategy(player.getLocation().toVector().add(VectorUtils.UP), .1F))
                         .build();
                 effect.execute(props);
             }
@@ -120,6 +122,10 @@ public class Berserk extends Role {
         List<String> fearDescr = (List<String>) getMetaInfo(MetaConstants.META_BERSERK_FEAR_DESCRIPTION, level);
         fearMeta.setLore(fearDescr);
         fear.setItemMeta(fearMeta);
+        NBT.modify(fear, (nbt) -> {
+            nbt.setString(RoleConstant.BERSERK_NBT_CONTAINER, RoleConstant.BERSERK_NBT_FEAR);
+            nbt.setString(RoleConstant.ROLE, getRoleID());
+        });
         items.add(fear);
         
         if((Boolean)getMetaInfo(MetaConstants.META_BERSERK_RAGE_AVAILABILITY, level)) {
@@ -128,12 +134,13 @@ public class Berserk extends Role {
             String name = (String)getMetaInfo(MetaConstants.META_BERSERK_RAGE_NAME, level);
             List<String> rageDescr = (List<String>) getMetaInfo(MetaConstants.META_BERSERK_RAGE_DESCRIPTION, level);
             meta.setDisplayName(name);
-            fearMeta.setLore(rageDescr);
+            meta.setLore(rageDescr);
             collapser.setItemMeta(meta);
             NBT.modify(collapser, (nbt) -> {
                 nbt.setString(RoleConstant.BERSERK_NBT_CONTAINER, RoleConstant.BERSERK_NBT_RAGE);
                 nbt.setString(RoleConstant.ROLE, getRoleID());
             });
+            items.add(collapser);
         }
         return items;
     }
@@ -145,8 +152,10 @@ public class Berserk extends Role {
             player.sendMessage(ChatColor.RED + "Неправильно выбранная точка!");
             return false;
         }
-        player.setVelocity(new Vector(0, 1, 0));
+        player.setVelocity(VectorUtils.UP);
         player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 60, 10));
+        double range = (Double)getMetaByName(model, MetaConstants.META_BERSERK_RAGE_EXPLOSION_RANGE);
+        double damage = (Double)getMetaByName(model, MetaConstants.META_BERSERK_RAGE_EXPLOSION_DAMAGE);
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -157,19 +166,23 @@ public class Berserk extends Role {
         new BukkitRunnable() {
             @Override
             public void run() {
-                AttackPresets.summonExplosion(player.getLocation(), player, 5, 10, 3, 10, 10, 1, true);
+                AttackPresets.summonExplosion(player.getLocation(), player, range, damage, 3, 10, 10, 1, true);
             }
-        }.runTaskLater(Nftilation.getInstance(), 15);
+        }.runTaskLater(Nftilation.getInstance(), 20);
         new BukkitRunnable() {
+            @SuppressWarnings("unchecked")
             @Override
             public void run() {
                 player.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 1f, .1f);
-
-                player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, DataConstants.TICKS_IN_MINUTE, 1));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, DataConstants.TICKS_IN_MINUTE, 1));
+                int entitiesSize = player.getNearbyEntities(range, range, range).size();
+                if(entitiesSize < 1) return;
+                List<EffectPotion> effects = (List<EffectPotion>) getMetaByName(model, MetaConstants.META_BERSERK_RAGE_EFFECTS); 
+                for(EffectPotion effect : effects) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(effect.getEffect()), effect.getDuration(), effect.getStrength()));
+                }
             }
-        }.runTaskLater(Nftilation.getInstance(), 25);
+        }.runTaskLater(Nftilation.getInstance(), 22);
         return true;
     }
 

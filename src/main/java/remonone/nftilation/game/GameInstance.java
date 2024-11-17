@@ -158,7 +158,7 @@ public class GameInstance {
             if(newScale > oldScale) {
                 team.getPlayers().forEach(playerModel -> {
                     Player player = playerModel.getReference();
-                    player.sendMessage(MessageConstant.TEAM_DAMAGED_MESSAGE);
+                    NotificationUtils.sendNotification(player, MessageConstant.TEAM_DAMAGED_MESSAGE, NotificationUtils.NotificationType.WARNING, false);
                     player.playSound(player.getLocation(), Sound.ENTITY_CAT_HISS, 1f, .7f);
                 });
             }
@@ -172,13 +172,13 @@ public class GameInstance {
         if(team == null) return;
         if(team.getCoreInstance() == null) return;
         if(team.getCoreInstance().isCoreCannotBeHealed()) {
-            player.sendMessage(ChatColor.RED + MessageConstant.CANNOT_HEAL_CORE);
+            NotificationUtils.sendNotification(player, MessageConstant.CANNOT_HEAL_CORE, NotificationUtils.NotificationType.FAIL, false);
             return;
         }
         PlayerInteractComponent component = (PlayerInteractComponent) getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
         if(component == null) return;
         if(!component.adjustPlayerTokens(player, -price, TransactionType.PURCHASE)) {
-            player.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
+            NotificationUtils.sendNotification(player, MessageConstant.NOT_ENOUGH_MONEY, NotificationUtils.NotificationType.FAIL, false);
             return;
         }
         team.getCoreInstance().Heal();

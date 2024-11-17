@@ -105,7 +105,7 @@ public class RoleItemDispenser {
         return NestedObjectFetcher.getNestedObject(path, meta, level);
     }
 
-    public static Collection<? extends ItemStack> getCustomAbilityItems(Player player) {
+    public static List<ItemStack> getCustomAbilityItems(Player player) {
         PlayerModel model = PlayerUtils.getModelFromPlayer(player);
         List<ItemStack> stacks = (List<ItemStack>) model.getParameters().get(PropertyConstant.PLAYER_CUSTOM_ABILITY_ITEMS);
         if(stacks == null) return Collections.emptyList();

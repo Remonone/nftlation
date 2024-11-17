@@ -7,7 +7,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.util.Vector;
 import remonone.nftilation.components.ItemStatModifierComponent;
 import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.NameConstants;
@@ -19,8 +18,8 @@ import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.roles.Watcher;
 import remonone.nftilation.utils.EntityDamageByPlayerLog;
-import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.PlayerUtils;
+import remonone.nftilation.utils.VectorUtils;
 
 import java.util.List;
 import java.util.Random;
@@ -38,13 +37,10 @@ public class WatcherOnKillHandler extends BaseDamageHandler {
     @SuppressWarnings("unchecked")
     @Override
     public void OnEntityDamageHandle(EntityDamageByEntityEvent e) {
-        Logger.debug("Checking for kill...");
         Player player = (Player) e.getEntity();
         PlayerModel target = PlayerUtils.getModelFromPlayer(player);
         if(!(Role.getRoleByID((String)target.getParameters().get(PropertyConstant.PLAYER_ROLE_ID)) instanceof Watcher)) return;
-        Logger.debug("Trying to kill watcher..." + (player.getHealth() - e.getFinalDamage()));
         if(player.getHealth() - e.getFinalDamage() > 0) return;
-        Logger.debug("Health is below zero...");
         e.setCancelled(true);
         Entity damager = e.getDamager();
         if(!(damager instanceof Player)) {
@@ -74,7 +70,7 @@ public class WatcherOnKillHandler extends BaseDamageHandler {
             inventory.addItem(itemStack);
         }
         watcher.getReference().setGameMode(GameMode.SPECTATOR);
-        watcher.getReference().teleport(watcher.getReference().getLocation().add(new Vector(0, 200, 0)));
+        watcher.getReference().teleport(watcher.getReference().getLocation().add(VectorUtils.UP.clone().multiply(200)));
         watcher.getReference().kickPlayer("Ваша миссия выполнена, милорд...");
         GameInstance.getInstance().removeTeam((String) watcher.getParameters().get(PropertyConstant.PLAYER_TEAM_NAME));
     }

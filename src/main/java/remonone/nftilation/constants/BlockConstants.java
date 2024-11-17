@@ -14,8 +14,7 @@ public class BlockConstants {
         put(Material.IRON_ORE, new BlockDetails(20, 5, null));
         put(Material.DIAMOND_ORE, new BlockDetails(40, 20, null));
         put(Material.GRAVEL, new BlockDetails(10, 0, Arrays.asList(Material.FEATHER, Material.STRING, Material.FLINT)));
-        put(Material.MELON_BLOCK, new BlockDetails(10, 0, null));
-        put(Material.HAY_BLOCK, new BlockDetails(10, 0, null));
+        put(Material.MELON_BLOCK, new BlockDetails(10, 0, Arrays.asList(Material.MELON, Material.APPLE, Material.RAW_BEEF, Material.PORK, Material.COOKIE, Material.RAW_FISH, Material.MUSHROOM_SOUP, Material.BEETROOT_SOUP)));
         put(Material.LOG, new BlockDetails(10, 0, null));
         put(Material.GOLD_ORE, new BlockDetails(30, 10, Collections.singletonList(Material.GOLD_NUGGET)));
     }};

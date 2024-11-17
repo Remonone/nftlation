@@ -27,7 +27,6 @@ import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.utils.EntityDamageByPlayerLog;
-import remonone.nftilation.utils.Logger;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.ResetUtils;
 
@@ -53,6 +52,8 @@ public class OnEntityDieHandler implements Listener {
             event.setCancelled(true);
             return;
         }
+        checkForEnforcement(model, event);
+        checkForFragility(model, event);
         PriorityQueue<IDamageHandler> queue = new PriorityQueue<>(model.getDamageHandlers());
         while(!queue.isEmpty()) {
             queue.poll().OnDamageHandle(event);
@@ -62,6 +63,42 @@ public class OnEntityDieHandler implements Listener {
             event.setCancelled(true);
             OnDeath(player);
             Player attacker = EntityDamageByPlayerLog.getEventLogForLivingEntity(player.getUniqueId());
+            if(attacker == null) return;
+            EntityDamageByPlayerLog.removeLogEvent(player.getUniqueId());
+            OnPlayerKillPlayerEvent e = new OnPlayerKillPlayerEvent(PlayerUtils.getModelFromPlayer(attacker), model);
+            getServer().getPluginManager().callEvent(e);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerTakeDamageFromHostileEntity(final EntityDamageByEntityEvent event) {
+        if(!(event.getEntity() instanceof Player)) return;
+        if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) {
+            event.setCancelled(true);
+            return;
+        }
+
+        Player player = (Player) event.getEntity();
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        if(model == null) return;
+        PlayerUtils.AttackerInfo attackerData = PlayerUtils.getAttackerPlayer(event.getDamager());
+        if(attackerData != null) return;
+        if(!(Boolean) model.getParameters().getOrDefault(PropertyConstant.PLAYER_IS_ALIVE_PARAM, false)) {
+            event.setCancelled(true);
+            return;
+        }
+        checkForEnforcement(model, event);
+        checkForFragility(model, event);
+        PriorityQueue<IDamageHandler> queue = new PriorityQueue<>(model.getDamageHandlers());
+        while(!queue.isEmpty()) {
+            queue.poll().OnDamageHandle(event);
+        }
+        if(event.isCancelled()) return;
+        if(player.getHealth() - event.getFinalDamage() <= 0) {
+            event.setCancelled(true);
+            OnDeath(player);
+            Player attacker = EntityDamageByPlayerLog.getEventLogForLivingEntity(player.getUniqueId());
+            
             if(attacker == null) return;
             EntityDamageByPlayerLog.removeLogEvent(player.getUniqueId());
             OnPlayerKillPlayerEvent e = new OnPlayerKillPlayerEvent(PlayerUtils.getModelFromPlayer(attacker), model);
@@ -123,22 +160,14 @@ public class OnEntityDieHandler implements Listener {
         PlayerModel targetModel = PlayerUtils.getModelFromPlayer(target);
         PlayerModel attackerModel = PlayerUtils.getModelFromPlayer(attackerData.attacker);
         if(targetModel == null || attackerModel == null) return;
-        Logger.debug("Target model and attacker model is exists: " + targetModel.getReference().getCustomName() + " " + attackerModel.getReference().getCustomName());
         //REWORK
-        if(targetModel.getParameters().containsKey(PropertyConstant.PLAYER_FRAGILITY_DURATION)) {
-            long duration = (long)targetModel.getParameters().get(PropertyConstant.PLAYER_FRAGILITY_DURATION);
-            if(duration - System.currentTimeMillis() < 0) {
-                targetModel.getParameters().remove(PropertyConstant.PLAYER_FRAGILITY_DURATION);
-            } else {
-                event.setDamage(ConfigManager.getInstance().getFragilityScale() * event.getFinalDamage());
-            }
-        }
+        checkForEnforcement(targetModel, event);
+        checkForFragility(targetModel, event);
         //REWORK
         if(GameInstance.getInstance().checkIfPlayersInSameTeam(target, attackerData.attacker)) {
             event.setCancelled(true);
             return;
         }
-        Logger.debug("Not from the same team");
         PriorityQueue<IDamageHandler> targetQueue = new PriorityQueue<>(targetModel.getDamageHandlers());
         while(!targetQueue.isEmpty()) {
             targetQueue.poll().OnEntityDamageHandle(event);
@@ -148,7 +177,6 @@ public class OnEntityDieHandler implements Listener {
             queue.poll().OnEntityDamageDealing(event, attackerData);
         }
         if(event.isCancelled()) return;
-        Logger.debug("Event has not been canceled");
         if(target.getHealth() - event.getFinalDamage() <= 0) {
             EntityDamageByPlayerLog.removeLogEvent(target.getUniqueId());
             OnPlayerKillPlayerEvent e = new OnPlayerKillPlayerEvent(attackerModel, targetModel);
@@ -158,8 +186,29 @@ public class OnEntityDieHandler implements Listener {
         }
         
         if(target.getHealth() - event.getFinalDamage() > 0) {
-            Logger.debug("Inserting log event...");
             EntityDamageByPlayerLog.insertLogEvent(target, attackerData.attacker);
+        }
+    }
+
+    private void checkForFragility(PlayerModel targetModel, EntityDamageEvent event) {
+        if(targetModel.getParameters().containsKey(PropertyConstant.PLAYER_FRAGILITY_DURATION)) {
+            long duration = (long)targetModel.getParameters().get(PropertyConstant.PLAYER_FRAGILITY_DURATION);
+            if(duration - System.currentTimeMillis() < 0) {
+                targetModel.getParameters().remove(PropertyConstant.PLAYER_FRAGILITY_DURATION);
+            } else {
+                event.setDamage(ConfigManager.getInstance().getFragilityScale() * event.getFinalDamage());
+            }
+        }
+    }
+
+    private void checkForEnforcement(PlayerModel targetModel, EntityDamageEvent event) {
+        if(targetModel.getParameters().containsKey(PropertyConstant.PLAYER_ARMOR_ENFORCEMENT)) {
+            long duration = (long)targetModel.getParameters().get(PropertyConstant.PLAYER_ARMOR_ENFORCEMENT);
+            if(duration - System.currentTimeMillis() < 0) {
+                targetModel.getParameters().remove(PropertyConstant.PLAYER_ARMOR_ENFORCEMENT);
+            } else {
+                event.setDamage(.4F * event.getFinalDamage());
+            }
         }
     }
 
@@ -173,6 +222,7 @@ public class OnEntityDieHandler implements Listener {
         String roleId = model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID).toString();
         Role.onDie(player, Role.getRoleByID(roleId));
         Vector pos = ConfigManager.getInstance().getCenterDeadZoneCoords();
+        
         Location location = pos.toLocation(Store.getInstance().getDataInstance().getMainWorld());
         player.teleport(location);
         player.setGameMode(GameMode.SPECTATOR);
@@ -186,7 +236,8 @@ public class OnEntityDieHandler implements Listener {
                     Role.refillInventoryWithItems(model);
             }
         }, (long) RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_RESPAWN_TIMER, (long) 5 * DataConstants.TICKS_IN_SECOND));
+
+        PlayerInteractComponent playerInteract = (PlayerInteractComponent)GameInstance.getComponentByName("PlayerInteract");
+        playerInteract.increasePlayerDeathCounter(teamName, player);
     }
-    
-    
 }

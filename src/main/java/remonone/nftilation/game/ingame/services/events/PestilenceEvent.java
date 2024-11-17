@@ -13,6 +13,7 @@ import remonone.nftilation.game.ingame.services.IPurchasableService;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.models.TransactionType;
+import remonone.nftilation.utils.NotificationUtils;
 import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class PestilenceEvent implements IPurchasableService {
     @Override
     public void OnPurchase(Player buyer, float price) {
         if(!PlayerUtils.tryWithdrawTokens(buyer, price, TransactionType.PURCHASE)) {
-            buyer.sendMessage(ChatColor.RED + MessageConstant.NOT_ENOUGH_MONEY);
+            NotificationUtils.sendNotification(buyer, MessageConstant.NOT_ENOUGH_MONEY, NotificationUtils.NotificationType.FAIL, false);
             return;
         }
         List<PlayerModel> enemyModels = getEnemyModels(buyer);

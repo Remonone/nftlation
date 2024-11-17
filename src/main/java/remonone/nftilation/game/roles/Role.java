@@ -180,7 +180,7 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
     }
     
     private void giveAbilityItems(Player player, Map<String, Object> params) {
-        List<ItemStack> abilities = getAbilityItems(params);
+        List<ItemStack> abilities = new LinkedList<>(getAbilityItems(params));
         abilities.addAll(RoleItemDispenser.getCustomAbilityItems(player));
         ItemStack[] abilityItems = abilities.toArray(new ItemStack[0]);
         setOwner(player, abilityItems);

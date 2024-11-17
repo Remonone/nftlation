@@ -27,10 +27,7 @@ import remonone.nftilation.effects.strategies.ParticleRepulsionStrategy;
 import remonone.nftilation.game.damage.WatcherOnKillHandler;
 import remonone.nftilation.game.models.IDamageHandler;
 import remonone.nftilation.game.models.PlayerModel;
-import remonone.nftilation.utils.AttackPresets;
-import remonone.nftilation.utils.BlockUtils;
-import remonone.nftilation.utils.PlayerUtils;
-import remonone.nftilation.utils.RGBConstants;
+import remonone.nftilation.utils.*;
 
 import java.util.*;
 
@@ -133,11 +130,12 @@ public class Watcher extends Role {
                 .center(performer.getLocation().toVector())
                 .build();
         new SphereEffect().execute(props);
+        Vector additionalForce = VectorUtils.UP.clone().multiply(.5);
         for(Entity entity : entities) {
             if(entity.equals(performer)) continue;
             Vector entityPosition = entity.getLocation().toVector().subtract(loc.toVector()).normalize();
             Vector entityVelocity = entity.getVelocity();
-            entityVelocity.add(entityPosition).multiply(scale).add(new Vector(0, .5F, 0));
+            entityVelocity.add(entityPosition).multiply(scale).add(additionalForce);
             entity.setVelocity(entityVelocity);
         }
         return true;
@@ -166,7 +164,7 @@ public class Watcher extends Role {
                 .particleStrategy(new ParticleRepulsionStrategy(target.getLocation().toVector().add(new Vector(0, .5D, 0)), .7f))
                 .world(target.getWorld())
                 .radius(3)
-                .center(target.getLocation().toVector().add(new Vector(0, 0.5, 0)))
+                .center(target.getLocation().toVector().add(VectorUtils.UP.clone().multiply(.5)))
                 .particle(Particle.DRAGON_BREATH)
                 .build();
         SphereEffect effect = new SphereEffect();

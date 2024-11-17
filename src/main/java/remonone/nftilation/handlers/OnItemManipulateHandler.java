@@ -1,9 +1,12 @@
 package remonone.nftilation.handlers;
 
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -64,6 +67,15 @@ public class OnItemManipulateHandler implements Listener {
     @EventHandler
     public void onInventoryMove(final InventoryMoveItemEvent e) {
         Logger.log(e.getItem().toString());
+    }
+    
+    @EventHandler
+    public void onItemInteract(final PlayerInteractEntityEvent e) {
+        Entity entity = e.getRightClicked();
+        ItemStack stack = e.getPlayer().getInventory().getItemInMainHand();
+        if(ItemStatModifierComponent.checkItemIfUndroppable(stack) && (entity.getType().equals(EntityType.ITEM_FRAME) || entity.getType().equals(EntityType.ARMOR_STAND))) {
+            e.setCancelled(true);
+        }
     }
     
     @EventHandler

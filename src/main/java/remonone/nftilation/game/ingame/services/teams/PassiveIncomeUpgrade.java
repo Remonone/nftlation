@@ -12,6 +12,7 @@ import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.utils.NestedObjectFetcher;
+import remonone.nftilation.utils.NotificationUtils;
 import remonone.nftilation.utils.PlayerUtils;
 
 public class PassiveIncomeUpgrade implements IPurchasableService {
@@ -29,7 +30,7 @@ public class PassiveIncomeUpgrade implements IPurchasableService {
             return;
         }
         if(!PlayerUtils.tryWithdrawTokens(buyer, price, TransactionType.PURCHASE)) {
-            buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
+            NotificationUtils.sendNotification(buyer, MessageConstant.NOT_ENOUGH_MONEY, NotificationUtils.NotificationType.FAIL, false);
             return;
         }
         team.getParameters().put(PropertyConstant.TEAM_PASSIVE_INCOME, currentLevel);

@@ -7,6 +7,7 @@ import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.models.TransactionType;
+import remonone.nftilation.utils.NotificationUtils;
 import remonone.nftilation.utils.PlayerUtils;
 
 public class ThirdTierService implements IPurchasableService {
@@ -27,7 +28,7 @@ public class ThirdTierService implements IPurchasableService {
             playerInteract.upgradePlayer(buyer, 3);
             PlayerUtils.updateShopInventoryForPlayer(buyer);
         } else {
-            buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
+            NotificationUtils.sendNotification(buyer, MessageConstant.NOT_ENOUGH_MONEY, NotificationUtils.NotificationType.FAIL, false);
         }
     }
 }

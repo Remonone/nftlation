@@ -5,8 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class PlayerCredentials {
+public class  PlayerCredentials {
     public String login;
     public String password;
-    public String team;
 }

@@ -3,6 +3,7 @@ package remonone.nftilation.game.roles;
 import de.tr7zw.nbtapi.NBT;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -87,7 +88,7 @@ public class SybilAttacker extends Role {
                 .center(location.toVector())
                 .minAngle(0).maxAngle(360).step(.5F)
                 .particleStrategy(new ParticleColorStrategy(RGBConstants.white))
-                .offset(new Vector(0, .5F, 0))
+                .offset(VectorUtils.UP.clone().multiply(.5))
                 .build();
         CircleEffect effect = new CircleEffect();
         int areaTaskId = new BukkitRunnable() {
@@ -108,10 +109,10 @@ public class SybilAttacker extends Role {
 
     private Location shiftLocationUntilGround(Location location) {
         Block block = location.getBlock();
-        while(block.getType().equals(Material.AIR)) {
-            block = location.add(new Vector(0, -1, 0)).getBlock();
+        while(block.getRelative(BlockFace.DOWN).getType().equals(Material.AIR)) {
+            block = block.getRelative(BlockFace.DOWN);
         }
-        return block.getLocation().add(new Vector(0,1,0));
+        return block.getLocation();
     }
 
     private boolean shotArrow(PlayerModel model) {
@@ -178,7 +179,7 @@ public class SybilAttacker extends Role {
         }
         if(e.getHitBlock() != null) {
             location = e.getHitBlock().getLocation();
-            location = location.add(new Vector(0, 1, 0));
+            location = location.add(VectorUtils.UP);
         }
         if(location != null) {
             double power = (Double) getMetaByName(model, MetaConstants.META_SA_SHOT_EXPLOSIVE_POWER);

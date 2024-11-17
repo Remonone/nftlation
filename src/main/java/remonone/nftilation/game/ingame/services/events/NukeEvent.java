@@ -12,6 +12,7 @@ import remonone.nftilation.game.ingame.services.IPurchasableService;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.utils.EntityDamageByPlayerLog;
+import remonone.nftilation.utils.NotificationUtils;
 import remonone.nftilation.utils.PlayerUtils;
 
 import static org.bukkit.Bukkit.getServer;
@@ -28,7 +29,7 @@ public class NukeEvent implements IPurchasableService {
         if(PlayerUtils.tryWithdrawTokens(model, price, TransactionType.PURCHASE)) {
             eliminateCenter(buyer);
         } else {
-            buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
+            NotificationUtils.sendNotification(buyer, MessageConstant.NOT_ENOUGH_MONEY, NotificationUtils.NotificationType.FAIL, false);
         }
     }
 

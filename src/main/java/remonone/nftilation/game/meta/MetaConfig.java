@@ -74,7 +74,6 @@ public class MetaConfig {
         this.globalEvents = events.entrySet().stream().collect(
                 Collectors.toMap(value -> Integer.parseInt(value.getKey()),
                         e -> (List<GlobalEvent>) e.getValue()));
-        Logger.log(this.globalEvents.toString());
     }
     
     public Object getValue(String key) {

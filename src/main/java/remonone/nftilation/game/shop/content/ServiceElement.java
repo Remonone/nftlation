@@ -17,22 +17,26 @@ public class ServiceElement implements IShopElement, IPurchasableAction, Configu
     private final static String SERVICE_DISPLAY = "serviceDisplay";
     private final static String SERVICE_PRICE = "servicePrice";
     private final static String SERVICE_REQUISITES = "requisites";
+    private final static String SERVICE_DESCRIPTION = "description";
     
     @Getter
     private final String id;
     private final String serviceName;
     private final int price;
+    @Getter
+    private final List<String> description;
 
     private final ItemStack displayItem;
     @Getter
     private final RequisiteContainer requisites;
     
-    public ServiceElement(String id, ItemStack displayItem, String serviceName, int price, RequisiteContainer container) {
+    public ServiceElement(String id, ItemStack displayItem, String serviceName, int price, RequisiteContainer container, List<String> description) {
         this.serviceName = serviceName;
         this.price = price;
         this.id = id;
         this.displayItem = displayItem;
         this.requisites = container;
+        this.description = description;
     }
 
     @Override
@@ -51,11 +55,6 @@ public class ServiceElement implements IShopElement, IPurchasableAction, Configu
     }
 
     @Override
-    public List<String> getDescription() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put(SERVICE_ID, this.id);
@@ -64,9 +63,11 @@ public class ServiceElement implements IShopElement, IPurchasableAction, Configu
         return map;
     }
 
+    @SuppressWarnings("unchecked")
     public static ServiceElement deserialize(Map<String, Object> map) {
         String id = "";
         String serviceName = "";
+        List<String> description = new ArrayList<>();
         ItemStack itemStack = new ItemStack(Material.AIR);
         int price = 0;
         RequisiteContainer container;
@@ -83,12 +84,17 @@ public class ServiceElement implements IShopElement, IPurchasableAction, Configu
         if (map.containsKey(SERVICE_PRICE)) {
             price = (int) map.get(SERVICE_PRICE);
         }
+        
+        if(map.containsKey(SERVICE_DESCRIPTION)) {
+            description = (List<String>) map.get(SERVICE_DESCRIPTION);
+        }
+        
         if(map.containsKey(SERVICE_REQUISITES)) {
             container = (RequisiteContainer) map.get(SERVICE_REQUISITES);
         } else {
             container = new RequisiteContainer(new ArrayList<>());
         }
 
-        return new ServiceElement(id, itemStack, serviceName, price, container);
+        return new ServiceElement(id, itemStack, serviceName, price, container, description);
     }
 }

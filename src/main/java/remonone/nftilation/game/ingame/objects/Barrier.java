@@ -21,6 +21,7 @@ import remonone.nftilation.game.models.EffectPotion;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.RGBConstants;
+import remonone.nftilation.utils.VectorUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -63,8 +64,7 @@ public class Barrier implements Listener {
                 sphereEffect.execute(props);
             }
         }.runTaskTimer(Nftilation.getInstance(), 0, 4L).getTaskId();
-        Vector shift = new Vector(0,.3,0);
-        Vector zero = new Vector();
+        Vector shift = VectorUtils.UP.clone().multiply(.3);
         buffTaskId = new BukkitRunnable() {
             @Override
             public void run() {
@@ -77,7 +77,7 @@ public class Barrier implements Listener {
                         player.addPotionEffect(effect);
                         SphereProps prop = SphereProps.builder()
                                 .density(15)
-                                .particleStrategy(new ParticleStaticStrategy(1, zero))
+                                .particleStrategy(new ParticleStaticStrategy(1, VectorUtils.ZERO))
                                 .radius(.5)
                                 .center(player.getLocation().toVector().add(shift))
                                 .particle(Particle.TOTEM)

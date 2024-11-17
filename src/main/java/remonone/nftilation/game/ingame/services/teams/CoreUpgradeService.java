@@ -15,6 +15,7 @@ import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.utils.NestedObjectFetcher;
+import remonone.nftilation.utils.NotificationUtils;
 import remonone.nftilation.utils.PlayerUtils;
 
 
@@ -33,7 +34,7 @@ public class CoreUpgradeService implements IPurchasableService {
             return;
         }
         if(!PlayerUtils.tryWithdrawTokens(buyer, price, TransactionType.PURCHASE)) {
-            buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
+            NotificationUtils.sendNotification(buyer, MessageConstant.NOT_ENOUGH_MONEY, NotificationUtils.NotificationType.FAIL, false);
             return;
         }
         String nextLevelMaterial = (String) NestedObjectFetcher.getNestedObject(MetaConstants.META_UPGRADES_CORE, MetaConfig.getInstance().getUpgrades(), currentLevel);

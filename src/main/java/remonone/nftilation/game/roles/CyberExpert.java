@@ -90,7 +90,7 @@ public class CyberExpert extends Role {
                 .step(5D)
                 .particleStrategy(new ParticleRepulsionStrategy(player.getLocation().toVector().add(new Vector(0, 2F, 0)), 1F))
                 .particle(Particle.CLOUD)
-                .center(player.getLocation().toVector().add(new Vector(0, 1F, 0)))
+                .center(player.getLocation().toVector().add(VectorUtils.UP))
                 .minAngle(0)
                 .maxAngle(360)
                 .world(player.getWorld())

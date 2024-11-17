@@ -45,6 +45,7 @@ public class AttackPresets {
                 .build();
         effect.execute(mainExplosion);
         effect.execute(dust);
+        Vector directionShifter = VectorUtils.UP.clone().multiply(.3);
         for(Entity entity : entities) {
             if(!(entity instanceof LivingEntity)) {
                 continue;
@@ -59,7 +60,7 @@ public class AttackPresets {
             EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(attacker, entity, EntityDamageEvent.DamageCause.ENTITY_EXPLOSION, damage * scale);
             getServer().getPluginManager().callEvent(event);
             if(event.isCancelled()) continue;
-            Vector n_direction = direction.add(new Vector(0, 2, 0)).normalize();
+            Vector n_direction = direction.add(directionShifter).normalize();
             LivingEntity target = (LivingEntity) entity;
             target.setHealth(target.getHealth() - event.getFinalDamage());
             entity.setVelocity(n_direction.multiply(scale * 8));

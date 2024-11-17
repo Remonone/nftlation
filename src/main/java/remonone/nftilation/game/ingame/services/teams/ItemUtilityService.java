@@ -14,6 +14,7 @@ import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.roles.RoleItemDispenser;
 import remonone.nftilation.utils.NestedObjectFetcher;
+import remonone.nftilation.utils.NotificationUtils;
 import remonone.nftilation.utils.PlayerUtils;
 
 public class ItemUtilityService implements IPurchasableService {
@@ -31,7 +32,7 @@ public class ItemUtilityService implements IPurchasableService {
             return;
         }
         if(!PlayerUtils.tryWithdrawTokens(buyer, price, TransactionType.PURCHASE)) {
-            buyer.sendMessage(MessageConstant.NOT_ENOUGH_MONEY);
+            NotificationUtils.sendNotification(buyer, MessageConstant.NOT_ENOUGH_MONEY, NotificationUtils.NotificationType.FAIL, false);
             return;
         }
         team.getParameters().put(PropertyConstant.TEAM_UTILITY_ITEM_LEVEL, currentLevel);

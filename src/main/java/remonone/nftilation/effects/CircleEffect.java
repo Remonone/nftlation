@@ -15,7 +15,7 @@ public class CircleEffect implements IEffect<CircleProps> {
         Vector center = props.getCenter();
         Location centerLocation = new Location(world, center.getX(), center.getY(), center.getZ());
         IParticleStrategy strategy = props.getParticleStrategy();
-        for(float rotation = 0; rotation < 360; rotation += 2) {
+        for(float rotation = 0; rotation < 360; rotation += (float) props.getStep()) {
             Vector rotationVector = MathUtils.getRotationVector(rotation);
             Location pos = centerLocation.clone().add(rotationVector.multiply(props.getRadius()).add(props.getOffset()));
             ParticleStrategyOutput output = strategy.calculateStrategy(pos.toVector());

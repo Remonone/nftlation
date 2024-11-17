@@ -28,7 +28,7 @@ public class EntityDamageByPlayerLog {
         if(!queueDictionary.containsKey(livingEntity)) { return null; }
         DamageLog log = queueDictionary.get(livingEntity);
         if(log == null) { return null; }
-        if(log.compareTo(System.currentTimeMillis()) <= 0) {
+        if(log.compareTo(System.currentTimeMillis()) >= 0) {
             queueDictionary.remove(livingEntity);
             return null;
         }

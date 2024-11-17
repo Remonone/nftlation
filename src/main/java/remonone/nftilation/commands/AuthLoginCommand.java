@@ -21,20 +21,14 @@ public class AuthLoginCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(!(sender instanceof Player)) return false;
         Player player = (Player) sender;
-        if(args.length < 2) return false;
-        String adminRow = "";
-        if(args.length > 2) {
-            adminRow = args[2];
-        }
+        if(args.length < 1) return false;
         String pass = args[0];
-        String team = args[1];
-        PlayerCredentials credentials = new PlayerCredentials(player.getName(), pass, team);
+        PlayerCredentials credentials = new PlayerCredentials(player.getName(), pass);
 
-        String finalAdminRow = adminRow;
         BukkitRunnable loginTask = new BukkitRunnable() {
             @Override
             public void run() {
-                PlayerData data = MiddlewareService.logInPlayer(credentials, finalAdminRow.equals("ADMIN50329AAC"));
+                PlayerData data = MiddlewareService.logInPlayer(credentials);
                 if(data == null) {
                     Logger.error("Error during handling login command.");
                     player.sendMessage(ChatColor.RED + "Something went wrong...");

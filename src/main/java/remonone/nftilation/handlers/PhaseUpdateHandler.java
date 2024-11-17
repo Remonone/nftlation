@@ -92,7 +92,7 @@ public class PhaseUpdateHandler implements Listener {
                 instance.setRule(RuleConstants.RULE_CORE_SELF_DESTRUCTIVE, true);
                 instance.setRule(RuleConstants.RULE_INVENTORY_AUTO_CLEAR, false);
                 instance.setRule(RuleConstants.RULE_CORE_DAMAGE_INTAKE, 4);
-                instance.setRule(RuleConstants.RULE_RESPAWN_TIMER, 20 * DataConstants.TICKS_IN_SECOND);
+                instance.setRule(RuleConstants.RULE_RESPAWN_TIMER, (long)20 * DataConstants.TICKS_IN_SECOND);
                 BukkitRunnable runnable = new BukkitRunnable() {
                     @Override
                     public void run() {
@@ -149,7 +149,6 @@ public class PhaseUpdateHandler implements Listener {
     }
 
     private void initiateStageActions(int stage) {
-        Logger.debug(String.valueOf(stage));
         List<MetaConfig.GlobalEvent> eventsToInitiate = MetaConfig.getInstance().getGlobalEvents().get(stage);
         if(eventsToInitiate == null) return;
         for(MetaConfig.GlobalEvent event : eventsToInitiate) {
