@@ -5,7 +5,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.MetaConstants;
@@ -40,9 +39,8 @@ public class CoreUpgradeService implements IPurchasableService {
         String nextLevelMaterial = (String) NestedObjectFetcher.getNestedObject(MetaConstants.META_UPGRADES_CORE, MetaConfig.getInstance().getUpgrades(), currentLevel);
         team.getParameters().put(PropertyConstant.TEAM_CORE_BLOCK, currentLevel);
         Material material = Material.getMaterial(nextLevelMaterial);
-        Vector corePos = team.getTeamSpawnPoint().getCoreCenter();
-        Location location = new Location(buyer.getWorld(), corePos.getX(), corePos.getY(), corePos.getZ());
-        location.getBlock().setType(material);
+        Location corePos = team.getTeamSpawnPoint().getCoreCenter();
+        corePos.getBlock().setType(material);
         String playerName = Store.getInstance().getDataInstance().FindPlayerByName(buyer.getUniqueId()).getData().getLogin();
         int finalCurrentLevel = currentLevel;
         team.getPlayers().forEach(playerModel -> {

@@ -78,4 +78,7 @@ public class MessageConstant {
     public static final String EVENT_PURCHASE = " купил событие: ";
     public static final String PESTILENCE_KILL = "Мор пожрал еще одну душу...";
     public static final String PESTILENCE_START = "Ваше состояние удручающее. Ваша жизнь начала гаснуть...";
+    public static final String EMPTY_TARGET = "Цель не выбрана!";
+    public static final String PLAYER_TARGET_REQUIRED = "Выбранная цель не является игроком!";
+    public static final String PLAYER_IN_SAME_TEAM = "Выбранный игрок находится в вашей команде!";
 }

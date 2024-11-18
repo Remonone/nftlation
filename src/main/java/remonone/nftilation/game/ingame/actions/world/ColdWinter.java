@@ -10,7 +10,7 @@ import remonone.nftilation.utils.PlayerUtils;
 
 import java.util.Map;
 
-public class HotSummer implements IAction {
+public class ColdWinter implements IAction {
     @Override
     public void Init(Map<String, Object> params) {
         Bukkit.getOnlinePlayers().forEach(player -> {
@@ -23,12 +23,12 @@ public class HotSummer implements IAction {
 
     @Override
     public String getTitle() {
-        return "Жаркое лето";
+        return "Морозная зима";
     }
 
     @Override
     public String getDescription() {
-        return "Может кто-нибудь включить кондёр?";
+        return "Может кто-нибудь включить обогреватель?";
     }
 
     @Override

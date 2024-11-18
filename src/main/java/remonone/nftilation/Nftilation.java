@@ -74,7 +74,7 @@ public final class Nftilation extends JavaPlugin {
         ActionContainer.registerAction(ActionType.CHECKER, new Checker());
         ActionContainer.registerAction(ActionType.MONEY_RAIN, new MoneyRain());
         ActionContainer.registerAction(ActionType.TOTAL_SALE, new TotalSale());
-        ActionContainer.registerAction(ActionType.HOT_SUMMER, new HotSummer());
+        ActionContainer.registerAction(ActionType.HOT_SUMMER, new ColdWinter());
         ActionContainer.registerAction(ActionType.MASSIVE_DELIRIUM, new MassiveDelirium());
         ActionContainer.registerAction(ActionType.WATCHER_BOSS, new WatcherBoss());
         

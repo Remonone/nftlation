@@ -14,7 +14,7 @@ public class DataConstants {
 
     public static final int CONSTANT_POTION_DURATION = Integer.MAX_VALUE;
 
-    public static final int ACTION_ROBO_SYBIL_COUNT_PER_POINT = 4;
+    public static final int ACTION_ROBO_SYBIL_COUNT_PER_POINT = 2;
 
     public static final int INVULNERABILITY_RANGE = 35;
     public static final int DAMAGE_REPORT_LIFETIME = 12;

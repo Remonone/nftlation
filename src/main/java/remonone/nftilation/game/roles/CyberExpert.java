@@ -9,13 +9,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
-import remonone.nftilation.constants.DataConstants;
-import remonone.nftilation.constants.MetaConstants;
-import remonone.nftilation.constants.PropertyConstant;
-import remonone.nftilation.constants.RoleConstant;
+import remonone.nftilation.constants.*;
 import remonone.nftilation.effects.CircleEffect;
 import remonone.nftilation.effects.props.CircleProps;
 import remonone.nftilation.effects.strategies.ParticleRepulsionStrategy;
+import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.ingame.objects.TrapCircle;
 import remonone.nftilation.game.models.EffectPotion;
 import remonone.nftilation.game.models.PlayerModel;
@@ -110,14 +108,18 @@ public class CyberExpert extends Role {
         Player player = model.getReference();
         Entity selectedEntity = PlayerUtils.getEntityLookedAt(player, range);
         if(selectedEntity == null) {
-            player.playSound(player.getLocation(), Sound.ENTITY_CAT_HISS, .5f, 1f);
+            NotificationUtils.sendNotification(player, MessageConstant.EMPTY_TARGET, NotificationUtils.NotificationType.FAIL, true);
             return false;
         }
         if(!(selectedEntity instanceof Player)) {
-            player.playSound(player.getLocation(), Sound.ENTITY_CAT_HISS, .5f, 1f);
+            NotificationUtils.sendNotification(player, MessageConstant.PLAYER_TARGET_REQUIRED, NotificationUtils.NotificationType.FAIL, true);
             return false;
         }
         Player target = (Player)selectedEntity;
+        if(GameInstance.getInstance().checkIfPlayersInSameTeam(target, player)){
+            NotificationUtils.sendNotification(player, MessageConstant.PLAYER_IN_SAME_TEAM, NotificationUtils.NotificationType.FAIL, true);
+            return false;
+        }
         createTrap(target, model);
         return true;
     }

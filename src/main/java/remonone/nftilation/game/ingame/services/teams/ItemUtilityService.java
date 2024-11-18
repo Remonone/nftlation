@@ -43,7 +43,7 @@ public class ItemUtilityService implements IPurchasableService {
             Player player = playerModel.getReference();
             player.playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, .7f, .4f);
             player.sendMessage(ChatColor.WHITE + playerName + ChatColor.GOLD + MessageConstant.TEAM_UPGRADE + MessageConstant.TEAM_UPGRADE_UTILITY + " " + finalCurrentLevel);
-            Role.refillInventoryWithItems(playerModel);
+            Role.setInventoryItems(playerModel);
             PlayerUtils.updateShopInventoryForPlayer(player);
         });
     }

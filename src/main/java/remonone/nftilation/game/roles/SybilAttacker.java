@@ -14,6 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
+import remonone.nftilation.components.EntityHandleComponent;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.PropertyConstant;
@@ -118,7 +119,7 @@ public class SybilAttacker extends Role {
     private boolean shotArrow(PlayerModel model) {
         Arrow arrow = model.getReference().launchProjectile(Arrow.class);
         double scale = (Double) getMetaByName(model, MetaConstants.META_SA_SHOT_STRENGTH);
-        
+        EntityHandleComponent.setEntityOwner(arrow, model.getReference());
         arrow.setVelocity(arrow.getVelocity().multiply(scale));
         boolean isExplosive = (Boolean) getMetaByName(model, MetaConstants.META_SA_SHOT_EXPLOSIVE);
         arrow.setMetadata(RoleConstant.SYBIL_ATTACKER_ARROW_EXPLOSIVE, new FixedMetadataValue(Nftilation.getInstance(), isExplosive));

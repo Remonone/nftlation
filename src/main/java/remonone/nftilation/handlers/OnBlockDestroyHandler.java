@@ -14,7 +14,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.PlayerInteractComponent;
@@ -87,9 +86,9 @@ public class OnBlockDestroyHandler implements Listener {
             };
             getServer().getScheduler().runTaskLater(Nftilation.getInstance(), task, timer);
         }
-        List<Vector> corePositions = ConfigManager.getInstance().getTeamSpawnList().stream().map(TeamSpawnPoint::getCoreCenter).collect(Collectors.toList());
-        if(corePositions.stream().anyMatch(position -> position.distance(block.getLocation().toVector()) < 1D)) {
-            ITeam team = GameInstance.getInstance().getTeamByCorePosition(block.getLocation().toVector());
+        List<Location> corePositions = ConfigManager.getInstance().getTeamSpawnList().stream().map(TeamSpawnPoint::getCoreCenter).map(center -> new Location(block.getWorld(), center.getBlockX(), center.getBlockY(), center.getBlockZ())).collect(Collectors.toList());
+        if(corePositions.stream().anyMatch(position -> position.getBlock().equals(block.getLocation().getBlock()))) {
+            ITeam team = GameInstance.getInstance().getTeamByCorePosition(block.getLocation());
             String playerTeam = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
             e.setCancelled(true);
             if(team.getTeamName().equals(playerTeam)) {

@@ -144,7 +144,7 @@ public class ConfigManager {
         SetValue(PropertyConstant.ROBO_SYBIL_SPAWN_POINTS, roboSybilsSpawnList.toArray());
     }
     
-    public boolean trySetTeamSpawnCore(String id, Vector pos) {
+    public boolean trySetTeamSpawnCore(String id, Location pos) {
         TeamSpawnPoint teamPoint = teamSpawnList.stream().filter(point -> point.getId().equals(id)).findFirst().orElse(null);
         if(teamPoint == null) {
             return false;

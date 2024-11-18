@@ -67,6 +67,10 @@ public abstract class Role implements Cloneable, Listener, IDamageContainer, IIn
                 modifiers.forEach(modifier -> {
                     Attribute attribute = Attribute.valueOf(modifier.getAttributeName());
                     Object levelBasedValue = NestedObjectFetcher.getLevelBasedObject(level, modifier.getAttributeValue());
+                    if(attribute.equals(Attribute.GENERIC_MOVEMENT_SPEED)) {
+                        player.setWalkSpeed(((Double)modifier.getAttributeValue()).floatValue());
+                        return;
+                    }
                     player.getAttribute(attribute).setBaseValue((double) levelBasedValue);
                     if(attribute.equals(Attribute.GENERIC_MAX_HEALTH)) {
                         player.setHealthScale((double) levelBasedValue);

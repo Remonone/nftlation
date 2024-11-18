@@ -95,9 +95,7 @@ public class GameInstance {
     public final Function<String, Void> destroyTeam = (String teamName) -> {
         IModifiableTeam team = teamData.get(teamName);
         team.setCoreAlive(false);
-
-        World world = Store.getInstance().getDataInstance().getMainWorld();
-        Location location = team.getTeamSpawnPoint().getCoreCenter().toLocation(world);
+        Location location = team.getTeamSpawnPoint().getCoreCenter();
         location.getBlock().setType(Material.AIR);
         notifyDestruction(team);
 
@@ -137,9 +135,9 @@ public class GameInstance {
     }
 
 
-    public ITeam getTeamByCorePosition(Vector position) {
+    public ITeam getTeamByCorePosition(Location position) {
         for(ITeam team : teamData.values()) {
-            if(position.isInSphere(team.getTeamSpawnPoint().getCoreCenter(), 1.0D)) {
+            if(position.getBlock().equals(team.getTeamSpawnPoint().getCoreCenter().getBlock())) {
                 return team;
             }
         }
@@ -257,13 +255,12 @@ public class GameInstance {
         ITeam team = teamData.get(teamName);
         if(team == null) return;
         if(team.isCoreAlive()) {
-            Vector vector = VectorUtils.getRandomPosInCircle(team.getTeamSpawnPoint().getPosition().toVector(), 5);
+            Vector vector = VectorUtils.getRandomPosInCircle(VectorUtils.ZERO, 5);
             Location location = team.getTeamSpawnPoint().getPosition();
-            location.setX(vector.getX());
-            location.setY(vector.getY());
-            location.setZ(vector.getZ());
-            player.teleport(location);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 100, 100));
+            location.add(vector);
+            Location loc = BlockUtils.getNearestEmptySpace(location.getBlock(), 2);
+            player.teleport(loc);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 100, 10));
             PlayerModel model = getPlayerModelFromTeam(teamName, player);
             if(model == null) return;
             model.getParameters().put(PropertyConstant.PLAYER_IS_ALIVE_PARAM, true);

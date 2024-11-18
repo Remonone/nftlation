@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
-import org.bukkit.util.Vector;
 import remonone.nftilation.utils.VectorUtils;
 
 import java.util.HashMap;
@@ -20,14 +19,14 @@ public class TeamSpawnPoint implements Cloneable, ConfigurationSerializable {
 
     private String id;
     private Location position;
-    private Vector coreCenter;
+    private Location coreCenter;
     private Location shopKeeperPosition;
     private Location checkerChestPosition;
     private Location airDropPosition;
     
     @Override
     public String toString() {
-        return "TeamSpawnPoint [id=" + id + ", position=" + VectorUtils.convertRoundVectorString(position.toVector()) + ", coreCenter=" + VectorUtils.convertRoundVectorString(coreCenter) + "];";
+        return "TeamSpawnPoint [id=" + id + ", position=" + VectorUtils.convertRoundVectorString(position.toVector()) + ", coreCenter=" + VectorUtils.convertRoundVectorString(coreCenter.toVector()) + "];";
     }
 
     public Map<String, Object> serialize() {
@@ -57,7 +56,7 @@ public class TeamSpawnPoint implements Cloneable, ConfigurationSerializable {
     public static TeamSpawnPoint deserialize(Map<String, Object> args) {
         String id = "";
         Location pos = new Location(null, 0, 0, 0);
-        Vector center = VectorUtils.ZERO;
+        Location center = null;
         Location shopKeeper = new Location(null, 0, 0, 0);
         Location checkerChest = new Location(null, 0, 0, 0);
         Location airDropPosition = new Location(null, 0, 0, 0);
@@ -69,7 +68,7 @@ public class TeamSpawnPoint implements Cloneable, ConfigurationSerializable {
             pos = (Location) args.get("position");
         }
         if (args.containsKey("coreCenter")) {
-            center = (Vector) args.get("coreCenter");
+            center = (Location) args.get("coreCenter");
         }
         if(args.containsKey("shopKeeper")) {
             shopKeeper = (Location) args.get("shopKeeper");

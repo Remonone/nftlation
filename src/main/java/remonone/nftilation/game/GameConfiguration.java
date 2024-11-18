@@ -5,7 +5,6 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftIronGolem;
 import org.bukkit.entity.LivingEntity;
@@ -120,10 +119,9 @@ public class GameConfiguration {
     }
 
     public static void spawnShopKeeper(TeamSpawnPoint point) {
-        World world = Store.getInstance().getDataInstance().getMainWorld();
         Location location = point.getShopKeeperPosition();
         location.getChunk().load();
-        Villager villager = world.spawn(location, Villager.class);
+        Villager villager = location.getWorld().spawn(location, Villager.class);
         villager.setAI(false);
         villager.setCustomName("Shop keeper");
         villager.setCustomNameVisible(false);
@@ -204,8 +202,7 @@ public class GameConfiguration {
 
     private static Core setCore(TeamSpawnPoint point) {
         Core core = new Core(() -> {});
-        World world = Store.getInstance().getDataInstance().getMainWorld();
-        Location location = point.getCoreCenter().toLocation(world);
+        Location location = point.getCoreCenter();
         String matName = (String)NestedObjectFetcher.getNestedObject("coreUpgrade", MetaConfig.getInstance().getUpgrades(), 0);
         location.getBlock().setType(Material.getMaterial(matName));
         return core;
