@@ -62,22 +62,26 @@ public class Cryptomarine extends Role {
         return "CM";
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public List<ItemStack> getAbilityItems(Map<String, Object> params){
         List<ItemStack> items = new ArrayList<>();
         ItemStack itemStack = new ItemStack(Material.SHIELD);
+        int level = (Integer) params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        String name = (String)getMetaInfo(MetaConstants.META_CYPTOMARINE_SHIELD_NAME, level);
+        List<String> description = (List<String>)getMetaInfo(MetaConstants.META_CRYPTOMARINE_SHIELD_DESCRIPTION, level);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName(RoleConstant.CTYPTOMARINE_SHIELD);
+        meta.setDisplayName(name);
+        meta.setLore(description);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
         items.add(itemStack);
-        int level = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         if((Boolean)getMetaInfo(MetaConstants.META_CRYPTOMARINE_BARRIER_AVAILABILITY, level)) {
             ItemStack barrier = new ItemStack(Material.BANNER);
             ItemMeta barrierMeta = barrier.getItemMeta();
-            String name = (String)getMetaInfo(MetaConstants.META_CRYPTOMARINE_BARRIER_NAME, level);
-            barrierMeta.setDisplayName(name);
+            String barrierName = (String)getMetaInfo(MetaConstants.META_CRYPTOMARINE_BARRIER_NAME, level);
+            barrierMeta.setDisplayName(barrierName);
             barrier.setItemMeta(barrierMeta);
             NBT.modify(barrier, nbt -> {
                 nbt.setString(RoleConstant.ROLE, getRoleID());

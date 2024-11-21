@@ -58,7 +58,7 @@ public class OnEntityDieHandler implements Listener {
         while(!queue.isEmpty()) {
             queue.poll().OnDamageHandle(event);
         }
-        if(event.isCancelled() || event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) return;
+        if(event.isCancelled() || event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || event.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)) return;
         if(player.getHealth() - event.getFinalDamage() <= 0) {
             event.setCancelled(true);
             OnDeath(player);

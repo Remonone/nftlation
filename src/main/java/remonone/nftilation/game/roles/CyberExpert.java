@@ -55,13 +55,18 @@ public class CyberExpert extends Role {
         }, RoleConstant.CYBER_EXPERT_NBT_CONTAINER);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<ItemStack> getAbilityItems(Map<String, Object> playerParams) {
         ArrayList<ItemStack> items = new ArrayList<>();
+        int upgradeLevel = (int)playerParams.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         if((Integer)playerParams.getOrDefault(PropertyConstant.PLAYER_LEVEL_PARAM, 1) != 1) {
             ItemStack jail = new ItemStack(Material.IRON_FENCE);
+            String name = (String)getMetaInfo(MetaConstants.META_CE_JAIL_NAME, upgradeLevel);
+            List<String> description = (List<String>)getMetaInfo(MetaConstants.META_CE_JAIL_DESCRIPTION, upgradeLevel);
             ItemMeta meta = jail.getItemMeta();
-            meta.setDisplayName("Кибер-СИЗО");
+            meta.setDisplayName(name);
+            meta.setLore(description);
             jail.setItemMeta(meta);
             NBT.modify(jail, (nbt) -> {
                 nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "jail");
@@ -74,8 +79,11 @@ public class CyberExpert extends Role {
             nbt.setString(RoleConstant.CYBER_EXPERT_NBT_CONTAINER, "feather");
             nbt.setString(RoleConstant.ROLE, getRoleID());
         });
+        String name = (String)getMetaInfo(MetaConstants.META_CE_FLOW_NAME, upgradeLevel);
+        List<String> description = (List<String>)getMetaInfo(MetaConstants.META_CE_FLOW_DESCRIPTION, upgradeLevel);
         ItemMeta flowMeta = flow.getItemMeta();
-        flowMeta.setDisplayName(ChatColor.GRAY + "Режим погони");
+        flowMeta.setDisplayName(name);
+        flowMeta.setLore(description);
         flow.setItemMeta(flowMeta);
         items.add(flow);
         return items;

@@ -62,6 +62,7 @@ public class ShopInteractHandler implements Listener {
         if(element instanceof CategoryElement) {
             CategoryElement el = (CategoryElement) element;
             Inventory inventory = InventoryService.buildShopKeeperInventory(player, el);
+            if(inventory == null) return;
             player.openInventory(inventory);
         }
     }

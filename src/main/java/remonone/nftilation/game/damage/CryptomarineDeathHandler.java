@@ -2,18 +2,14 @@ package remonone.nftilation.game.damage;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.components.EntityHandleComponent;
-import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.roles.Cryptomarine;
+import remonone.nftilation.game.roles.Role;
+import remonone.nftilation.utils.AttackPresets;
 import remonone.nftilation.utils.PlayerUtils;
 
 public class CryptomarineDeathHandler extends BaseDamageHandler {
@@ -25,19 +21,16 @@ public class CryptomarineDeathHandler extends BaseDamageHandler {
     @Override
     public void OnDamageHandle(EntityDamageEvent e) {
         Player player = (Player) e.getEntity();
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Cryptomarine)) return;
+        Role role = Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId());
+        if(!(role instanceof Cryptomarine)) return;
         if(player.getHealth() - e.getFinalDamage() > 0) return;
         String team = Store.getInstance().getDataInstance().getPlayerTeam(player.getUniqueId());
         PlayerModel model = GameInstance.getInstance().getPlayerModelFromTeam(team, player);
         if(!PlayerUtils.validateParams(model.getParameters())) return;
-        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        if(upgradeLevel < 3) return;
+        if(!(Boolean)role.getMetaByName(model, MetaConstants.META_CRYPTOMARINE_EXPLOSION_AVAILABILITY)) return;
         Location location = player.getLocation();
-        player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20, 1000, false, false));
-        TNTPrimed entity = player.getWorld().spawn(location, TNTPrimed.class);
-        entity.setMetadata("cryptomarine", new FixedMetadataValue(Nftilation.getInstance(), 10));
-        entity.setFuseTicks(0);
-        EntityHandleComponent.setEntityOwner(entity, player);
-        entity.setIsIncendiary(true);
+        double range = (Double)role.getMetaByName(model, MetaConstants.META_CRYPTOMARINE_EXPLOSION_RANGE);
+        double damage = (Double)role.getMetaByName(model, MetaConstants.META_CRYPTOMARINE_EXPLOSION_DAMAGE);
+        AttackPresets.summonExplosion(location, player, range, damage, 2, 15, 100, 2, true);
     }
 }

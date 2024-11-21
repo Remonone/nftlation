@@ -1,14 +1,9 @@
 package remonone.nftilation.game.roles;
 
 import de.tr7zw.nbtapi.NBT;
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -16,19 +11,16 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
-import remonone.nftilation.constants.MessageConstant;
-import remonone.nftilation.constants.PropertyConstant;
-import remonone.nftilation.constants.RoleConstant;
+import remonone.nftilation.constants.*;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.models.ITeam;
 import remonone.nftilation.game.models.PlayerModel;
-import remonone.nftilation.utils.InventoryUtils;
+import remonone.nftilation.utils.ColorUtils;
 import remonone.nftilation.utils.PlayerUtils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.bukkit.Bukkit.getServer;
 
@@ -41,71 +33,75 @@ public class Indian extends Role {
 
     public Indian() {
         super("IN");
+        super.registerHandlers(new HashMap<String, IAbilityHandler>(){{
+            put(RoleConstant.INDIAN_NBT_BLOCKS, new IAbilityHandler() {
+                @Override
+                public boolean executeHandle(PlayerModel model) {
+                    return onBlockActivate(model);
+                }
+
+                @Override
+                public float getCooldown(PlayerModel model) {
+                    return ((Double)getMetaByName(model, MetaConstants.META_INDIAN_BLOCKS_COOLDOWN)).floatValue();
+                }
+            });
+            put(RoleConstant.INDIAN_NBT_RECALL, new IAbilityHandler() {
+                @Override
+                public boolean executeHandle(PlayerModel model) {
+                    return onRecall(model);
+                }
+
+                @Override
+                public float getCooldown(PlayerModel model) {
+                    return 0;
+                }
+            });
+        }}, RoleConstant.INDIAN_NBT_CONTAINER);
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public List<ItemStack> getAbilityItems(Map<String, Object> params) {
+        List<ItemStack> stacks = new ArrayList<>();
         int upgradeLevel = (Integer)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        ItemStack blocks = new ItemStack(Material.STONE);
-        switch (upgradeLevel) {
-            case 1:
-                blocks = new ItemStack(Material.WOOL);
-                NBT.modify(blocks, nbt -> {
-                    nbt.setString("block-type", Material.WOOL.toString());
-                    nbt.setInteger("amount", 16);
-                });
-                break;
-            case 2:
-                blocks = new ItemStack(Material.SANDSTONE);
-                NBT.modify(blocks, nbt -> {
-                    nbt.setString("block-type", Material.SANDSTONE.toString());
-                    nbt.setInteger("amount", 32);
-                });
-                break;
-            case 3:
-                blocks = new ItemStack(Material.ENDER_STONE);
-                NBT.modify(blocks, nbt -> {
-                    nbt.setString("block-type", Material.ENDER_STONE.toString());
-                    nbt.setInteger("amount", 32);
-                });
-                break;            
+        Material material = Material.getMaterial((String)getMetaInfo(MetaConstants.META_INDIAN_BLOCKS_TYPE, upgradeLevel));
+        int amount = (int)getMetaInfo(MetaConstants.META_INDIAN_BLOCKS_AMOUNT, upgradeLevel);
+        ItemStack blocks = new ItemStack(material);
+        if(material.equals(Material.WOOL)) {
+            ITeam team = GameInstance.getInstance().getTeam((String) params.get(PropertyConstant.PLAYER_TEAM_NAME));
+            char teamColor = team.getTeamColor();
+            blocks = new ItemStack(material, 1, getColorData(teamColor));
         }
+        NBT.modify(blocks, nbt -> {
+            nbt.setString("block-type", material.toString());
+            nbt.setInteger("amount", amount);
+            nbt.setString(RoleConstant.INDIAN_NBT_CONTAINER, RoleConstant.INDIAN_NBT_BLOCKS);
+            nbt.setString(RoleConstant.ROLE, getRoleID());
+        });
+        String blocksName = (String)getMetaInfo(MetaConstants.META_INDIAN_BLOCKS_NAME, upgradeLevel);
+        List<String> blocksDescription = (List<String>)getMetaInfo(MetaConstants.META_INDIAN_BLOCKS_DESCRIPTION, upgradeLevel);
         ItemMeta blockMeta = blocks.getItemMeta();
-        blockMeta.setDisplayName(RoleConstant.INDIAN_BLOCK_ABILITY);
+        blockMeta.setDisplayName(blocksName);
+        blockMeta.setLore(blocksDescription);
         blocks.setItemMeta(blockMeta);
-        ItemStack itemStack = new ItemStack(Material.TORCH);
-        ItemMeta meta = itemStack.getItemMeta();
-        meta.setUnbreakable(true);
-        meta.setDisplayName(RoleConstant.INDIAN_RECALL_ABILITY);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        itemStack.setItemMeta(meta);
-        NBT.modify(itemStack, nbt -> {nbt.setString(RoleConstant.INDIAN_NBT_CONTAINER, RoleConstant.INDIAN_NBT_RECALL);});
-        return Arrays.asList(blocks, itemStack);
-    }
-    
-    @EventHandler
-    public void onItemInteract(final PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        ItemStack item = event.getItem();
-        if(item == null || item.getAmount() < 0 || item.getType() == Material.AIR) {
-            return;
+        stacks.add(blocks);
+        if((Boolean)getMetaInfo(MetaConstants.META_INDIAN_RECALL_AVAILABILITY, upgradeLevel)) {
+            ItemStack itemStack = new ItemStack(Material.TORCH);
+            String recallName = (String) getMetaInfo(MetaConstants.META_INDIAN_RECALL_NAME, upgradeLevel);
+            List<String> recallDescription = (List<String>) getMetaInfo(MetaConstants.META_INDIAN_RECALL_DESCRIPTION, upgradeLevel);
+            ItemMeta meta = itemStack.getItemMeta();
+            meta.setUnbreakable(true);
+            meta.setDisplayName(recallName);
+            meta.setLore(recallDescription);
+            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+            itemStack.setItemMeta(meta);
+            NBT.modify(itemStack, nbt -> {
+                nbt.setString(RoleConstant.INDIAN_NBT_CONTAINER, RoleConstant.INDIAN_NBT_RECALL);
+                nbt.setString(RoleConstant.ROLE, getRoleID());
+            });
+            stacks.add(itemStack);
         }
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Indian)) return;
-        String block = NBT.get(item, nbt -> (String)nbt.getString("block-type"));
-        if(StringUtils.isEmpty(block)) return;
-        event.setCancelled(true);
-        if(InventoryUtils.isCooldownRemain(item)) {
-            InventoryUtils.notifyAboutCooldown(player, item);
-            return;
-        }
-        int amount = NBT.get(item, nbt -> (Integer)nbt.getInteger("amount"));
-        Material mat = Material.getMaterial(block);
-        ItemStack stack = new ItemStack(mat);
-        stack.setAmount(amount);
-        player.getInventory().addItem(stack);
-        World world = player.getWorld();
-        world.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, .5f, 1f);
-        InventoryUtils.setCooldownForItem(PlayerUtils.getModelFromPlayer(player), item, RoleConstant.INDIAN_BLOCK_COOLDOWN);
+        return stacks;
     }
 
     @EventHandler
@@ -126,39 +122,57 @@ public class Indian extends Role {
         getServer().getScheduler().cancelTask(taskId);
         accessor.sendMessage(ChatColor.GOLD + RoleConstant.INDIAN_RECALL_CANCEL);
     }
-
-    @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        ItemStack item = event.getItem();
-        if(item == null || item.getAmount() < 0 || item.getType() == Material.AIR) {
-            return;
+    
+    
+    private boolean onBlockActivate(PlayerModel model) {
+        Player player = model.getReference();
+        ItemStack item = player.getInventory().getItemInMainHand();
+        if(item == null || item.getType() == Material.AIR || item.getAmount() < 0) {
+            item = player.getInventory().getItemInOffHand();
         }
-        if(!(Store.getInstance().getDataInstance().getPlayerRole(player.getUniqueId()) instanceof Indian)) return;
-        String isRecall = NBT.get(item, nbt -> (String) nbt.getString(RoleConstant.INDIAN_NBT_CONTAINER));
-        if(StringUtils.isEmpty(isRecall) || !isRecall.equals(RoleConstant.INDIAN_NBT_RECALL)) return;
-        event.setCancelled(true);
-        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        String block = NBT.get(item, nbt -> (String)nbt.getString("block-type"));
+        int amount = NBT.get(item, nbt -> (Integer)nbt.getInteger("amount"));
+        Material mat = Material.getMaterial(block);
+
+        ItemStack stack = new ItemStack(mat);
+        ITeam team = PlayerUtils.getTeamFromPlayer(player);
+        if(team == null) {
+            return false;
+        }
+        if(mat.equals(Material.WOOL)) {
+            stack = new ItemStack(mat, amount, DyeColor.getByColor(ColorUtils.TranslateToColor(ChatColor.getByChar(team.getTeamColor()))).getWoolData());
+        }
+        stack.setAmount(amount);
+        player.getInventory().addItem(stack);
+        player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, .5f, 1f);
+        return true;
+    }
+    
+    private boolean onRecall(PlayerModel model) {
+        Player player = model.getReference();
         Map<String, Object> params = model.getParameters();
-        String team = (String)params.get(PropertyConstant.PLAYER_TEAM_NAME);
         if(params.containsKey(RoleConstant.INDIAN_PARAM_RECALL)) {
             player.sendMessage(ChatColor.GOLD + RoleConstant.INDIAN_RECALL_ACTIVE);
-            return;
+            return false;
         }
         player.sendMessage(ChatColor.GOLD + MessageConstant.START_RECALL);
-        
-        if(!PlayerUtils.validateParams(model.getParameters())) return;
-        int upgradeLevel = (Integer)model.getParameters().get(PropertyConstant.PLAYER_LEVEL_PARAM);
+        double delay = (Double)getMetaByName(model, MetaConstants.META_INDIAN_CALLBACK_AWAIT);
+        String teamName = (String) params.get(PropertyConstant.PLAYER_TEAM_NAME);
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override
             public void run() {
                 params.remove(RoleConstant.INDIAN_PARAM_RECALL);
-                GameInstance.getInstance().teleportPlayerToBase(team, player);
+                GameInstance.getInstance().teleportPlayerToBase(teamName, player);
             }
         };
-        int delay = upgradeLevel > 2 ? RoleConstant.INDIAN_RECALL_MAX_LEVEL : RoleConstant.INDIAN_RECALL_MIN_LEVEL;
-        runnable.runTaskLater(Nftilation.getInstance(), delay * 20);
-        int taskId = runnable.getTaskId();
-        params.put(RoleConstant.INDIAN_PARAM_RECALL, taskId);
+        runnable.runTaskLater(Nftilation.getInstance(),(long)(delay * DataConstants.TICKS_IN_SECOND));
+        params.put(RoleConstant.INDIAN_PARAM_RECALL, runnable.getTaskId());
+        return true;
+    }
+    
+    @SuppressWarnings("deprecation")
+    private byte getColorData(char color) {
+        Color rawColor = ColorUtils.TranslateToColor(ChatColor.getByChar(color));
+        return DyeColor.getByColor(rawColor).getWoolData();
     }
 }

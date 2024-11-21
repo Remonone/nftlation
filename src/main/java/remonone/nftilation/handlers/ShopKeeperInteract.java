@@ -20,6 +20,7 @@ public class ShopKeeperInteract implements Listener {
         if("Shop keeper".equals(name)) {
             event.setCancelled(true);
             Inventory inventory = InventoryService.buildShopKeeperInventory(player, ShopBuilder.getInstance().getMainElement());
+            if(inventory == null) return;
             player.openInventory(inventory);
         }
     }

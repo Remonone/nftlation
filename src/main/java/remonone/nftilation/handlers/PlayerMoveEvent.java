@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import remonone.nftilation.Store;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RuleConstants;
@@ -40,6 +41,13 @@ public class PlayerMoveEvent implements Listener {
                 (Store.getInstance().getGameStage().getStage().equals(Stage.IN_GAME) &&
                 model != null && isMoveForbidden())) {
             
+            event.setCancelled(true);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onHungerConsume(final FoodLevelChangeEvent event) {
+        if(!Store.getInstance().getGameStage().getStage().equals(Stage.IN_GAME)) {
             event.setCancelled(true);
         }
     }

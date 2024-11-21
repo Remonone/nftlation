@@ -131,13 +131,17 @@ public class SybilAttacker extends Role {
         return "SA";
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public List<ItemStack> getAbilityItems(Map<String, Object> params) {
         List<ItemStack> items = new ArrayList<>();
         int level = (Integer) params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
-        ItemStack pistol = new ItemStack(Material.TRIPWIRE_HOOK);
+        ItemStack pistol = new ItemStack(Material.BONE);
+        String pistolName = (String)getMetaInfo(MetaConstants.META_SA_SHOT_NAME, level);
+        List<String> pistolDescription = (List<String>) getMetaInfo(MetaConstants.META_SA_SHOT_DESCRIPTION, level); 
         ItemMeta pistolMeta = pistol.getItemMeta();
-        pistolMeta.setDisplayName(ChatColor.DARK_PURPLE + "Пистолет Макарова");
+        pistolMeta.setDisplayName(pistolName);
+        pistolMeta.setLore(pistolDescription);
         pistol.setItemMeta(pistolMeta);
         NBT.modify(pistol, (nbt) -> {
             nbt.setString(RoleConstant.SYBIL_ATTACKER_NBT_CONTAINER, RoleConstant.SYBIL_ATTACKER_PISTOL);
@@ -149,7 +153,9 @@ public class SybilAttacker extends Role {
             ItemStack explosion = new ItemStack(Material.FIREWORK);
             ItemMeta explosionMeta = explosion.getItemMeta();
             String name = (String) getMetaInfo(MetaConstants.META_SA_EXPLOSION_NAME, level);
+            List<String> description = (List<String>) getMetaInfo(MetaConstants.META_SA_EXPLOSION_DESCRIPTION, level);
             explosionMeta.setDisplayName(name);
+            explosionMeta.setLore(description);
             explosion.setItemMeta(explosionMeta);
             NBT.modify(explosion, (nbt) -> {
                 nbt.setString(RoleConstant.SYBIL_ATTACKER_NBT_CONTAINER, RoleConstant.SYBIL_ATTACKER_EXPLOSION);

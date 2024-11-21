@@ -42,7 +42,7 @@ public class WatcherBoss implements IAction {
 
     @Override
     public String getDescription() {
-        return "Следит за ростом битка";
+        return "Бегите, глупцы!";
     }
 
     @Override

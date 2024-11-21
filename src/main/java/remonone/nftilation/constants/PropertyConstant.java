@@ -36,6 +36,7 @@ public class PropertyConstant {
     public static final String PLAYER_STUN_DURATION = "stunDuration";
     public static final String PLAYER_FRAGILITY_DURATION = "fragility_duration";
     public static final String PLAYER_ARMOR_ENFORCEMENT = "enforcement_duration";
+    public static final String PLAYER_FALL_DAMAGE_BERSERK = "berserk_fall";
     // REWORK TO EFFECT SYSTEM
     public static final String PLAYER_CUSTOM_ABILITY_ITEMS = "customItems";
     

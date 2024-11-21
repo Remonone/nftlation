@@ -88,6 +88,7 @@ public class InventoryService {
     public static Inventory buildShopKeeperInventory(Player player, CategoryElement el) {
         Inventory inventory = Bukkit.createInventory(player, 27, NameConstants.SHOP_TAB + el.getExpandableName());
         Map<Integer, String> availableItems = getAvailableItems(player, el.getExpandableElements());
+        if(availableItems.isEmpty()) return null;
         Float discount = (Float) RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_PRICE_SCALE, 1F);
         for(Map.Entry<Integer, String> element : availableItems.entrySet()) {
             IShopElement shopElement = ShopItemRegistry.getItem(element.getValue());
@@ -128,6 +129,7 @@ public class InventoryService {
     
     private static Map<Integer, String> getAvailableItems(Player player, List<String> ids) {
         List<String> filteredIds = filterIds(player, ids);
+        if(filteredIds.isEmpty()) return Collections.emptyMap();
         Map<Integer, String> availableItems = new HashMap<>();
         int count = filteredIds.size();
         int slots = 9;
@@ -155,6 +157,7 @@ public class InventoryService {
     private static List<String> filterIds(Player player, List<String> ids) {
         List<String> result = new ArrayList<>();
         PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        if(model == null) return Collections.emptyList();
         Map<String, Object> requisites = new HashMap<>(model.getParameters());
         String teamName = (String)model.getParameters().get(PropertyConstant.PLAYER_TEAM_NAME);
         ITeam team = GameInstance.getInstance().getTeam(teamName);

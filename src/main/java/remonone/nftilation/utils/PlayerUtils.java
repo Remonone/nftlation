@@ -140,6 +140,7 @@ public class PlayerUtils {
         if(!(expandable instanceof CategoryElement)) return;
         CategoryElement element = (CategoryElement) expandable;
         Inventory inventory = InventoryService.buildShopKeeperInventory(player, element);
+        if(inventory == null) return;
         player.openInventory(inventory);
     }
 

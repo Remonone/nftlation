@@ -83,27 +83,40 @@ public class Watcher extends Role {
         }, RoleConstant.WATCHER_NBT_CONTAINER);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<ItemStack> getAbilityItems(Map<String, Object> playerParams) {
         ItemStack teleport = new ItemStack(Material.BLAZE_ROD);
+        String wormholeName = (String)getMetaInfo(MetaConstants.META_WA_WORMHOLE_NAME, 1);
+        List<String> wormholeDescription = new ArrayList<>((List<String>)getMetaInfo(MetaConstants.META_WA_WORMHOLE_DESCRIPTION, 1));
+        wormholeDescription.add(0, ChatColor.GOLD + "LEGENDARY");
         ItemMeta meta = teleport.getItemMeta();
-        meta.setDisplayName("Teleport");
+        meta.setDisplayName(wormholeName);
+        meta.setLore(wormholeDescription);
         teleport.setItemMeta(meta);
         NBT.modify(teleport, (nbt) -> {
             nbt.setString(RoleConstant.WATCHER_NBT_CONTAINER, RoleConstant.WATCHER_WORMHOLE);
             nbt.setString(RoleConstant.ROLE, getRoleID());
         });
         ItemStack soulSuppression = new ItemStack(Material.STRING);
+        String suppressionName = (String)getMetaInfo(MetaConstants.META_WA_SUPPRESSION_NAME, 1);
+        List<String> suppressionDescription = new ArrayList<>((List<String>)getMetaInfo(MetaConstants.META_WA_SUPPRESSION_DESCRIPTION, 1));
+        suppressionDescription.add(0, ChatColor.GOLD + "LEGENDARY");
         ItemMeta soulSuppressionMeta = soulSuppression.getItemMeta();
-        soulSuppressionMeta.setDisplayName("Suppression");
+        soulSuppressionMeta.setDisplayName(suppressionName);
+        soulSuppressionMeta.setLore(suppressionDescription);
         soulSuppression.setItemMeta(soulSuppressionMeta);
         NBT.modify(soulSuppression, (nbt) -> {
             nbt.setString(RoleConstant.WATCHER_NBT_CONTAINER, RoleConstant.WATCHER_SUPPRESSION);
             nbt.setString(RoleConstant.ROLE, getRoleID());
         });
         ItemStack windGust = new ItemStack(Material.FEATHER);
+        String gustName = (String)getMetaInfo(MetaConstants.META_WA_GUST_NAME, 1);
+        List<String> gustDescription = new ArrayList<>((List<String>)getMetaInfo(MetaConstants.META_WA_GUST_DESCRIPTION, 1));
+        gustDescription.add(ChatColor.BLUE + "EPIC");
         ItemMeta windGustMeta = windGust.getItemMeta();
-        windGustMeta.setDisplayName("Gust");
+        windGustMeta.setDisplayName(gustName);
+        windGustMeta.setLore(gustDescription);
         windGust.setItemMeta(windGustMeta);
         NBT.modify(windGust, (nbt) -> {
             nbt.setString(RoleConstant.WATCHER_NBT_CONTAINER, RoleConstant.WATCHER_WIND_GUST);

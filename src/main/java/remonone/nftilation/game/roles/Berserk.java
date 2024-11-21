@@ -8,8 +8,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
@@ -21,9 +19,9 @@ import remonone.nftilation.effects.CircleEffect;
 import remonone.nftilation.effects.props.CircleProps;
 import remonone.nftilation.effects.strategies.ParticleRepulsionStrategy;
 import remonone.nftilation.game.GameInstance;
-import remonone.nftilation.game.models.EffectPotion;
+import remonone.nftilation.game.damage.BerserkUltimateHandler;
+import remonone.nftilation.game.models.IDamageHandler;
 import remonone.nftilation.game.models.PlayerModel;
-import remonone.nftilation.utils.AttackPresets;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.VectorUtils;
 
@@ -96,7 +94,7 @@ public class Berserk extends Role {
                         .build();
                 effect.execute(props);
             }
-        }.runTaskTimer(Nftilation.getInstance(), 0, 5).getTaskId();
+        }.runTaskTimer(Nftilation.getInstance(), 0, 20).getTaskId();
         new BukkitRunnable(){
             @Override
             public void run() {
@@ -153,9 +151,7 @@ public class Berserk extends Role {
             return false;
         }
         player.setVelocity(VectorUtils.UP);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 60, 10));
-        double range = (Double)getMetaByName(model, MetaConstants.META_BERSERK_RAGE_EXPLOSION_RANGE);
-        double damage = (Double)getMetaByName(model, MetaConstants.META_BERSERK_RAGE_EXPLOSION_DAMAGE);
+        
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -163,27 +159,13 @@ public class Berserk extends Role {
                 player.setVelocity(direction);
             }
         }.runTaskLater(Nftilation.getInstance(), 10);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                AttackPresets.summonExplosion(player.getLocation(), player, range, damage, 3, 10, 10, 1, true);
-            }
-        }.runTaskLater(Nftilation.getInstance(), 20);
-        new BukkitRunnable() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void run() {
-                player.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
-                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 1f, .1f);
-                int entitiesSize = player.getNearbyEntities(range, range, range).size();
-                if(entitiesSize < 1) return;
-                List<EffectPotion> effects = (List<EffectPotion>) getMetaByName(model, MetaConstants.META_BERSERK_RAGE_EFFECTS); 
-                for(EffectPotion effect : effects) {
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(effect.getEffect()), effect.getDuration(), effect.getStrength()));
-                }
-            }
-        }.runTaskLater(Nftilation.getInstance(), 22);
+        
+        model.getParameters().put(PropertyConstant.PLAYER_FALL_DAMAGE_BERSERK, 1);
         return true;
     }
 
+    @Override
+    public List<IDamageHandler> getDamageHandlers() {
+        return Collections.singletonList(new BerserkUltimateHandler());
+    }
 }

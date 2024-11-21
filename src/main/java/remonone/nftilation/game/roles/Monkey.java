@@ -6,6 +6,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
@@ -24,8 +25,10 @@ import remonone.nftilation.constants.RoleConstant;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.DataInstance;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.damage.MonkeyFallDamageInvulnerability;
 import remonone.nftilation.game.damage.MonkeyWandDamage;
 import remonone.nftilation.game.models.EffectPotion;
+import remonone.nftilation.game.models.IDamageHandler;
 import remonone.nftilation.game.models.IDamageInvoker;
 import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.utils.PlayerUtils;
@@ -69,13 +72,18 @@ public class Monkey extends Role {
         return "MN";
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<ItemStack> getAbilityItems(Map<String, Object> params){
         List<ItemStack> items = new ArrayList<>();
+        int level = (int)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         ItemStack itemStack = new ItemStack(Material.INK_SACK);
+        String name = (String)getMetaInfo(MetaConstants.META_MONKEY_INVISIBILITY_NAME, level);
+        List<String> description = (List<String>) getMetaInfo(MetaConstants.META_MONKEY_INVISIBILITY_DESCRIPTION, level);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName(RoleConstant.MONKEY_ABILITY_ITEM);
+        meta.setDisplayName(name);
+        meta.setLore(description);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         itemStack.setItemMeta(meta);
         NBT.modify(itemStack, nbt -> {
@@ -83,12 +91,14 @@ public class Monkey extends Role {
             nbt.setString(RoleConstant.ROLE, getRoleID());
         });
         items.add(itemStack);
-        int level = (int)params.get(PropertyConstant.PLAYER_LEVEL_PARAM);
         if(level > 1) {
             ItemStack thrower = new ItemStack(Material.BROWN_MUSHROOM);
+            String throwerName = (String)getMetaInfo(MetaConstants.META_MONKEY_THROWER_NAME, level);
+            List<String> throwerDescription = (List<String>) getMetaInfo(MetaConstants.META_MONKEY_THROWER_DESCRIPTION, level);
             ItemMeta throwerMeta = thrower.getItemMeta();
             throwerMeta.setUnbreakable(true);
-            throwerMeta.setDisplayName(RoleConstant.MONKEY_ABILITY_THROWER_ITEM);
+            throwerMeta.setDisplayName(throwerName);
+            throwerMeta.setLore(throwerDescription);
             thrower.setItemMeta(throwerMeta);
             NBT.modify(thrower, nbt -> {
                 nbt.setString(RoleConstant.MONKEY_NBT_CONTAINER, RoleConstant.MONKEY_NBT_THROWER);
@@ -103,6 +113,7 @@ public class Monkey extends Role {
     public void setPlayer(Player player, Map<String, Object> params) {
         super.setPlayer(player, params);
         player.setAllowFlight(true);
+        player.setFoodLevel(18);
     }
 
     @EventHandler
@@ -201,5 +212,23 @@ public class Monkey extends Role {
     @Override
     public List<IDamageInvoker> getDamageInvokers() {
         return Collections.singletonList(new MonkeyWandDamage());
+    }
+    
+    @Override
+    public List<IDamageHandler> getDamageHandlers() {
+        return Collections.singletonList(new MonkeyFallDamageInvulnerability());
+    }
+    
+    @EventHandler
+    public void onHunger(final FoodLevelChangeEvent e) {
+        if(!(e.getEntity() instanceof Player)) return;
+        Player player = (Player) e.getEntity();
+        PlayerModel model = PlayerUtils.getModelFromPlayer(player);
+        if(model == null) return;
+        String roleId = (String)model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID);
+        Role role = Role.getRoleByID(roleId);
+        if(!(role instanceof Monkey)) return;
+        e.setFoodLevel(15);
+        
     }
 }
