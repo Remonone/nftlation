@@ -22,6 +22,7 @@ import remonone.nftilation.game.models.PlayerModel;
 import remonone.nftilation.game.models.TransactionType;
 import remonone.nftilation.utils.PlayerUtils;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -95,7 +96,7 @@ public class TokenTransferCommand implements CommandExecutor, TabCompleter {
         Player player = (Player) commandSender;
         PlayerModel model = PlayerUtils.getModelFromPlayer(player);
         if(model == null) return Collections.emptyList();
-        if(strings.length != 0 && !strings[0].isEmpty()) return Collections.emptyList();
+        if(strings.length > 1) return Arrays.asList("100", "200", "500", "1000");
 
         String team = (String)model.getParameters().get(PropertyConstant.PLAYER_TEAM_NAME);
         if(StringUtils.isBlank(team)) return Collections.emptyList();

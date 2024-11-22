@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.hints.Hint;
 import remonone.nftilation.utils.Logger;
 
 import java.io.File;
@@ -41,6 +42,8 @@ public class ConfigManager {
     private List<Location> roboSybilsSpawnList;
     @Getter
     private List<Location> ironGolemPositions;
+    @Getter
+    private List<Hint> hints;
     
     private ConfigManager() {}
     
@@ -90,6 +93,11 @@ public class ConfigManager {
         }
         ironGolemPositions = ironGolemPos;
         fragilityScale = configuration.getDouble(PropertyConstant.FRAGILITY_SCALE);
+        List<Hint> hintList = (List<Hint>) configuration.getList(PropertyConstant.HINTS);
+        if(hintList == null) {
+            hintList = new ArrayList<>();
+        }
+        hints = hintList;
     }
 
     public void Save() {
@@ -124,6 +132,11 @@ public class ConfigManager {
     public void addIronGolemPos(Location loc) {
         ironGolemPositions.add(loc);
         SetValue(PropertyConstant.IRON_GOLEM_SPAWN_POINTS, ironGolemPositions);
+    }
+    
+    public void addHint(Hint hint) {
+        hints.add(hint);
+        SetValue(PropertyConstant.HINTS, hints);
     }
     
     public String addTeamSpawnPosition(Location coords) {

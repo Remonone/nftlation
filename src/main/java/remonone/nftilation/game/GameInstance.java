@@ -69,6 +69,7 @@ public class GameInstance {
         initComponents();
         this.repeatedTask = GameConfiguration.startRepeatedTask();
         this.reservation = new BossReservation();
+        GameConfiguration.initHints();
     }
 
     private void initComponents() {

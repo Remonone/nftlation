@@ -77,3 +77,4 @@ commands:
   move:
     usage: /move [player]
   rbfbsafa:
+  addHint:

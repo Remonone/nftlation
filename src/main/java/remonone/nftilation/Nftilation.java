@@ -29,6 +29,7 @@ import remonone.nftilation.game.shop.content.ItemElement;
 import remonone.nftilation.game.shop.content.ServiceElement;
 import remonone.nftilation.game.shop.registry.ShopItemRegistry;
 import remonone.nftilation.handlers.*;
+import remonone.nftilation.hints.Hint;
 import remonone.nftilation.restore.DumpCollector;
 import remonone.nftilation.utils.CustomEntities;
 import remonone.nftilation.utils.EntityList;
@@ -102,6 +103,7 @@ public final class Nftilation extends JavaPlugin {
         ConfigurationSerialization.registerClass(Requisite.class);
         ConfigurationSerialization.registerClass(MetaConfig.ContentInfo.class);
         ConfigurationSerialization.registerClass(MetaConfig.GlobalEvent.class);
+        ConfigurationSerialization.registerClass(Hint.class);
     }
 
     private void RegisterRoles() {
@@ -168,6 +170,7 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("transfer").setExecutor(new TokenTransferCommand());
         this.getCommand("move").setExecutor(new MoveToPlayer());
         this.getCommand("rbfbsafa").setExecutor(new BossReservationCommand());
+        this.getCommand("addHint").setExecutor(new AddHintCommand());
     }
     
     public static Nftilation getInstance() {

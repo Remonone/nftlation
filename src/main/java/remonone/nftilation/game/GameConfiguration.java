@@ -7,9 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftIronGolem;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
+import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
@@ -39,6 +37,8 @@ import remonone.nftilation.game.mob.AngryGolem;
 import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.runes.Rune;
+import remonone.nftilation.hints.Hint;
+import remonone.nftilation.hints.HintDrawer;
 import remonone.nftilation.utils.*;
 
 import java.util.*;
@@ -174,6 +174,14 @@ public class GameConfiguration {
             teamData.put(teamName, team);
         }
         return teamData;
+    }
+    
+    public static void initHints() {
+        List<Hint> hints = ConfigManager.getInstance().getHints();
+        for(Hint hint : hints) {
+            Entity entity = HintDrawer.printHint(hint);
+            EntityList.addEntity(entity);
+        }
     }
     
 
