@@ -21,7 +21,6 @@ public class HttpRequestSender {
         outputStream.close();
         InputStream stream = connection.getInputStream();
         String response = buildJsonString(stream);
-        Logger.debug(response);
         if(connection.getResponseCode() > 299) {
             Logger.error("[" + connection.getResponseCode() + "] " + connection.getResponseMessage());
             throw new IllegalArgumentException(response);
@@ -53,7 +52,6 @@ public class HttpRequestSender {
         connection.setRequestMethod("GET");
         
         String raw = buildJsonString(connection.getInputStream());
-        Logger.debug(raw);
         if(connection.getResponseCode() > 299) {
             throw new IllegalArgumentException(raw);
         }

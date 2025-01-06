@@ -236,7 +236,6 @@ public class OnEntityDieHandler implements Listener {
                     Role.refillInventoryWithItems(model);
             }
         }, (long) RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_RESPAWN_TIMER, (long) 5 * DataConstants.TICKS_IN_SECOND));
-
         PlayerInteractComponent playerInteract = (PlayerInteractComponent)GameInstance.getComponentByName("PlayerInteract");
         playerInteract.increasePlayerDeathCounter(teamName, player);
     }

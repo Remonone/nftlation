@@ -71,6 +71,7 @@ public class WatcherOnKillHandler extends BaseDamageHandler {
         }
         watcher.getReference().setGameMode(GameMode.SPECTATOR);
         watcher.getReference().teleport(watcher.getReference().getLocation().add(VectorUtils.UP.clone().multiply(200)));
+        watcher.getReference().getWorld().setTime(6000L);
         watcher.getReference().kickPlayer("Ваша миссия выполнена, милорд...");
         GameInstance.getInstance().removeTeam((String) watcher.getParameters().get(PropertyConstant.PLAYER_TEAM_NAME));
     }

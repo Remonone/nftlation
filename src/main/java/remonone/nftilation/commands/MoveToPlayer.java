@@ -51,6 +51,7 @@ public class MoveToPlayer implements CommandExecutor, TabCompleter {
         if(dataInstance.FindPlayerByName(player.getUniqueId()).getData().getRole().equals(PlayerRole.PLAYER)) return Collections.emptyList();
         if(strings.length > 1) return Collections.emptyList();
         List<String> playerNicknames = dataInstance.getPlayers().stream().filter(playerInfo -> playerInfo.getData().getRole().equals(PlayerRole.PLAYER)).map(playerInfo -> playerInfo.getData().getLogin()).collect(Collectors.toList());
+        if(strings[0] == null || strings[0].isEmpty()) return playerNicknames;
         StringUtil.copyPartialMatches(strings[0], playerNicknames, playerNicknames);
         return playerNicknames;
     }

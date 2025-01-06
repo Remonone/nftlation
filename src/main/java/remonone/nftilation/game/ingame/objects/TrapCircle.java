@@ -123,6 +123,7 @@ public class TrapCircle implements Listener {
                 PlayerModel model = PlayerUtils.getModelFromPlayer(mover);
                 if(!(Boolean)model.getParameters().get(PropertyConstant.PLAYER_IS_ALIVE_PARAM)) {
                     unregisterTrap();
+                    return;
                 }
             }
             trappee.setHealth(trappee.getHealth() - e.getFinalDamage());

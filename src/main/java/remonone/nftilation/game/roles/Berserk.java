@@ -70,6 +70,7 @@ public class Berserk extends Role {
             if(!(entity instanceof Player)) continue;
             if(GameInstance.getInstance().checkIfPlayersInSameTeam(player, (Player)entity)) continue;
             PlayerModel target = PlayerUtils.getModelFromPlayer((Player) entity);
+            if(target == null) continue;
             target.getParameters().put(PropertyConstant.PLAYER_FRAGILITY_DURATION, (long)(System.currentTimeMillis() + duration));
             initFearEffect(target, effect, duration);
         }

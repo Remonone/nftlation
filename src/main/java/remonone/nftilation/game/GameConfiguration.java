@@ -204,7 +204,7 @@ public class GameConfiguration {
                 .filter(info -> ObjectUtils.notEqual(info.getRole(), null))
                 .map(roleContainer -> roleContainer.getRole().getRoleID())
                 .collect(Collectors.toList());
-        List<Role> availableRoles = Role.getRoles().stream().filter(role -> !reservedRoles.contains(role.getRoleID()) && !role.getName().equals("Guts")).collect(Collectors.toList());
+        List<Role> availableRoles = Role.getRoles().stream().filter(role -> !reservedRoles.contains(role.getRoleID()) && !role.getRoleID().equals("WA")).collect(Collectors.toList());
         return availableRoles.get(RANDOM.nextInt(availableRoles.size()));
     }
 

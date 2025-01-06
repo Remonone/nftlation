@@ -47,6 +47,7 @@ public class MetaConstants {
     public static final String META_MONKEY_THROWER_EFFECTS = "thrower.effects";
 
     public static final String META_RUNE_TIME_FROST = "frost";
+    public static final String META_RUNE_TIME_COOLDOWN = "cooldown";
     public static final String META_RUNE_TIME_CHANCE = "chance";
     
     public static final String META_UPGRADES = "meta.upgrades";

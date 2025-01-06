@@ -33,6 +33,7 @@ public class WatcherBoss implements IAction {
         model.getReference().setCustomName(ChatColor.GOLD + "СМОТРИТЕЛЬ");
         PlayerNMSUtil.changePlayerName(model.getReference(), ChatColor.GOLD + "СМОТРИТЕЛЬ");
         model.getReference().teleport(team.getTeamSpawnPoint().getPosition());
+        model.getReference().getWorld().setTime(18000L);
     }
 
     @Override

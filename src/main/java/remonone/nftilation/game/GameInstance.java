@@ -250,6 +250,7 @@ public class GameInstance {
             }
             teamData.values().forEach(temp -> temp.getPlayers().forEach(ScoreboardHandler::updateScoreboard));
         }
+        checkOnActiveTeams();
     }
     
     public void respawnPlayer(Player player, String teamName) {

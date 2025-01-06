@@ -26,7 +26,7 @@ public class ColorUtils {
         AQUA(Color.fromRGB(65535), ChatColor.AQUA),
         RED(Color.fromRGB(11546150), ChatColor.RED),
         LIGHT_PURPLE(Color.fromRGB(15961002), ChatColor.LIGHT_PURPLE),
-        YELLOW(Color.fromRGB(16776960), ChatColor.YELLOW),
+        YELLOW(Color.fromRGB(16701501), ChatColor.YELLOW),
         WHITE(Color.fromRGB(16383998), ChatColor.WHITE);
         
         private final Color color;

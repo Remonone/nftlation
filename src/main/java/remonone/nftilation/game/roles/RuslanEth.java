@@ -100,7 +100,9 @@ public class RuslanEth extends Role {
         meta.setDisplayName(name);
         meta.setLore(description);
         summonAbility.setItemMeta(meta);
-        NBT.modify(summonAbility, (nbt) -> {nbt.setString(RoleConstant.RUSLAN_NBT_CONTAINER, RoleConstant.RUSLAN_SUMMON);});
+        NBT.modify(summonAbility, (nbt) -> {nbt.setString(RoleConstant.RUSLAN_NBT_CONTAINER, RoleConstant.RUSLAN_SUMMON);
+            nbt.setString(RoleConstant.ROLE, getRoleID());
+        });
         return Collections.singletonList(summonAbility);
     }
     
@@ -232,13 +234,14 @@ public class RuslanEth extends Role {
         Entity entity = e.getHitEntity();
         if (!(entity instanceof LivingEntity)) return;
         LivingEntity livingEntity = (LivingEntity) entity;
+        if(!(((CraftBlaze)fireball.getShooter()).getHandle() instanceof RuslanBlaze)) return;
+        RuslanBlaze ruslanBlaze = (RuslanBlaze) ((CraftBlaze)fireball.getShooter()).getHandle();
         if(livingEntity instanceof Blaze) {
-            RuslanBlaze ruslanBlaze = (RuslanBlaze) ((CraftBlaze)fireball.getShooter()).getHandle();
             String team = ruslanBlaze.getTeam();
             RuslanBlaze targetBlaze = (RuslanBlaze) ((CraftBlaze)livingEntity).getHandle();
             if(targetBlaze.getTeam().equals(team)) return;
         }
-        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent((Entity)fireball.getShooter(), livingEntity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 2D);
+        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(ruslanBlaze.getOwner().getBukkitEntity(), livingEntity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 2D);
         getServer().getPluginManager().callEvent(event);
         if(!event.isCancelled()) {
             livingEntity.setHealth(livingEntity.getHealth() - event.getFinalDamage());
@@ -281,7 +284,6 @@ public class RuslanEth extends Role {
         removeRuslanActionItems(player);
         return true;
     }
-    
     
     @SuppressWarnings("StatementWithEmptyBody")
     private void removeRuslanActionItems(Player player) {

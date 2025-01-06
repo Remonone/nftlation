@@ -38,6 +38,7 @@ public class BerserkUltimateHandler extends BaseDamageHandler {
         AttackPresets.summonExplosion(player.getLocation(), player, range, damage, 3, 10, 10, 1, true);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 1f, .1f);
         List<Entity> entities = player.getNearbyEntities(range, range, range);
+        if(entities == null || entities.isEmpty()) return;
         for(Entity entity : entities) {
             if (!(entity instanceof Player)) {
                 entities.remove(entity);

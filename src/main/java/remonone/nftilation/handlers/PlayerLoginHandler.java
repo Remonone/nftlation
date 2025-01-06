@@ -78,11 +78,12 @@ public class PlayerLoginHandler implements Listener {
                 player.kickPlayer(MessageConstant.NO_PERMISSION_TO_JOIN);
                 return;
             }
+            if(playerData.getData().getRole().equals(PlayerRole.ADMIN)) {
+                GameInstance.getInstance().getCounter().bar.addPlayer(player);
+                return;
+            }
             if(playerData.getData().getTeam() == null || playerData.getData().getTeam().getTeamName() == null) {
-                if(playerData.getData().getRole().equals(PlayerRole.ADMIN)) {
-                    GameInstance.getInstance().getCounter().bar.addPlayer(player);
-                    return;
-                }
+                
                 player.kickPlayer(MessageConstant.NO_PERMISSION_TO_JOIN);
                 return;
             }

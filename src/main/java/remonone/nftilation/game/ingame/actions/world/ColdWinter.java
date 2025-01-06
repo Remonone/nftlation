@@ -15,7 +15,7 @@ public class ColdWinter implements IAction {
     public void Init(Map<String, Object> params) {
         Bukkit.getOnlinePlayers().forEach(player -> {
             if(PlayerUtils.getModelFromPlayer(player) != null) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 2 * DataConstants.TICKS_IN_MINUTE, 1, false, false));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 2 * DataConstants.TICKS_IN_MINUTE, 1, false, false));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 2 * DataConstants.TICKS_IN_MINUTE, 1, false, false));
             }
         });

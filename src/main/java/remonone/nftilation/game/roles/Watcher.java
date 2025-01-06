@@ -113,7 +113,7 @@ public class Watcher extends Role {
         ItemStack windGust = new ItemStack(Material.FEATHER);
         String gustName = (String)getMetaInfo(MetaConstants.META_WA_GUST_NAME, 1);
         List<String> gustDescription = new ArrayList<>((List<String>)getMetaInfo(MetaConstants.META_WA_GUST_DESCRIPTION, 1));
-        gustDescription.add(ChatColor.BLUE + "EPIC");
+        gustDescription.add(0, ChatColor.BLUE + "EPIC");
         ItemMeta windGustMeta = windGust.getItemMeta();
         windGustMeta.setDisplayName(gustName);
         windGustMeta.setLore(gustDescription);

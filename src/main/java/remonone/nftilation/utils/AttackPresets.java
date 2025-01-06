@@ -62,7 +62,8 @@ public class AttackPresets {
             if(event.isCancelled()) continue;
             Vector n_direction = direction.add(directionShifter).normalize();
             LivingEntity target = (LivingEntity) entity;
-            target.setHealth(target.getHealth() - event.getFinalDamage());
+            double dmg = target.getHealth() - event.getFinalDamage() < 0 ? 0 : target.getHealth() - event.getFinalDamage();
+            target.setHealth(dmg);
             entity.setVelocity(n_direction.multiply(scale * 8));
         }
     }

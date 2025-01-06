@@ -35,6 +35,7 @@ public class MoneyRain implements IAction {
                     World world = position.getWorld();
                     ItemStack stack = new ItemStack(Material.GOLD_NUGGET);
                     NBT.modify(stack, (nbt) -> {
+                        nbt.setString("event", "moneydrop");
                         nbt.setFloat("money-rain", 2.0F);
                     });
                     Location newLoc = new Location(world, newPos.getX(), newPos.getY(), newPos.getZ());

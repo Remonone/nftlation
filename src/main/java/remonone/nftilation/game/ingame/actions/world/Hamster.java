@@ -33,8 +33,8 @@ public class Hamster implements IAction, Listener {
         Zombie zombie = location.getWorld().spawn(location, Zombie.class);
         zombie.setCustomName(ChatColor.BLUE + "" + ChatColor.BOLD + "Хомяк");
         zombie.setCustomNameVisible(true);
-        zombie.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(400.0D);
-        zombie.setHealth(400.0D);
+        zombie.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(100.0D);
+        zombie.setHealth(100.0D);
         zombie.setRemoveWhenFarAway(false);
         EntityHandleComponent.setEntityHostile(zombie);
         EntityHandleComponent.setEntityUnloadLocked(zombie);
