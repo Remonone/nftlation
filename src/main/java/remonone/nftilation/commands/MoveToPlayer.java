@@ -18,6 +18,7 @@ import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.utils.CommandUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,11 +49,12 @@ public class MoveToPlayer implements CommandExecutor, TabCompleter {
         if(!(commandSender instanceof Player)) return Collections.emptyList();
         Player player = (Player) commandSender;
         DataInstance dataInstance = Store.getInstance().getDataInstance();
-        if(dataInstance.FindPlayerByName(player.getUniqueId()).getData().getRole().equals(PlayerRole.PLAYER)) return Collections.emptyList();
+        if(dataInstance.FindPlayerByID(player.getUniqueId()).getData().getRole().equals(PlayerRole.PLAYER)) return Collections.emptyList();
         if(strings.length > 1) return Collections.emptyList();
         List<String> playerNicknames = dataInstance.getPlayers().stream().filter(playerInfo -> playerInfo.getData().getRole().equals(PlayerRole.PLAYER)).map(playerInfo -> playerInfo.getData().getLogin()).collect(Collectors.toList());
         if(strings[0] == null || strings[0].isEmpty()) return playerNicknames;
-        StringUtil.copyPartialMatches(strings[0], playerNicknames, playerNicknames);
+        List<String> nicknameMatches = new ArrayList<>();
+        StringUtil.copyPartialMatches(strings[0], playerNicknames, nicknameMatches);
         return playerNicknames;
     }
 }

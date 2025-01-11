@@ -6,6 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -79,7 +80,7 @@ public class SybilAttacker extends Role {
             public void run() {
                 Vector vec = VectorUtils.getRandomPosInCircle(location.toVector(), area);
                 Location loc = new Location(location.getWorld(), vec.getX(), vec.getY(), vec.getZ());
-                AttackPresets.summonExplosion(loc, player, radius, damage, 2, 12, 50, radius, false);
+                AttackPresets.summonExplosion(loc, player, radius, damage, 2, 12, 50, radius, false, EntityDamageEvent.DamageCause.ENTITY_EXPLOSION);
             }
         }.runTaskTimer(Nftilation.getInstance(), 10, delay).getTaskId();
         CircleProps props = CircleProps.builder()
@@ -191,7 +192,7 @@ public class SybilAttacker extends Role {
         if(location != null) {
             double power = (Double) getMetaByName(model, MetaConstants.META_SA_SHOT_EXPLOSIVE_POWER);
             double range = (Double) getMetaByName(model, MetaConstants.META_SA_SHOT_EXPLOSIVE_RANGE);
-            AttackPresets.summonExplosion(location, shooter, range, power, 2, 10, 60, .3, true);
+            AttackPresets.summonExplosion(location, shooter, range, power, 2, 10, 60, .3, true, EntityDamageEvent.DamageCause.ENTITY_EXPLOSION);
             SphereProps incarnation = SphereProps.builder()
                     .density(200)
                     .center(location.toVector())

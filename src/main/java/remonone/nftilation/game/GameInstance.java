@@ -273,7 +273,7 @@ public class GameInstance {
 
     public boolean setHealth(Player applicant, String teamName, int health) {
         if(applicant == null) return false;
-        DataInstance.PlayerInfo applicantInfo = Store.getInstance().getDataInstance().FindPlayerByName(applicant.getUniqueId());
+        DataInstance.PlayerInfo applicantInfo = Store.getInstance().getDataInstance().FindPlayerByID(applicant.getUniqueId());
         if(applicantInfo == null || applicantInfo.getData() == null || !applicantInfo.getData().getRole().equals(PlayerRole.ADMIN)) return false;
         if(health < 0 || health > 100) return false;
         for(IModifiableTeam team : teamData.values()) {

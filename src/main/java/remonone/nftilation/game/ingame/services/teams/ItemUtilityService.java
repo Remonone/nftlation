@@ -36,7 +36,7 @@ public class ItemUtilityService implements IPurchasableService {
             return;
         }
         team.getParameters().put(PropertyConstant.TEAM_UTILITY_ITEM_LEVEL, currentLevel);
-        String playerName = Store.getInstance().getDataInstance().FindPlayerByName(buyer.getUniqueId()).getData().getLogin();
+        String playerName = Store.getInstance().getDataInstance().FindPlayerByID(buyer.getUniqueId()).getData().getLogin();
         
         int finalCurrentLevel = currentLevel;
         team.getPlayers().forEach(playerModel -> {

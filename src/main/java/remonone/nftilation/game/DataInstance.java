@@ -1,5 +1,6 @@
 package remonone.nftilation.game;
 
+import javafx.util.Pair;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,43 +50,45 @@ public class DataInstance {
     @Getter
     private final Map<String, List<PlayerInfo>> teams = new HashMap<>();
     
-    public LoginState TryAddPlayerToGame(PlayerData playerData, Player player) {
+    public LoginState tryAddPlayerToGame(PlayerData playerData, Player player) {
         if(playerData.getRole().equals(PlayerRole.PLAYER) && playerData.getTeam().getTeamName().isEmpty()) return LoginState.EMPTY_TEAM;
-        if(FindPlayerByName(player.getUniqueId()) != null) {
-            return LoginState.ALREADY_LOGGED_IN;
-        }
-        
         if(!initialized && playerData.getRole().equals(PlayerRole.PLAYER)) {
             return LoginState.NOT_ALLOWED;
         }
-        PlayerInfo playerInfo;
-        if(playerData.getRole().equals(PlayerRole.PLAYER)) {
-            if(!isTeamPresented(playerData.getTeam().getTeamName())) return LoginState.NOT_PRESENTED;
-            if(Store.getInstance().getGameStage().getStage() == Stage.IN_GAME) {
-                PlayerInfo info = getPlayerInfo(playerData);
-                if(info == null) return LoginState.NOT_ALLOWED;
-                info.data = playerData;
-                playerInfo = info;
-            } else {
-                playerInfo = new PlayerInfo(playerData, null, null, player.getUniqueId());
-                teams.get(playerData.getTeam().getTeamName()).add(playerInfo);
-            }
-        } else {
-            playerInfo = new PlayerInfo(playerData, null, null, player.getUniqueId());
+        if(FindPlayerByID(player.getUniqueId()) != null) {
+            return LoginState.ALREADY_LOGGED_IN;
         }
-        players.add(playerInfo);
-        
-        Logger.log("Player " + playerData.getLogin() + " has authenticated to the game");
+        Pair<LoginState, PlayerInfo> registerState = registerPlayerInfo(playerData, player);
+        if(!LoginState.LOGGED_IN.equals(registerState.getKey())) return registerState.getKey();
+        Logger.log("Adding player " + player.getName() + " to game");
+        players.add(registerState.getValue());
         return LoginState.LOGGED_IN;
     }
-    
+
+    private Pair<LoginState, PlayerInfo> registerPlayerInfo(PlayerData playerData, Player player) {
+        if(!playerData.getRole().equals(PlayerRole.PLAYER)) {
+            return new Pair<>(LoginState.LOGGED_IN, new PlayerInfo(playerData, null, null, player.getUniqueId()));
+        }
+        if(!isTeamPresented(playerData.getTeam().getTeamName())) return new Pair<>(LoginState.NOT_PRESENTED, null);
+        if(Store.getInstance().getGameStage().getStage() == Stage.IN_GAME) {
+            PlayerInfo info = getPlayerInfo(playerData);
+            if(info == null) return new Pair<>(LoginState.NOT_ALLOWED, null);
+            info.data = playerData;
+            return new Pair<>(LoginState.LOGGED_IN, info);
+        } else {
+            PlayerInfo info = new PlayerInfo(playerData, null, null, player.getUniqueId());
+            teams.get(playerData.getTeam().getTeamName()).add(info);
+            return new Pair<>(LoginState.LOGGED_IN, info);
+        }
+    }
+
     public String getPlayerTeam(UUID playerId) {
-        PlayerInfo info = FindPlayerByName(playerId);
+        PlayerInfo info = FindPlayerByID(playerId);
         if(info == null || info.getData() == null || info.getData().getTeam() == null) return "";
         return info.getData().getTeam().getTeamName();
     }
     
-    public void DisconnectPlayer(UUID playerId) {
+    public void disconnectPlayer(UUID playerId) {
         PlayerInfo info = players.stream().filter(p -> p.getPlayerId().equals(playerId)).findFirst().orElse(null);
         if(info == null) {
             Logger.warn("Player " + playerId + " has not been authenticated to the game");
@@ -109,7 +112,7 @@ public class DataInstance {
         return teams.get(teamName);
     }
 
-    public PlayerInfo FindPlayerByName(final UUID playerId) {
+    public PlayerInfo FindPlayerByID(final UUID playerId) {
         if(infos.containsKey(playerId)) {
             return infos.get(playerId);
         }
@@ -127,7 +130,7 @@ public class DataInstance {
     }
     
     public Role getPlayerRole(UUID playerId) {
-        PlayerInfo info = FindPlayerByName(playerId);
+        PlayerInfo info = FindPlayerByID(playerId);
         if(info == null) {
             return null;
         }
@@ -135,7 +138,7 @@ public class DataInstance {
     }
 
     public Rune getPlayerRune(UUID playerId) {
-        PlayerInfo info = FindPlayerByName(playerId);
+        PlayerInfo info = FindPlayerByID(playerId);
         if(info == null) {
             return null;
         }
@@ -152,7 +155,7 @@ public class DataInstance {
     }
     
     public boolean updatePlayerRole(Role role, UUID playerId) {
-        PlayerInfo info = FindPlayerByName(playerId);
+        PlayerInfo info = FindPlayerByID(playerId);
         if(role == null) {
             Logger.error("Role is undefined!");
             return false;
@@ -175,7 +178,7 @@ public class DataInstance {
     }
     
     public boolean updatePlayerRune(Rune rune, UUID playerId) {
-        PlayerInfo info = FindPlayerByName(playerId);
+        PlayerInfo info = FindPlayerByID(playerId);
         if(info == null) {
             Logger.warn("Player " + playerId + " has not been authenticated to the game");
             return false;

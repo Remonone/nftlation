@@ -20,7 +20,7 @@ public class AddHintCommand implements CommandExecutor {
             return true;
         }
         Player player = (Player) commandSender;
-        if(PlayerUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
+        if(PlayerUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByID(player.getUniqueId()).getData())) {
             return true;
         }
 

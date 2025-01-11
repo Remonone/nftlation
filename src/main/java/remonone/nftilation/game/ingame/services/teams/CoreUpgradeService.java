@@ -41,7 +41,7 @@ public class CoreUpgradeService implements IPurchasableService {
         Material material = Material.getMaterial(nextLevelMaterial);
         Location corePos = team.getTeamSpawnPoint().getCoreCenter();
         corePos.getBlock().setType(material);
-        String playerName = Store.getInstance().getDataInstance().FindPlayerByName(buyer.getUniqueId()).getData().getLogin();
+        String playerName = Store.getInstance().getDataInstance().FindPlayerByID(buyer.getUniqueId()).getData().getLogin();
         int finalCurrentLevel = currentLevel;
         team.getPlayers().forEach(playerModel -> {
             Player player = playerModel.getReference();

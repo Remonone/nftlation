@@ -35,7 +35,7 @@ public class BerserkUltimateHandler extends BaseDamageHandler {
         model.getParameters().remove(PropertyConstant.PLAYER_FALL_DAMAGE_BERSERK);
         double range = (Double)role.getMetaByName(model, MetaConstants.META_BERSERK_RAGE_EXPLOSION_RANGE);
         double damage = (Double)role.getMetaByName(model, MetaConstants.META_BERSERK_RAGE_EXPLOSION_DAMAGE);
-        AttackPresets.summonExplosion(player.getLocation(), player, range, damage, 3, 10, 10, 1, true);
+        AttackPresets.summonExplosion(player.getLocation(), player, range, damage, 3, 10, 10, 1, true, EntityDamageEvent.DamageCause.ENTITY_EXPLOSION);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 1f, .1f);
         List<Entity> entities = player.getNearbyEntities(range, range, range);
         if(entities == null || entities.isEmpty()) return;

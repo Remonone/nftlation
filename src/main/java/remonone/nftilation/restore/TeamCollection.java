@@ -53,7 +53,7 @@ public class TeamCollection implements ConfigurationSerializable, Cloneable {
         this.playerNames = team.getPlayers().stream()
                 .map(PlayerModel::getReference)
                 .map(Player::getUniqueId)
-                .map(instance::FindPlayerByName)
+                .map(instance::FindPlayerByID)
                 .map(DataInstance.PlayerInfo::getData)
                 .map(PlayerData::getLogin)
                 .collect(Collectors.toList());

@@ -12,7 +12,7 @@ public class CommandUtils {
             return State.FAILED_EXECUTION;
         }
         Player player = (Player) commandSender;
-        if(PlayerUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
+        if(PlayerUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByID(player.getUniqueId()).getData())) {
             return State.FAILED_EXECUTION;
         }
         if(args.length != mandatoryLength) {
@@ -30,7 +30,7 @@ public class CommandUtils {
             return State.FAILED_EXECUTION;
         }
         Player player = (Player) commandSender;
-        if(PlayerUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
+        if(PlayerUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByID(player.getUniqueId()).getData())) {
             return State.FAILED_EXECUTION;
         }
         if(isIdlePermitted && PlayerUtils.trySendMessageOnWrongStage(player)) {

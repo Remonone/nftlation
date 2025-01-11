@@ -21,7 +21,7 @@ import static org.bukkit.Bukkit.getServer;
 public class AttackPresets {
     
     @SuppressWarnings("deprecation")
-    public static void summonExplosion(Location loc, Player attacker, double range, double damage, int explosion_density, int explosion_quality, int dust_density, double radius, boolean isHuge) {
+    public static void summonExplosion(Location loc, Player attacker, double range, double damage, int explosion_density, int explosion_quality, int dust_density, double radius, boolean isHuge, EntityDamageEvent.DamageCause source) {
         SphereEffect effect = new SphereEffect();
         loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, .2f);
         Collection<Entity> entities = loc.getWorld().getNearbyEntities(loc, range, range, range);
@@ -50,14 +50,14 @@ public class AttackPresets {
             if(!(entity instanceof LivingEntity)) {
                 continue;
             }
-            if(entity.equals(attacker)) continue;
+            if(entity.getUniqueId().equals(attacker.getUniqueId())) continue;
             Vector position = entity.getLocation().toVector();
             Vector direction = position.subtract(center);
             double scale = .1F;
             if(direction.length() > .1) {
                 scale = 1 / direction.length();
             }
-            EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(attacker, entity, EntityDamageEvent.DamageCause.ENTITY_EXPLOSION, damage * scale);
+            EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(attacker, entity, source, damage * scale);
             getServer().getPluginManager().callEvent(event);
             if(event.isCancelled()) continue;
             Vector n_direction = direction.add(directionShifter).normalize();

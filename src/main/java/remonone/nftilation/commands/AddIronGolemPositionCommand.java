@@ -19,7 +19,7 @@ public class AddIronGolemPositionCommand implements CommandExecutor {
             return true;
         }
         Player player = (Player) commandSender;
-        if(PlayerUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId()).getData())) {
+        if(PlayerUtils.trySendMessageOnProhibited(player, Store.getInstance().getDataInstance().FindPlayerByID(player.getUniqueId()).getData())) {
             return true;
         }
         Location location = player.getLocation();

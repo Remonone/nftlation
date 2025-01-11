@@ -145,7 +145,7 @@ public class PlayerUtils {
     }
 
     public static String getOriginalPlayerName(Player player) {
-        DataInstance.PlayerInfo info = Store.getInstance().getDataInstance().FindPlayerByName(player.getUniqueId());
+        DataInstance.PlayerInfo info = Store.getInstance().getDataInstance().FindPlayerByID(player.getUniqueId());
         if(info == null) return NameConstants.NULL_STRING;
         return info.getData().getLogin();
     }

@@ -26,7 +26,7 @@ public class WatcherBoss implements IAction {
         }
         ITeam team = GameInstance.getInstance().getTeam(PropertyConstant.TEAM_BOSS);
         PlayerModel model = team.getPlayers().get(0);
-        DataInstance.PlayerInfo info = Store.getInstance().getDataInstance().FindPlayerByName(model.getReference().getUniqueId());
+        DataInstance.PlayerInfo info = Store.getInstance().getDataInstance().FindPlayerByID(model.getReference().getUniqueId());
         info.getData().setTeam(new TeamData(PropertyConstant.TEAM_BOSS, "BS", '4'));
         GameConfiguration.initPlayerRoles(team);
         team.getPlayers().forEach(Role::refillInventoryWithItems);

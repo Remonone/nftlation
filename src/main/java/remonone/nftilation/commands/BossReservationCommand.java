@@ -19,7 +19,7 @@ public class BossReservationCommand implements CommandExecutor {
         }
         Player player = (Player) commandSender;
         DataInstance instance = Store.getInstance().getDataInstance();
-        DataInstance.PlayerInfo info = instance.FindPlayerByName(player.getUniqueId());
+        DataInstance.PlayerInfo info = instance.FindPlayerByID(player.getUniqueId());
         if(info == null) {
             commandSender.sendMessage("You are not authorized!");
             return true;

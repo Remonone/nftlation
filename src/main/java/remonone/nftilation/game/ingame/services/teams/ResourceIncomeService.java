@@ -37,7 +37,7 @@ public class ResourceIncomeService implements IPurchasableService {
         }
         Map<String, Object> params = team.getParameters();
         params.put(PropertyConstant.TEAM_RESOURCE_INCOME, currentLevel);
-        String playerName = Store.getInstance().getDataInstance().FindPlayerByName(buyer.getUniqueId()).getData().getLogin();
+        String playerName = Store.getInstance().getDataInstance().FindPlayerByID(buyer.getUniqueId()).getData().getLogin();
         Integer finalCurrentLevel = currentLevel;
         team.getPlayers().forEach(playerModel -> {
             Player player = playerModel.getReference();

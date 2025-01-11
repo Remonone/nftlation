@@ -272,7 +272,7 @@ public class RuslanEth extends Role {
             double damage = (Double)getMetaByName(model, MetaConstants.META_RE_EXPLOSION_DAMAGE);
             float gasesRange = ((Double)getMetaByName(model,  MetaConstants.META_RE_EXPLOSION_GASES_RANGE)).floatValue();
             double gasesDuration = (Double)getMetaByName(model,  MetaConstants.META_RE_EXPLOSION_GASES_DURATION);
-            AttackPresets.summonExplosion(loc, player, range, damage, 2, 10, 100, 1f, false);
+            AttackPresets.summonExplosion(loc, player, range, damage, 2, 10, 100, 1f, false, EntityDamageEvent.DamageCause.ENTITY_EXPLOSION);
             AreaEffectCloud area = player.getWorld().spawn(loc, AreaEffectCloud.class);
             area.setCustomName(RoleConstant.RUSLAN_AREA_EFFECT_NAME);
             EntityHandleComponent.setEntityOwner(area, player);

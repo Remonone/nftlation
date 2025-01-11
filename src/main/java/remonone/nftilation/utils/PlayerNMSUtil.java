@@ -9,7 +9,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import remonone.nftilation.Nftilation;
 
 import java.lang.reflect.Field;
@@ -25,6 +24,7 @@ public class PlayerNMSUtil {
         }
         Location location = p.getLocation();
         EntityPlayer pl = ((CraftPlayer) p).getHandle();
+        EnumGamemode gameMode = EnumGamemode.getById(p.getGameMode().getValue());
         GameProfile profile = pl.getProfile();
         PlayerConnection connection = pl.playerConnection;
         connection.sendPacket(new PacketPlayOutPlayerInfo(
@@ -37,8 +37,10 @@ public class PlayerNMSUtil {
                 pl));
         @SuppressWarnings("deprecation")
         int dimensionId = pl.getWorld().getWorld().getEnvironment().getId();
-        connection.sendPacket(new PacketPlayOutRespawn(dimensionId, pl.getWorld().getDifficulty(), pl.getWorld().getWorldData().getType(), EnumGamemode.SURVIVAL));
+        Logger.log("Skin is set for player " + p.getDisplayName() + ". Respawning...");
+        connection.sendPacket(new PacketPlayOutRespawn(dimensionId, pl.getWorld().getDifficulty(), pl.getWorld().getWorldData().getType(), gameMode));
         connection.sendPacket(new PacketPlayOutPosition(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch(), new HashSet<>(), 0));
+        p.updateInventory();
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.hidePlayer(Nftilation.getInstance(), p);
             player.showPlayer(Nftilation.getInstance(), p);

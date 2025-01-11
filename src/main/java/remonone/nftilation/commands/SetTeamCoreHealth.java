@@ -48,7 +48,7 @@ public class SetTeamCoreHealth implements CommandExecutor, TabCompleter {
         }
         Player performer = (Player) commandSender;
         DataInstance data = Store.getInstance().getDataInstance();
-        if(data.FindPlayerByName(performer.getUniqueId()) == null || !data.FindPlayerByName(performer.getUniqueId()).getData().getRole().equals(PlayerRole.ADMIN)) {
+        if(data.FindPlayerByID(performer.getUniqueId()) == null || !data.FindPlayerByID(performer.getUniqueId()).getData().getRole().equals(PlayerRole.ADMIN)) {
             return Collections.emptyList();
         }
         List<String> info = new ArrayList<>();

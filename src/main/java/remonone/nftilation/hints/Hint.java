@@ -6,7 +6,6 @@ import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import remonone.nftilation.utils.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +32,6 @@ public class Hint implements ConfigurationSerializable {
 
     private static String decodeData(String data) {
         StringBuilder builder = new StringBuilder();
-        Logger.debug(data);
         while(data.contains("+&")) {
             int start = data.indexOf("+&");
             char ch = data.charAt(start+2);

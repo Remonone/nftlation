@@ -57,7 +57,7 @@ public class GiveTokenToPlayer implements CommandExecutor, TabCompleter {
         if(!(commandSender instanceof Player)) return Collections.emptyList();
         Player player = (Player) commandSender;
         DataInstance dataInstance = Store.getInstance().getDataInstance();
-        if(dataInstance.FindPlayerByName(player.getUniqueId()).getData().getRole().equals(PlayerRole.PLAYER)) return Collections.emptyList();
+        if(dataInstance.FindPlayerByID(player.getUniqueId()).getData().getRole().equals(PlayerRole.PLAYER)) return Collections.emptyList();
         if(strings.length > 1) return Collections.emptyList();
         List<String> playerNicknames = dataInstance.getPlayers().stream().filter(playerInfo -> playerInfo.getData().getRole().equals(PlayerRole.PLAYER)).map(playerInfo -> playerInfo.getData().getLogin()).collect(Collectors.toList());
         StringUtil.copyPartialMatches(strings[0], playerNicknames, playerNicknames);

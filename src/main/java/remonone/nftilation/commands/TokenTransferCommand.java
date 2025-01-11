@@ -102,7 +102,7 @@ public class TokenTransferCommand implements CommandExecutor, TabCompleter {
         if(StringUtils.isBlank(team)) return Collections.emptyList();
         List<PlayerModel> teammates = GameInstance.getInstance().getTeam(team).getPlayers();
         DataInstance instance = Store.getInstance().getDataInstance();
-        List<String> playerNicknames = teammates.stream().map(mate -> instance.FindPlayerByName(mate.getReference().getUniqueId()).getData().getLogin()).collect(Collectors.toList());
+        List<String> playerNicknames = teammates.stream().map(mate -> instance.FindPlayerByID(mate.getReference().getUniqueId()).getData().getLogin()).collect(Collectors.toList());
         if(StringUtils.isNotBlank(strings[0])) {
             StringUtil.copyPartialMatches(strings[0], playerNicknames, playerNicknames);
         }
