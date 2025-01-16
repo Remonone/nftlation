@@ -23,6 +23,7 @@ import remonone.nftilation.constants.MetaConstants;
 import remonone.nftilation.constants.NameConstants;
 import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.game.damage.TeamAttackInvoker;
+import remonone.nftilation.game.ingame.actions.ActionType;
 import remonone.nftilation.game.ingame.objects.Core;
 import remonone.nftilation.game.ingame.services.*;
 import remonone.nftilation.game.ingame.services.events.ArmorEnforcementEvent;
@@ -37,6 +38,7 @@ import remonone.nftilation.game.mob.AngryGolem;
 import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.runes.Rune;
+import remonone.nftilation.handlers.GlobalEventHandler;
 import remonone.nftilation.hints.Hint;
 import remonone.nftilation.hints.HintDrawer;
 import remonone.nftilation.utils.*;
@@ -46,6 +48,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.bukkit.Bukkit.getPlayer;
+import static org.bukkit.Bukkit.getServer;
 
 public class GameConfiguration {
 
@@ -79,7 +82,7 @@ public class GameConfiguration {
             EntityHandleComponent.setEntityUnloadLocked(golem.getBukkitEntity());
             EntityHandleComponent.setEntityHostile(golem.getBukkitEntity());
             EntityHandleComponent.setEntityBounty(golem.getBukkitEntity(), 120);
-            EntityList.addEntity((LivingEntity) golem.getBukkitEntity());
+            EntityList.addEntity( golem.getBukkitEntity());
             golem.setCustomName("Angry Golem");
             ((CraftIronGolem)golem.getBukkitEntity()).setRemoveWhenFarAway(false);
         }
@@ -208,7 +211,7 @@ public class GameConfiguration {
         return availableRoles.get(RANDOM.nextInt(availableRoles.size()));
     }
 
-    private static Core setCore(TeamSpawnPoint point) {
+    public static Core setCore(TeamSpawnPoint point) {
         Core core = new Core(() -> {});
         Location location = point.getCoreCenter();
         String matName = (String)NestedObjectFetcher.getNestedObject("coreUpgrade", MetaConfig.getInstance().getUpgrades(), 0);
@@ -297,5 +300,13 @@ public class GameConfiguration {
             models.add(model);
         }
         return models;
+    }
+
+    public static void initGlobalEvents() {
+        List<MetaConfig.GlobalEvent> events = MetaConfig.getInstance().getGlobalEvents();
+        for(MetaConfig.GlobalEvent event : events) {
+            GlobalEventHandler eventHandler = new GlobalEventHandler(event.getDelay(), event.getPhase(), event.getAdditionalParams(), ActionType.valueOf(event.getName()), false);
+            getServer().getPluginManager().registerEvents(eventHandler, Nftilation.getInstance());
+        }
     }
 }

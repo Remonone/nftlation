@@ -14,7 +14,7 @@ public class SkipPhaseCommand implements CommandExecutor {
         CommandUtils.State state = CommandUtils.verifyPlayerSender(sender, args, 0);
         if(!state.equals(CommandUtils.State.NONE)) return state.getValue();
         if(Store.getInstance().getGameStage().getStage() != Stage.IN_GAME) return true;
-        GameInstance.getInstance().getCounter().SkipPhase();
+        GameInstance.getInstance().getCounter().skipPhase();
         return true;
     }
 }

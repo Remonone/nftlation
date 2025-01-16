@@ -30,7 +30,6 @@ import remonone.nftilation.utils.EntityDamageByPlayerLog;
 import remonone.nftilation.utils.PlayerUtils;
 import remonone.nftilation.utils.ResetUtils;
 
-
 import java.util.PriorityQueue;
 
 import static org.bukkit.Bukkit.getServer;

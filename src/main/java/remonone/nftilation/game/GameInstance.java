@@ -13,10 +13,7 @@ import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.components.IComponent;
 import remonone.nftilation.components.PlayerInteractComponent;
-import remonone.nftilation.constants.MessageConstant;
-import remonone.nftilation.constants.NameConstants;
-import remonone.nftilation.constants.PropertyConstant;
-import remonone.nftilation.constants.RuleConstants;
+import remonone.nftilation.constants.*;
 import remonone.nftilation.enums.PlayerRole;
 import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.phase.PhaseCounter;
@@ -24,6 +21,7 @@ import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.scoreboard.ScoreboardHandler;
 import remonone.nftilation.handlers.OnEntityDieHandler;
+import remonone.nftilation.restore.DumpCollector;
 import remonone.nftilation.utils.*;
 
 import java.util.*;
@@ -56,8 +54,8 @@ public class GameInstance {
         GameConfiguration.disposePlayers(teamRaw);
         GameConfiguration.initServices();
         GameConfiguration.spawnGolems();
-        counter = new PhaseCounter();
-        counter.Init();
+        GameConfiguration.initGlobalEvents();
+
         for(ITeam team : teamData.values()) {
             GameConfiguration.initPlayerRoles(team);
             GameConfiguration.initPlayerRunes(team);
@@ -66,11 +64,44 @@ public class GameInstance {
                 ScoreboardHandler.buildScoreboard(model.getReference());
             }
         }
+        if(counter == null) {
+            counter = new PhaseCounter();
+            counter.init();
+        }
         initComponents();
         this.repeatedTask = GameConfiguration.startRepeatedTask();
         this.reservation = new BossReservation();
         GameConfiguration.initHints();
+        setRecoveryDataCollector();
     }
+
+    public void initTimer(int i, int i1) {
+        if(counter != null) {
+            counter.stop();
+            counter = null;
+        }
+        counter = new PhaseCounter();
+        counter.init(i, i1);
+    }
+    
+    public void setTeamData(List<IModifiableTeam> teams) {
+        teamRaw.clear();
+        teamRaw.addAll(teams);
+        teamData.clear();
+        for(IModifiableTeam team : teams) {
+            teamData.put(team.getTeamName(), team);
+        }
+    }
+
+    private void setRecoveryDataCollector() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                DumpCollector.generateDump();
+            }
+        }.runTaskTimer(Nftilation.getInstance(), 10 * DataConstants.TICKS_IN_MINUTE, 10 * DataConstants.TICKS_IN_MINUTE);
+    }
+    
 
     private void initComponents() {
         components = new HashMap<>();

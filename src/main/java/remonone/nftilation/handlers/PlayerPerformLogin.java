@@ -42,7 +42,7 @@ public class PlayerPerformLogin implements Listener {
         // Transferring the player
         if(!PlayerRole.PLAYER.equals(data.getRole())) {
             if(Stage.IN_GAME.equals(instance.getGameStage().getStage()))
-                GameInstance.getInstance().getCounter().bar.addPlayer(player);
+                GameInstance.getInstance().getCounter().getBarWorker().getBar().addPlayer(player);
             return;
         }
         if(!Stage.IN_GAME.equals(instance.getGameStage().getStage())) {
@@ -55,7 +55,7 @@ public class PlayerPerformLogin implements Listener {
         Role role = instance.getDataInstance().getPlayerRole(player.getUniqueId());
         PlayerNMSUtil.changePlayerSkin(player, SkinCache.getInstance().getTexture(role.getRoleID()), SkinCache.getInstance().getSignature(role.getRoleID()));
         ScoreboardHandler.updateScoreboard(model);
-        GameInstance.getInstance().getCounter().bar.addPlayer(player);
+        GameInstance.getInstance().getCounter().getBarWorker().getBar().addPlayer(player);
         Role.updatePlayerAbilities(player);
     }
 

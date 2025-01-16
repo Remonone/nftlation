@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.Vector;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.constants.PropertyConstant;
+import remonone.nftilation.game.models.PhaseProps;
 import remonone.nftilation.hints.Hint;
 import remonone.nftilation.utils.Logger;
 
@@ -44,6 +45,9 @@ public class ConfigManager {
     private List<Location> ironGolemPositions;
     @Getter
     private List<Hint> hints;
+    @Getter
+    private List<PhaseProps> phaseProps;
+    
     
     private ConfigManager() {}
     
@@ -72,32 +76,37 @@ public class ConfigManager {
         centerDeadZoneCoords = (Vector) configuration.get(PropertyConstant.CENTER_DEAD_POINT);
         List<TeamSpawnPoint> teamSpawnPoints = (List<TeamSpawnPoint>) configuration.getList(PropertyConstant.TEAMS_SPAWN_POINTS);
         if(teamSpawnPoints == null) {
-            teamSpawnPoints = new ArrayList<>();
+            teamSpawnPoints = Collections.emptyList();
         }
         Logger.log("Loaded " + teamSpawnPoints.size() + " team spawn points.");
         teamSpawnList = teamSpawnPoints;
         List<Location> diamondPositions = (List<Location>) configuration.getList(PropertyConstant.DIAMOND_POSITION);
         if(diamondPositions == null) {
-            diamondPositions = new ArrayList<>();
+            diamondPositions = Collections.emptyList();
         }
         diamondSpawnList = diamondPositions;
         centerLocation = (Location) configuration.get(PropertyConstant.CENTER_LOCATION);
         List<Location> roboSybilPoints = (List<Location>) configuration.getList(PropertyConstant.ROBO_SYBIL_SPAWN_POINTS);
         if(roboSybilPoints == null) {
-            roboSybilPoints = new ArrayList<>();
+            roboSybilPoints = Collections.emptyList();
         }
         roboSybilsSpawnList = roboSybilPoints;
         List<Location> ironGolemPos = (List<Location>) configuration.getList(PropertyConstant.IRON_GOLEM_SPAWN_POINTS);
         if(ironGolemPos == null) {
-            ironGolemPos = new ArrayList<>();
+            ironGolemPos = Collections.emptyList();
         }
         ironGolemPositions = ironGolemPos;
         fragilityScale = configuration.getDouble(PropertyConstant.FRAGILITY_SCALE);
         List<Hint> hintList = (List<Hint>) configuration.getList(PropertyConstant.HINTS);
         if(hintList == null) {
-            hintList = new ArrayList<>();
+            hintList = Collections.emptyList();
         }
         hints = hintList;
+        List<PhaseProps> phases = (List<PhaseProps>)configuration.getList(PropertyConstant.PHASES);
+        if(phases == null) {
+            phases = Collections.emptyList();
+        }
+        phaseProps = phases;
     }
 
     public void Save() {

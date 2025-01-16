@@ -1,113 +1,115 @@
 package remonone.nftilation.game.phase;
 
-import org.bukkit.Bukkit;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
+import lombok.Getter;
 import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
-import remonone.nftilation.constants.DataConstants;
+import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.constants.RuleConstants;
+import remonone.nftilation.events.OnCounterTickEvent;
 import remonone.nftilation.events.OnPhaseUpdateEvent;
+import remonone.nftilation.game.models.PhaseProps;
 import remonone.nftilation.game.rules.RuleManager;
+import remonone.nftilation.utils.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.bukkit.Bukkit.getServer;
 
 public class PhaseCounter {
     
-    public final List<Long> phases = new ArrayList<>();
+    private final List<PhaseProps> phases;
     
-    public BossBar bar;
-    public int barTask;
-    
-    private int phaseCounter = 0;
-    private int secondsCounter = 0;
-    
-    private int taskId = -1;
+    @Getter
+    private BarWorker barWorker;
+    @Getter
+    private int phase;
+    @Getter
+    private int seconds;
+    private BukkitRunnable task;
     
     public PhaseCounter() {
-        phases.add((long)15 * DataConstants.TICKS_IN_MINUTE);
-        phases.add((long)20 * DataConstants.TICKS_IN_MINUTE);
-        phases.add((long)20 * DataConstants.TICKS_IN_MINUTE);
-        phases.add((long)30 * DataConstants.TICKS_IN_MINUTE);
-        phases.add((long)15 * DataConstants.TICKS_IN_MINUTE);
+        phases = ConfigManager.getInstance().getPhaseProps();
     }
     
-    public void Init() {
-        long delay = phases.get(phaseCounter);
-        int delaySeconds = (int) (delay / DataConstants.TICKS_IN_MINUTE) * 60;
-        bar = Bukkit.createBossBar(getBossBarTitle(phaseCounter + 1, delaySeconds), BarColor.RED, BarStyle.SEGMENTED_10);
-        bar.setVisible(true);
-        Bukkit.getOnlinePlayers().forEach(bar::addPlayer);
-        getServer().getPluginManager().callEvent(new OnPhaseUpdateEvent(phaseCounter + 1));
-        BukkitRunnable task = new BukkitRunnable() {
-            @Override
-            public void run() {
-                Next();
-            }
-        };
-        task.runTaskLater(Nftilation.getInstance(), delay);
-        taskId = task.getTaskId();
-        StartCounter(delaySeconds);
+    public void init() {
+        PhaseProps props = getPhase(0);
+        initBar(0, props);
+        initTimer(0, 0);
+        getServer().getPluginManager().callEvent(new OnPhaseUpdateEvent(0));
+    }
+    
+    public void init(int phase, int delayInSeconds) {
+        PhaseProps props = getPhase(phase);
+        initBar(phase, props);
+        initTimer(phase, delayInSeconds);
     }
 
-    public void PauseCounter() {
-        getServer().getScheduler().cancelTask(taskId);
+    private void initTimer(int phase, int delayInSeconds) {
+        final int[] timeInfo = {delayInSeconds, phase};
+        PhaseProps props = getPhase(phase);
+        task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                timeInfo[0]++;
+                if(timeInfo[0] >= props.getLength()) {
+                    timeInfo[1]++;
+                    timeInfo[0] = 0;
+                    getServer().getPluginManager().callEvent(new OnPhaseUpdateEvent(timeInfo[1]));
+                }
+                setTime(timeInfo);
+                getServer().getPluginManager().callEvent(new OnCounterTickEvent(timeInfo[0], timeInfo[1]));
+            }
+        };
+        task.runTaskTimer(Nftilation.getInstance(), 0, 20);
+        
+    }
+
+    private void setTime(int[] timeInfo) {
+        this.seconds = timeInfo[0];
+        this.phase = timeInfo[1];
+    }
+
+    private void initBar(int phase, PhaseProps props) {
+        this.barWorker = new BarWorker();
+        this.barWorker.initBar(phase, props.getLength(), props.getBarColor(), props.getBarStyle());
+        getServer().getPluginManager().registerEvents(barWorker, Nftilation.getInstance());
+    }
+    
+    public void setPhase(int phase) {
+        if(task == null) return;
+        getServer().getScheduler().cancelTask(task.getTaskId());
+        getServer().getPluginManager().callEvent(new OnPhaseUpdateEvent(phase - 1));
+        initTimer(phase - 1, 0);
+    }
+    
+    public void pauseCounter() {
+        if(task == null) return;
+        Logger.log("Game has been paused!");
+        getServer().getScheduler().cancelTask(task.getTaskId());
         RuleManager.getInstance().setRule(RuleConstants.RULE_GAME_IS_RUNNING, false);
     }
 
-    public void ResumeCounter() {
+    public void resumeCounter() {
+        Logger.log("Game has been resumed!");
         RuleManager.getInstance().setRule(RuleConstants.RULE_GAME_IS_RUNNING, true);
-        if(phaseCounter >= phases.size()) return;
-        long delay = phases.get(phaseCounter);
-        StartCounter((int)delay);
-    }
-
-    private void StartCounter(int delaySeconds) {
-        BukkitRunnable barTask = new BukkitRunnable() {
-            @Override
-            public void run() {
-                secondsCounter++;
-                int totalSeconds = delaySeconds - secondsCounter;
-                bar.setTitle(getBossBarTitle(phaseCounter + 1, totalSeconds));
-                bar.setProgress((double) totalSeconds / (double) delaySeconds);
-            }
-        };
-        barTask.runTaskTimer(Nftilation.getInstance(), 0, 20);
-        this.barTask = barTask.getTaskId();
-    }
-
-    public String getBossBarTitle(int phase, int remainingSeconds) {
-        int mins = remainingSeconds / 60;
-        int secs = remainingSeconds % 60;
-        return String.format("Phase: " + phase + ". Next phase: " + mins + ":" + String.format("%02d", secs)); 
+        initTimer(phase, seconds);
     }
     
-    private void Next() {
-        Bukkit.getScheduler().cancelTask(this.barTask);
-        secondsCounter = 0;
-        if(++phaseCounter >= phases.size()) {
-            getServer().getPluginManager().callEvent(new OnPhaseUpdateEvent(phaseCounter + 1));
-            return;
+    public PhaseProps getPhase(int phase)  {
+        return phases.get(phase);
+    }
+    
+    public void skipPhase() {
+        if(task == null) return;
+        getServer().getScheduler().cancelTask(task.getTaskId());
+        getServer().getPluginManager().callEvent(new OnPhaseUpdateEvent(++phase));
+        initTimer(phase, 0);
+    }
+
+    public void stop() {
+        if(task != null) {
+            getServer().getScheduler().cancelTask(task.getTaskId());
         }
-        getServer().getPluginManager().callEvent(new OnPhaseUpdateEvent(phaseCounter + 1));
-        long delay = phases.get(phaseCounter);
-        BukkitRunnable task = new BukkitRunnable() {
-            public void run() {
-                Next();
-            }
-        };
-        task.runTaskLater(Nftilation.getInstance(), delay);
-        taskId = task.getTaskId();
-        int delaySeconds = (int) (delay / DataConstants.TICKS_IN_MINUTE) * 60;
-        StartCounter(delaySeconds);
-    }
-    
-    public void SkipPhase() {
-        getServer().getScheduler().cancelTask(taskId);
-        Next();
+        barWorker.stopWorker();
     }
 }

@@ -19,6 +19,8 @@ import remonone.nftilation.utils.Logger;
 
 import java.util.*;
 
+import static org.bukkit.Bukkit.getServer;
+
 public class DataInstance {
         
     public DataInstance() {}
@@ -122,6 +124,16 @@ public class DataInstance {
                 return player;
             }
         }
+        return null;
+    }
+    
+    public Player getPlayerByLogin(final String login) {
+        for(PlayerInfo playerInfo : players) {
+            if(playerInfo.getData().getLogin().equals(login)) {
+                return getServer().getPlayer(playerInfo.getPlayerId());
+            }
+        }
+        Logger.warn("Player with login " + login + " not found");
         return null;
     }
     

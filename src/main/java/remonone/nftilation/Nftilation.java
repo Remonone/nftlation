@@ -13,14 +13,11 @@ import remonone.nftilation.game.ingame.actions.ActionContainer;
 import remonone.nftilation.game.ingame.actions.ActionType;
 import remonone.nftilation.game.ingame.actions.donate.*;
 import remonone.nftilation.game.ingame.actions.world.*;
+import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.services.LobbyService;
 import remonone.nftilation.game.meta.MetaConfig;
 import remonone.nftilation.game.meta.RoleInfo;
 import remonone.nftilation.game.meta.RuneInfo;
-import remonone.nftilation.game.models.AttributeModifier;
-import remonone.nftilation.game.models.EffectPotion;
-import remonone.nftilation.game.models.Requisite;
-import remonone.nftilation.game.models.RequisiteContainer;
 import remonone.nftilation.game.roles.*;
 import remonone.nftilation.game.runes.*;
 import remonone.nftilation.game.shop.ShopBuilder;
@@ -30,7 +27,9 @@ import remonone.nftilation.game.shop.content.ServiceElement;
 import remonone.nftilation.game.shop.registry.ShopItemRegistry;
 import remonone.nftilation.handlers.*;
 import remonone.nftilation.hints.Hint;
-import remonone.nftilation.restore.DumpCollector;
+import remonone.nftilation.restore.PlayerCollection;
+import remonone.nftilation.restore.TeamCollection;
+import remonone.nftilation.restore.WorldCollection;
 import remonone.nftilation.utils.CustomEntities;
 import remonone.nftilation.utils.EntityList;
 import remonone.nftilation.utils.Logger;
@@ -104,6 +103,10 @@ public final class Nftilation extends JavaPlugin {
         ConfigurationSerialization.registerClass(MetaConfig.ContentInfo.class);
         ConfigurationSerialization.registerClass(MetaConfig.GlobalEvent.class);
         ConfigurationSerialization.registerClass(Hint.class);
+        ConfigurationSerialization.registerClass(PhaseProps.class);
+        ConfigurationSerialization.registerClass(TeamCollection.class);
+        ConfigurationSerialization.registerClass(PlayerCollection.class);
+        ConfigurationSerialization.registerClass(WorldCollection.class);
     }
 
     private void RegisterRoles() {
@@ -172,6 +175,10 @@ public final class Nftilation extends JavaPlugin {
         this.getCommand("move").setExecutor(new MoveToPlayer());
         this.getCommand("rbfbsafa").setExecutor(new BossReservationCommand());
         this.getCommand("addHint").setExecutor(new AddHintCommand());
+        this.getCommand("pauseGame").setExecutor(new PauseGameCommand());
+        this.getCommand("setPhase").setExecutor(new SetPhaseCommand());
+        this.getCommand("createBackup").setExecutor(new CreateBackupCommand());
+        this.getCommand("restore").setExecutor(new RestoreGameCommand());
     }
     
     public static Nftilation getInstance() {
@@ -183,15 +190,12 @@ public final class Nftilation extends JavaPlugin {
         Logger.log("Disabling...");
         EntityList.clearEntities();
         if(GameInstance.getInstance().getCounter() != null) {
-            GameInstance.getInstance().getCounter().bar.setVisible(false);
+            GameInstance.getInstance().getCounter().getBarWorker().getBar().setVisible(false);
         }
         for(Player p : Bukkit.getOnlinePlayers()) {
             p.kickPlayer("Сервер в данный момент перезагружается, перезайдите позже...");
         }
         CustomEntities.unregisterEntities();
-        if(!GameInstance.getInstance().isFinished()) {
-            DumpCollector.GenerateDump();
-        }
     }
     
     

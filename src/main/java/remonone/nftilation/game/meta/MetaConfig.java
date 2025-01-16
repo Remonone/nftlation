@@ -2,7 +2,6 @@ package remonone.nftilation.game.meta;
 
 import lombok.Data;
 import lombok.Getter;
-import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -12,7 +11,6 @@ import remonone.nftilation.utils.Logger;
 
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MetaConfig {
 
@@ -34,7 +32,7 @@ public class MetaConfig {
     private Map<String, Object> events;
     
     @Getter
-    private Map<Integer, List<GlobalEvent>> globalEvents = new HashMap<>();
+    private List<GlobalEvent> globalEvents;
     
     public MetaConfig() {}
     
@@ -70,10 +68,11 @@ public class MetaConfig {
         this.upgrades = upgradeList.content;
         ContentInfo eventList = (ContentInfo) configuration.get(MetaConstants.META_EVENTS);
         this.events = eventList.content;
-        Map<String, Object> events = ((MemorySection)configuration.get(MetaConstants.META_GLOBAL)).getValues(true);
-        this.globalEvents = events.entrySet().stream().collect(
-                Collectors.toMap(value -> Integer.parseInt(value.getKey()),
-                        e -> (List<GlobalEvent>) e.getValue()));
+        List<GlobalEvent> events = ((List<GlobalEvent>)configuration.get(MetaConstants.META_GLOBAL));
+        if(events == null) {
+            events = Collections.emptyList();
+        }
+        this.globalEvents = events;
     }
     
     public Object getValue(String key) {
@@ -108,6 +107,7 @@ public class MetaConfig {
     public static class GlobalEvent implements ConfigurationSerializable {
         private int delay;
         private String name;
+        private int phase;
         private Map<String, Object> additionalParams;
         
         @Override
@@ -123,6 +123,9 @@ public class MetaConfig {
             }
             if(map.containsKey("name")) {
                 event.setName(map.get("name").toString());
+            }
+            if(map.containsKey("phase")) {
+                event.setPhase(Integer.parseInt(map.get("phase").toString()));
             }
             if(map.containsKey("params")) {
                 event.setAdditionalParams((Map<String, Object>) map.get("params"));

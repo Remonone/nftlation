@@ -12,6 +12,7 @@ public class PropertyConstant {
     public static final String IRON_GOLEM_SPAWN_POINTS = "ironGolemSpawnPoints";
     public static final String FRAGILITY_SCALE = "fragilityScale";
     public static final String HINTS = "hints";
+    public static final String PHASES = "phases";
 
     public static final String NBT_ROLE = "role-name";
     public static final String NBT_RUNE = "rune-name";

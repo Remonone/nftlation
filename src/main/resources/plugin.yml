@@ -59,6 +59,7 @@ commands:
     description: Set Checker chest position
     usage: /setCheckerTeamPosition [teamId]
   startDonationEvent:
+    usage: /startDonationEvent
   addAirDropPos:
     description: Set AirDrop Position for the team
     usage: /addAirDropPos [teamId]
@@ -77,4 +78,14 @@ commands:
   move:
     usage: /move [player]
   rbfbsafa:
+    usage: /rbfbsafa
   addHint:
+    usage: /addHint
+  pauseGame:
+    usage: /pauseGame
+  setPhase:
+    usage: /setPhase
+  createBackup:
+    usage: /createBackup
+  restore:
+    usage: /restore [file_name]
