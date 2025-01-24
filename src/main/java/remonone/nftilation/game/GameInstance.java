@@ -15,17 +15,15 @@ import remonone.nftilation.components.IComponent;
 import remonone.nftilation.components.PlayerInteractComponent;
 import remonone.nftilation.constants.*;
 import remonone.nftilation.enums.PlayerRole;
+import remonone.nftilation.events.OnCoreDamageEvent;
 import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.phase.PhaseCounter;
 import remonone.nftilation.game.roles.Role;
-import remonone.nftilation.game.rules.RuleManager;
 import remonone.nftilation.game.scoreboard.ScoreboardHandler;
-import remonone.nftilation.handlers.OnEntityDieHandler;
 import remonone.nftilation.restore.DumpCollector;
 import remonone.nftilation.utils.*;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.bukkit.Bukkit.getServer;
@@ -48,7 +46,7 @@ public class GameInstance {
     
     public void startGame() {
         Map<String, List<DataInstance.PlayerInfo>> teams = Store.getInstance().getDataInstance().getTeams();
-        teamData = GameConfiguration.constructTeamData(teams, destroyTeam);
+        teamData = GameConfiguration.constructTeamData(teams);
         
         teamRaw.addAll(teamData.values());
         GameConfiguration.disposePlayers(teamRaw);
@@ -85,6 +83,9 @@ public class GameInstance {
     }
     
     public void setTeamData(List<IModifiableTeam> teams) {
+        for(IModifiableTeam team : teamData.values()) {
+            OnCoreDamageEvent.getHandlerList().unregister(team.getCoreInstance());
+        }
         teamRaw.clear();
         teamRaw.addAll(teams);
         teamData.clear();
@@ -124,27 +125,6 @@ public class GameInstance {
         return components.get(name);
     }
 
-    public final Function<String, Void> destroyTeam = (String teamName) -> {
-        IModifiableTeam team = teamData.get(teamName);
-        team.setCoreAlive(false);
-        Location location = team.getTeamSpawnPoint().getCoreCenter();
-        location.getBlock().setType(Material.AIR);
-        notifyDestruction(team);
-
-        if(!PlayerUtils.isTeamHaveAlivePlayers(teamName)) {
-            team.setTeamActive(false);
-            checkOnActiveTeams();
-        }
-        if((Boolean)RuleManager.getInstance().getRuleOrDefault(RuleConstants.RULE_IMMINENT_DEATH, false) && !isFinished) {
-            team.getPlayers().forEach(playerModel -> OnEntityDieHandler.OnDeath(playerModel.getReference()));
-        }
-        for(ITeam currentTeam : teamData.values()) {
-            currentTeam.getPlayers().forEach(ScoreboardHandler::updateScoreboard);
-        }
-        checkOnActiveTeams();
-        return null;
-    };
-
     public boolean checkIfPlayersInSameTeam(Player player1, Player player2) {
         String data1 = Store.getInstance().getDataInstance().getPlayerTeam(player1.getUniqueId());
         String data2 = Store.getInstance().getDataInstance().getPlayerTeam(player2.getUniqueId());
@@ -175,27 +155,6 @@ public class GameInstance {
         }
         return null;
     }
-
-    public boolean damageCore(String teamName, boolean isPlayerDamager) {
-        IModifiableTeam team = teamData.get(teamName);
-        if(team == null) return false;
-        int oldHP = team.getCoreInstance().getHealth();
-        boolean isDestroyed = team.getCoreInstance().TakeDamage(isPlayerDamager);
-        int newHP = team.getCoreInstance().getHealth();
-        if(!isDestroyed && isPlayerDamager) {
-            int oldScale = oldHP % 5;
-            int newScale = newHP % 5;
-            if(newScale > oldScale) {
-                team.getPlayers().forEach(playerModel -> {
-                    Player player = playerModel.getReference();
-                    NotificationUtils.sendNotification(player, MessageConstant.TEAM_DAMAGED_MESSAGE, NotificationUtils.NotificationType.WARNING, false);
-                    player.playSound(player.getLocation(), Sound.ENTITY_CAT_HISS, 1f, .7f);
-                });
-            }
-        }
-        team.getPlayers().forEach(ScoreboardHandler::updateScoreboard);
-        return isDestroyed;
-    }
     
     public void healCore(Player player, String teamName, float price) {
         IModifiableTeam team = teamData.get(teamName);
@@ -217,9 +176,9 @@ public class GameInstance {
         world.playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, 1f, 1f);
     }
 
-    private void checkOnActiveTeams() {
+    public void checkOnActiveTeams() {
         List<ITeam> aliveTeams = teamData.values().stream().filter(ITeam::isTeamActive).collect(Collectors.toList());
-        if(aliveTeams.size() < 2) {
+        if(aliveTeams.size() < 2 && !isFinished) {
             isFinished = true;
             announceTeamWinner(aliveTeams.get(0));
         }
@@ -242,22 +201,6 @@ public class GameInstance {
         };
         task.runTaskTimer(Nftilation.getInstance(), 0L, 40L);
         Bukkit.getScheduler().cancelTask(repeatedTask);
-    }
-
-    private void notifyDestruction(ITeam team) {
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            String title;
-            String subTitle;
-            if(team.getPlayers().stream().anyMatch(playerModel -> playerModel.getReference().getUniqueId().equals(player.getUniqueId()))) {
-                title = ChatColor.RED + "" + ChatColor.BOLD + MessageConstant.CORE_DESTROYED_TITLE;
-                subTitle = ChatColor.GOLD + MessageConstant.CORE_DESTROYED_SUBTITLE;
-            } else {
-                title = ChatColor.GREEN + "" + ChatColor.BOLD + String.format(MessageConstant.OTHER_CORE_DESTROYED_TITLE, team.getTeamName());
-                subTitle = ChatColor.WHITE + MessageConstant.OTHER_CORE_DESTROYED_SUBTITLE;
-            }
-            player.sendTitle(title, subTitle, 10, 60, 10);
-        });
-        Logger.broadcast(ChatColor.GOLD + String.format(MessageConstant.CORE_DESTROYED_BROADCAST, team.getTeamName()));
     }
     
     public PlayerModel getPlayerModelFromTeam(String teamName, Player player) {

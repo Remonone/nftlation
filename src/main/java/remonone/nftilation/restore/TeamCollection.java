@@ -93,6 +93,7 @@ public class TeamCollection implements ConfigurationSerializable, Cloneable {
         boolean teamActive = false;
         boolean teamOrigin = false;
         String point = "";
+        int coreHealth = 0;
         Map<String, Object> teamParams = Collections.emptyMap();
         List<String> players;
         if(!map.containsKey(ID)) {
@@ -121,6 +122,9 @@ public class TeamCollection implements ConfigurationSerializable, Cloneable {
         if(map.containsKey(TEAM_PARAMS)) {
             teamParams = (Map<String, Object>) map.get(TEAM_PARAMS);
         }
+        if(map.containsKey(CORE_HEALTH)) {
+            coreHealth = (int) map.get(CORE_HEALTH);
+        }
         if(map.containsKey(TEAM_PLAYERS)) {
             players = (List<String>) map.get(TEAM_PLAYERS);
         } else {
@@ -136,6 +140,7 @@ public class TeamCollection implements ConfigurationSerializable, Cloneable {
                 .playerNames(players)
                 .originalTeam(teamOrigin)
                 .teamParams(teamParams)
+                .coreHealth(coreHealth)
                 .build();
     }
 

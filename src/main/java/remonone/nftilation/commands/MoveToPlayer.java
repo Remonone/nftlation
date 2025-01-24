@@ -55,6 +55,6 @@ public class MoveToPlayer implements CommandExecutor, TabCompleter {
         if(strings[0] == null || strings[0].isEmpty()) return playerNicknames;
         List<String> nicknameMatches = new ArrayList<>();
         StringUtil.copyPartialMatches(strings[0], playerNicknames, nicknameMatches);
-        return playerNicknames;
+        return nicknameMatches;
     }
 }

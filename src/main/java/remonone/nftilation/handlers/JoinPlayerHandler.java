@@ -27,7 +27,6 @@ public class JoinPlayerHandler implements Listener {
         try {
             List<?> playersList =  HttpRequestSender.post(RequestConstant.REQ_GET_PLAYER_ID, new String[] {event.getPlayer().getDisplayName()}, List.class);
             String uuid = (String)((LinkedTreeMap<String, Object>)playersList.get(0)).get("id");
-            Logger.debug(uuid);
             SkinRestorationContainer container = HttpRequestSender.get(RequestConstant.REQ_RESTORE_SKIN + uuid + "?unsigned=false", SkinRestorationContainer.class);
             if (container != null) {
                 List<SkinProperty> properties = container.getProperties();

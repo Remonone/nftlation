@@ -44,7 +44,6 @@ import remonone.nftilation.hints.HintDrawer;
 import remonone.nftilation.utils.*;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.bukkit.Bukkit.getPlayer;
@@ -135,7 +134,7 @@ public class GameConfiguration {
     }
 
 
-    public static Map<String, IModifiableTeam> constructTeamData(Map<String, List<DataInstance.PlayerInfo>> teams, Function<String, Void> onTeamDestroy) {
+    public static Map<String, IModifiableTeam> constructTeamData(Map<String, List<DataInstance.PlayerInfo>> teams) {
         Map<String, IModifiableTeam> teamData = new HashMap<>();
         Stack<TeamSpawnPoint> teamList = new Stack<>();
         teamList.addAll(ConfigManager.getInstance().getTeamSpawnList());
@@ -161,8 +160,7 @@ public class GameConfiguration {
                 model.getDamageHandlers().addAll(constructDamageHandlers(model));
                 teamPlayers.add(model);
             }
-            Core teamCore = setCore(point);
-            teamCore.setOnDieFunction(() -> onTeamDestroy.apply(teamName));
+            Core teamCore = generateCore(teamName, point);
             GameConfiguration.spawnShopKeeper(point);
             IModifiableTeam team = TeamImpl.builder()
                     .teamName(teamName)
@@ -211,11 +209,12 @@ public class GameConfiguration {
         return availableRoles.get(RANDOM.nextInt(availableRoles.size()));
     }
 
-    public static Core setCore(TeamSpawnPoint point) {
-        Core core = new Core(() -> {});
+    public static Core generateCore(String teamName, TeamSpawnPoint point) {
+        Core core = new Core(teamName);
         Location location = point.getCoreCenter();
         String matName = (String)NestedObjectFetcher.getNestedObject("coreUpgrade", MetaConfig.getInstance().getUpgrades(), 0);
         location.getBlock().setType(Material.getMaterial(matName));
+        getServer().getPluginManager().registerEvents(core, Nftilation.getInstance());
         return core;
     }
 

@@ -228,7 +228,7 @@ public class Monkey extends Role {
         String roleId = (String)model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID);
         Role role = Role.getRoleByID(roleId);
         if(!(role instanceof Monkey)) return;
-        e.setFoodLevel(15);
+        e.setFoodLevel(18);
         
     }
 }

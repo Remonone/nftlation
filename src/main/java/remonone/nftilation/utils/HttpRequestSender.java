@@ -14,7 +14,6 @@ public class HttpRequestSender {
         connection.setRequestMethod("POST");
 
         String dataToSend = convertor.toJson(data);
-        Logger.debug(dataToSend);
         DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
         outputStream.writeBytes(dataToSend);
         outputStream.flush();

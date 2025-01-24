@@ -12,6 +12,7 @@ import remonone.nftilation.config.ConfigManager;
 import remonone.nftilation.constants.DataConstants;
 import remonone.nftilation.constants.MessageConstant;
 import remonone.nftilation.constants.RuleConstants;
+import remonone.nftilation.events.OnCoreDamageEvent;
 import remonone.nftilation.events.OnPhaseUpdateEvent;
 import remonone.nftilation.game.GameInstance;
 import remonone.nftilation.game.models.ITeam;
@@ -30,7 +31,7 @@ public class PhaseUpdateHandler implements Listener {
     @EventHandler
     public void onPhaseUpdate(final OnPhaseUpdateEvent event) {
         int stage = event.getPhaseStage() + 1;
-        PhaseProps props = GameInstance.getInstance().getCounter().getPhase(stage);
+        PhaseProps props = GameInstance.getInstance().getCounter().getPhase(stage - 1);
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.sendTitle(props.getPhaseTitleColor() + props.getPhaseTitle(), props.getPhaseDescriptionColor() + props.getPhaseDescription(), 10, 80, 10);
             if(props.getMessagesToSendPlayers().isEmpty()) continue;
@@ -87,7 +88,8 @@ public class PhaseUpdateHandler implements Listener {
                 while(teamIterator.hasNext()) {
                     ITeam team = teamIterator.next();
                     if(GameInstance.getInstance().getTeam(team.getTeamName()).isCoreAlive()) {
-                        GameInstance.getInstance().damageCore(team.getTeamName(), false);
+                        OnCoreDamageEvent event = new OnCoreDamageEvent(team.getTeamName(), null);
+                        getServer().getPluginManager().callEvent(event);
                     }
                 }
             }

@@ -144,6 +144,7 @@ public final class Nftilation extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new OnTokenGainHandler(), this);
         getServer().getPluginManager().registerEvents(new MoneyRainPickupHandler(), this);
         getServer().getPluginManager().registerEvents(new PlayerPerformLogin(), this);
+        getServer().getPluginManager().registerEvents(new OnCoreHandler(), this);
     }
     
     private void InitCommands() {

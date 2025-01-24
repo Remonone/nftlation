@@ -8,7 +8,7 @@ public class RayTrace {
 
     //origin = start position
     //direction = direction in which the raytrace will go
-    Vector origin, direction;
+    final Vector origin, direction;
 
     public RayTrace(Vector origin, Vector direction) {
         this.origin = origin;

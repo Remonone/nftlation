@@ -20,6 +20,7 @@ public class ResetUtils {
         player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(DataConstants.PLAYER_HEALTH);
         player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(.1F);
         player.setHealth(DataConstants.PLAYER_HEALTH);
+        player.setHealthScale(20);
         player.setWalkSpeed(DataConstants.PLAYER_SPEED);
         for(PotionEffect effect : player.getActivePotionEffects()) {
             player.removePotionEffect(effect.getType());

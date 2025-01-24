@@ -68,6 +68,7 @@ public class DumpCollector {
                     .currentHealth(model.getReference().getHealth())
                     .parameters(model.getParameters())
                     .tokens(model.getTokens())
+                    .currentFoodLevel(model.getReference().getFoodLevel())
                     .location(model.getReference().getLocation())
                     .inventory(model.getReference().getInventory().getContents())
                     .login(PlayerUtils.getOriginalPlayerName(model.getReference()))

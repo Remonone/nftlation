@@ -18,6 +18,7 @@ import java.util.HashSet;
 public class PlayerNMSUtil {
 
     public static void changePlayerSkin(Player p, String texture, String signature) {
+        if(p == null) return;
         if(StringUtils.isEmpty(texture) || StringUtils.isEmpty(signature)) {
             Logger.warn("Trying to load undefined skin for: " + p.getName());
             return;

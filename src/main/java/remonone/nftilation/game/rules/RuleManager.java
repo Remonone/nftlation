@@ -27,7 +27,7 @@ public class RuleManager {
         inGameRules.put(RuleConstants.RULE_CORE_SELF_DESTRUCTIVE, false);
         inGameRules.put(RuleConstants.RULE_INVENTORY_AUTO_CLEAR, true);
         inGameRules.put(RuleConstants.RULE_RESPAWN_TIMER, (long) 5 * 20);
-        inGameRules.put(RuleConstants.RULE_CORE_HEALTH_LOST_PERIOD, (long) 9 * DataConstants.TICKS_IN_SECOND);
+        inGameRules.put(RuleConstants.RULE_CORE_HEALTH_LOST_PERIOD, 9 * DataConstants.TICKS_IN_SECOND);
         inGameRules.put(RuleConstants.RULE_AVAILABLE_TIER, 1);
         inGameRules.put(RuleConstants.RULE_CORE_DAMAGE_INTAKE, 2);
         inGameRules.put(RuleConstants.RULE_IMMINENT_DEATH, false);

@@ -11,8 +11,8 @@ import java.util.Map;
 @Getter
 public class WorldCollection implements ConfigurationSerializable, Cloneable {
 
-    private static String SECONDS = "seconds";
-    private static String PHASE = "phase";
+    private final static String SECONDS = "seconds";
+    private final static String PHASE = "phase";
 
     private int seconds;
     private int phase;

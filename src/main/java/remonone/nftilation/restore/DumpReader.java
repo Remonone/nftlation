@@ -3,6 +3,7 @@ package remonone.nftilation.restore;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import remonone.nftilation.Nftilation;
 import remonone.nftilation.Store;
 import remonone.nftilation.application.services.SkinCache;
@@ -14,6 +15,7 @@ import remonone.nftilation.constants.RuleConstants;
 import remonone.nftilation.enums.Stage;
 import remonone.nftilation.game.GameConfiguration;
 import remonone.nftilation.game.GameInstance;
+import remonone.nftilation.game.ingame.objects.Core;
 import remonone.nftilation.game.models.*;
 import remonone.nftilation.game.roles.Role;
 import remonone.nftilation.game.rules.RuleManager;
@@ -81,15 +83,17 @@ public class DumpReader {
 
     private IModifiableTeam constructFullTeam(TeamCollection collection) {
         TeamSpawnPoint point = ConfigManager.getInstance().getTeamSpawnList().stream().filter(teamSpawnPoint -> teamSpawnPoint.getId().equals(collection.getTeamPointId())).findFirst().orElseThrow(() -> new IllegalArgumentException("Team Position not found"));
+        Core core = GameConfiguration.generateCore(collection.getTeamName(), point);
+        core.setHealth(collection.getCoreHealth());
         return TeamImpl.builder()
                 .teamName(collection.getTeamName())
                 .teamColor(ChatColor.getByChar(collection.getTeamColor()))
                 .parameters(collection.getTeamParams())
                 .players(constructPlayerPlaceholders(collection.getPlayerNames()))
                 .spawnPoint(point)
-                .core(GameConfiguration.setCore(point))
+                .core(core)
                 .isTeamActive(collection.isTeamActive())
-                .isCoreAlive(collection.getCoreHealth() > 0)
+                .isCoreAlive(collection.isTeamAlive())
                 .build();
     }
 
@@ -124,13 +128,19 @@ public class DumpReader {
             }
             team.getPlayers().removeIf(model -> model.getParameters().get("holder").equals(collection.getLogin()));
             PlayerModel model = constructPlayerModel(collection);
+            if(model.getReference() == null) continue;
             team.getPlayers().add(model);
             PlayerNMSUtil.changePlayerSkin(model.getReference(), SkinCache.getInstance().getTexture((String)model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID)), SkinCache.getInstance().getSignature((String)model.getParameters().get(PropertyConstant.PLAYER_ROLE_ID)));
             Role.updatePlayerAbilities(model);
-            model.getReference().getInventory().setContents(collection.getInventory());
-            model.getReference().teleport(collection.getLocation());
-            model.getReference().setHealth(collection.getCurrentHealth());
-            model.getReference().setFoodLevel(collection.getCurrentFoodLevel());
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    model.getReference().getInventory().setContents(collection.getInventory());
+                    model.getReference().teleport(collection.getLocation());
+                    model.getReference().setHealth(collection.getCurrentHealth());
+                    model.getReference().setFoodLevel(collection.getCurrentFoodLevel());
+                }
+            }.runTaskLater(Nftilation.getInstance(), 2);
             
             models.add(model);
         }

@@ -36,7 +36,6 @@ public class PlayerLoginHandler implements Listener {
         DataInstance dataInstance = instance.getDataInstance();
 
         LoginState state = dataInstance.tryAddPlayerToGame(data, player);
-        Logger.debug(state.toString());
         if(!EnumSet.of(LoginState.ALREADY_LOGGED_IN, LoginState.LOGGED_IN).contains(state)) {
             event.setCancelled(true);
             kickPlayerWithReason(player, state);

@@ -1,6 +1,5 @@
 package remonone.nftilation.game;
 
-import javafx.util.Pair;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -60,27 +59,27 @@ public class DataInstance {
         if(FindPlayerByID(player.getUniqueId()) != null) {
             return LoginState.ALREADY_LOGGED_IN;
         }
-        Pair<LoginState, PlayerInfo> registerState = registerPlayerInfo(playerData, player);
-        if(!LoginState.LOGGED_IN.equals(registerState.getKey())) return registerState.getKey();
+        LoginResult registerState = registerPlayerInfo(playerData, player);
+        if(!LoginState.LOGGED_IN.equals(registerState.state)) return registerState.state;
         Logger.log("Adding player " + player.getName() + " to game");
-        players.add(registerState.getValue());
+        players.add(registerState.createdUser);
         return LoginState.LOGGED_IN;
     }
 
-    private Pair<LoginState, PlayerInfo> registerPlayerInfo(PlayerData playerData, Player player) {
+    private LoginResult registerPlayerInfo(PlayerData playerData, Player player) {
         if(!playerData.getRole().equals(PlayerRole.PLAYER)) {
-            return new Pair<>(LoginState.LOGGED_IN, new PlayerInfo(playerData, null, null, player.getUniqueId()));
+            return new LoginResult(LoginState.LOGGED_IN, new PlayerInfo(playerData, null, null, player.getUniqueId()));
         }
-        if(!isTeamPresented(playerData.getTeam().getTeamName())) return new Pair<>(LoginState.NOT_PRESENTED, null);
+        if(!isTeamPresented(playerData.getTeam().getTeamName())) return new LoginResult(LoginState.NOT_PRESENTED, null);
         if(Store.getInstance().getGameStage().getStage() == Stage.IN_GAME) {
             PlayerInfo info = getPlayerInfo(playerData);
-            if(info == null) return new Pair<>(LoginState.NOT_ALLOWED, null);
+            if(info == null) return new LoginResult(LoginState.NOT_ALLOWED, null);
             info.data = playerData;
-            return new Pair<>(LoginState.LOGGED_IN, info);
+            return new LoginResult(LoginState.LOGGED_IN, info);
         } else {
             PlayerInfo info = new PlayerInfo(playerData, null, null, player.getUniqueId());
             teams.get(playerData.getTeam().getTeamName()).add(info);
-            return new Pair<>(LoginState.LOGGED_IN, info);
+            return new LoginResult(LoginState.LOGGED_IN, info);
         }
     }
 
@@ -216,6 +215,10 @@ public class DataInstance {
         private UUID playerId;
     }
     
-    
+    @AllArgsConstructor
+    private static class LoginResult {
+        public LoginState state;
+        public PlayerInfo createdUser;
+    }
 }
 
