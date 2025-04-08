@@ -2,6 +2,7 @@ package remonone.nftilation.game.ingame.objects;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,8 +12,8 @@ import remonone.nftilation.constants.PropertyConstant;
 import remonone.nftilation.constants.RuleConstants;
 import remonone.nftilation.events.OnCoreDamageEvent;
 import remonone.nftilation.events.OnCoreDestroyEvent;
+import remonone.nftilation.events.OnCoreHealEvent;
 import remonone.nftilation.game.rules.RuleManager;
-import remonone.nftilation.utils.Logger;
 
 import static org.bukkit.Bukkit.getServer;
 
@@ -43,12 +44,6 @@ public class Core implements ICoreData, Listener {
         return health < 1 || health >= 100;
     }
     
-    public void Heal() {
-        if(isCoreCannotBeHealed()) return;
-        oldHealth = health;
-        health++;
-    }
-    
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDamage(OnCoreDamageEvent event) {
         if(event.getAttacker() != null) {
@@ -66,5 +61,16 @@ public class Core implements ICoreData, Listener {
             OnCoreDestroyEvent e = new OnCoreDestroyEvent(teamName, event.getTeamName());
             getServer().getPluginManager().callEvent(e);
         }
+    }
+    
+    @EventHandler
+    public void onHeal(OnCoreHealEvent event) {
+        if(StringUtils.isBlank(event.getHealedTeam()) || !event.getHealedTeam().equals(teamName)) return;
+        if(isCoreCannotBeHealed()) {
+            event.setCancelled(true);
+            return;
+        }
+        oldHealth = health;
+        health++;
     }
 }

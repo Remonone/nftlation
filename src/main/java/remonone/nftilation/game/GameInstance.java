@@ -155,26 +155,6 @@ public class GameInstance {
         }
         return null;
     }
-    
-    public void healCore(Player player, String teamName, float price) {
-        IModifiableTeam team = teamData.get(teamName);
-        if(team == null) return;
-        if(team.getCoreInstance() == null) return;
-        if(team.getCoreInstance().isCoreCannotBeHealed()) {
-            NotificationUtils.sendNotification(player, MessageConstant.CANNOT_HEAL_CORE, NotificationUtils.NotificationType.FAIL, false);
-            return;
-        }
-        PlayerInteractComponent component = (PlayerInteractComponent) getComponentByName(NameConstants.PLAYER_INTERACT_NAME);
-        if(component == null) return;
-        if(!component.adjustPlayerTokens(player, -price, TransactionType.PURCHASE)) {
-            NotificationUtils.sendNotification(player, MessageConstant.NOT_ENOUGH_MONEY, NotificationUtils.NotificationType.FAIL, false);
-            return;
-        }
-        team.getCoreInstance().Heal();
-        team.getPlayers().forEach(ScoreboardHandler::updateScoreboard);
-        World world = player.getWorld();
-        world.playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, 1f, 1f);
-    }
 
     public void checkOnActiveTeams() {
         List<ITeam> aliveTeams = teamData.values().stream().filter(ITeam::isTeamActive).collect(Collectors.toList());
